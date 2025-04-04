@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "tailwind-native",
-    "slug": "tailwind-native",
+    "name": "react-sneakers-native",
+    "slug": "react-sneakers-native",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
