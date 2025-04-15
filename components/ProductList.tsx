@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, Animated, Easing, ScrollView } from 'react-native';
+import { View, Text, Animated, Easing, ScrollView, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import ProductCardComponent from './ProductCard';
 import { Product } from '@/constants/Types';

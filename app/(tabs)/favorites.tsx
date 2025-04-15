@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, View, Text, ScrollView, Image } from 'react-native';
+import { Animated, Easing, View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import Header from '@/components/Header';
 import ProductCardComponent from '@/components/ProductCard';
 import { Product } from '@/constants/Types';

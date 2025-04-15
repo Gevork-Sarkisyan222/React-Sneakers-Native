@@ -8,6 +8,8 @@ import axios from 'axios';
 import { RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setRemoveAllMarks, setUpdateAllFavorites } from '@/redux/slices/products.slice';
+import FastImage from 'react-native-fast-image';
+import { useRouter } from 'expo-router';
 
 export interface ProductCardProps {
   id: number;
@@ -31,6 +33,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   const dispatch = useDispatch();
   const updateAllFavorites = useSelector((state: RootState) => state.products.updateAllFavorites);
   const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
+  const router = useRouter();
 
   // Состояния для загрузки и переключения статусов
   const [addedToCart, setAddedToCart] = React.useState(isAddedToCart);
@@ -170,7 +173,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <View className="w-[48%] mb-4 h-[260px] rounded-[40px] border border-[#f3f3f3] bg-white p-[20px] px-[22px]">
+    <TouchableOpacity className="w-[48%] mb-4 h-[260px] rounded-[40px] border border-[#f3f3f3] bg-white p-[20px] px-[22px]">
       {/* Кнопка избранного */}
       <TouchableOpacity
         onPress={handleToggleFavorite}
@@ -186,11 +189,22 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
       </TouchableOpacity>
 
       {/* Изображение товара */}
-      <Image
-        source={{ uri: imageUri }}
-        className="w-[133px] h-[112px] mb-[10px]"
-        accessibilityLabel="product image"
-      />
+      <TouchableOpacity
+        onPress={() =>
+          router.push({
+            pathname: '/full-card/[id]',
+            params: { id: id.toString() },
+          })
+        }>
+        <Image
+          style={{ width: 133, height: 112, marginBottom: 10 }}
+          source={{
+            uri: imageUri,
+          }}
+          accessibilityLabel="product image"
+          resizeMode={FastImage.resizeMode.cover}
+        />
+      </TouchableOpacity>
 
       {/* Заголовок */}
       <Text className="text-[14px] font-normal text-black mb-[14px]">{title}</Text>
@@ -223,7 +237,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
