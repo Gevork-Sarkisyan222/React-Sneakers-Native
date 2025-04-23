@@ -40,12 +40,14 @@
     "expo-status-bar": "~2.0.1",
     "expo-symbols": "~0.2.2",
     "expo-system-ui": "~4.0.8",
+    "expo-updates": "~0.27.4",
     "expo-web-browser": "~14.0.2",
     "nativewind": "^4.1.23",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "^0.76.9",
     "react-native-css-interop": "^0.1.22",
+    "react-native-expo-image-cache": "^4.1.0",
     "react-native-fast-image": "^8.6.3",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-reanimated": "~3.16.1",
@@ -57,8 +59,7 @@
     "react-native-webview": "13.12.5",
     "react-redux": "^9.2.0",
     "redux": "^5.0.1",
-    "tailwindcss": "^3.4.17",
-    "expo-updates": "~0.27.4"
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -7,6 +7,7 @@ import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
+import { FlatList } from 'react-native';
 
 // Наш кастомный SkeletonPlaceholder
 const SkeletonPlaceholder: React.FC<{ style?: object }> = ({ style }) => {
@@ -85,23 +86,27 @@ export default function Favorites() {
                 {/* Скелетон для заголовка */}
                 <SkeletonPlaceholder style={{ width: 200, height: 30, marginBottom: 20 }} />
                 {/* Сетка скелетонов для карточек */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
+                <FlatList
+                  data={Array.from({ length: 6 })}
+                  keyExtractor={(_, index) => `skeleton-${index}`}
+                  numColumns={2}
+                  columnWrapperStyle={{
                     justifyContent: 'space-between',
-                  }}>
-                  {Array.from({ length: 6 }).map((_, index) => (
+                  }}
+                  contentContainerStyle={{
+                    paddingHorizontal: 15,
+                    paddingTop: 25,
+                  }}
+                  renderItem={({ index }) => (
                     <SkeletonPlaceholder
-                      key={index}
                       style={{
                         width: 150,
                         height: 200,
                         marginBottom: 20,
                       }}
                     />
-                  ))}
-                </View>
+                  )}
+                />
               </View>
             ) : favoriteProducts.length > 0 ? (
               // Если данные загрузились и есть товары, показываем их
@@ -110,25 +115,22 @@ export default function Favorites() {
                   style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
                   Мои закладки
                 </Text>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    justifyContent: 'space-between',
-                  }}>
-                  {favoriteProducts.map((product) => (
+                <FlatList
+                  data={favoriteProducts}
+                  keyExtractor={(item) => item.id.toString()}
+                  numColumns={2}
+                  columnWrapperStyle={{ justifyContent: 'space-between' }}
+                  renderItem={({ item }) => (
                     <ProductCardComponent
-                      key={product.id}
-                      id={product.id}
-                      title={product.title}
-                      imageUri={product.imageUri}
-                      price={product.price}
-                      isFavorite={product.isFavorite}
-                      isAddedToCart={product.isAddedToCart}
-                      handleRemoveFavorite={handleRemoveFavorite}
+                      id={item.id}
+                      title={item.title}
+                      imageUri={item.imageUri}
+                      price={item.price}
+                      isFavorite={item.isFavorite}
+                      isAddedToCart={item.isAddedToCart}
                     />
-                  ))}
-                </View>
+                  )}
+                />
               </View>
             ) : (
               // Если данных нет, отображаем сообщение об отсутствии закладок

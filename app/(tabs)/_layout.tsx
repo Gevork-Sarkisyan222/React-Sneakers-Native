@@ -24,13 +24,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <MaterialIcons name="favorite" size={24} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="full-card"
-        options={{
-          title: 'Favorites',
-          tabBarIcon: ({ color }) => <MaterialIcons name="favorite" size={24} color={color} />,
-        }}
-      />
     </Tabs>
   );
 }

@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, Animated, Easing, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, Animated, Easing, ScrollView, FlatList, RefreshControl } from 'react-native';
 import axios from 'axios';
 import ProductCardComponent from './ProductCard';
 import { Product } from '@/constants/Types';
 import { useDispatch, useSelector } from 'react-redux';
 import { setProducts } from '@/redux/slices/products.slice';
 import { RootState } from '@/redux/store';
-
-import EventEmitter from 'eventemitter3';
 
 // Компонент SkeletonPlaceholder для одного элемента
 const SkeletonPlaceholder: React.FC<{ style?: object }> = ({ style }) => {
@@ -54,19 +52,20 @@ const ProductList: React.FC = () => {
 
   // ==============================
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get<Product[]>('https://dcc2e55f63f7f47b.mokky.dev/products');
-        dispatch(setProducts(res.data));
-      } catch (error) {
-        dispatch(setProducts([]));
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true); // Добавляем установку состояния загрузки
+      const res = await axios.get<Product[]>('https://dcc2e55f63f7f47b.mokky.dev/products');
+      dispatch(setProducts(res.data));
+    } catch (error) {
+      console.error('Ошибка при загрузке:', error);
+      dispatch(setProducts([]));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProducts();
   }, [dispatch]);
 
@@ -77,18 +76,21 @@ const ProductList: React.FC = () => {
         {/* Заголовок */}
         <SkeletonPlaceholder style={{ width: 200, height: 30, marginBottom: 20 }} />
         {/* Сетка скелетонов для карточек */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-          {Array.from({ length: 6 }).map((_, index) => (
+        <FlatList
+          data={Array.from({ length: 6 })}
+          numColumns={2}
+          keyExtractor={(_, index) => `skeleton-${index}`}
+          columnWrapperStyle={{ justifyContent: 'space-between' }}
+          renderItem={({ index }) => (
             <SkeletonPlaceholder
-              key={index}
               style={{
                 width: 150,
                 height: 200,
                 marginBottom: 20,
               }}
             />
-          ))}
-        </View>
+          )}
+        />
       </ScrollView>
     );
   }
@@ -98,19 +100,22 @@ const ProductList: React.FC = () => {
       <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
         Все новые кроссовки
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-        {products.map((product: Product) => (
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        renderItem={({ item }) => (
           <ProductCardComponent
-            key={product.id}
-            id={product.id}
-            title={product.title}
-            imageUri={product.imageUri}
-            price={product.price}
-            isFavorite={product.isFavorite}
-            isAddedToCart={product.isAddedToCart}
+            id={item.id}
+            title={item.title}
+            imageUri={item.imageUri}
+            price={item.price}
+            isFavorite={item.isFavorite}
+            isAddedToCart={item.isAddedToCart}
           />
-        ))}
-      </View>
+        )}
+      />
     </View>
   );
 };

@@ -5,6 +5,7 @@ export interface Product {
   price: string;
   isFavorite: boolean;
   isAddedToCart: boolean;
+  description: string;
 }
 
 export interface CartProduct {

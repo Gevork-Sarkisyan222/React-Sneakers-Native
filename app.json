@@ -1,10 +1,11 @@
 {
   "expo": {
-    "name": "react-sneakers-native",
-    "slug": "react-sneakers-native",
+    "name": "Native Sneakers",
+    "slug": "Native Sneakers",
+    "description": "A React Native app for buying sneakers.",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/sneakers.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,7 +14,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/sneakers.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.gevorkcoder.reactsneakersnative"
