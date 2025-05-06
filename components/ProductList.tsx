@@ -67,10 +67,19 @@ const ProductList: React.FC = () => {
     const parsePrice = (price: string) => Number(price.replace(/\s/g, ''));
 
     switch (selectedSort) {
+      case 'men':
+        return filteredProducts.filter((item) => item.title.toLowerCase().includes('муж'));
+
+      case 'woman':
+        return filteredProducts.filter((item) => item.title.toLowerCase().includes('жен'));
+
       case 'price_asc':
         return [...filteredProducts].sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+
       case 'price_desc':
         return [...filteredProducts].sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
+
+      case 'all':
       default:
         return filteredProducts;
     }

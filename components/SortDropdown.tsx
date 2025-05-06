@@ -6,6 +6,8 @@ const SORT_OPTIONS = [
   { key: 'all', label: 'Все' },
   { key: 'price_asc', label: 'Цена: по возрастанию' },
   { key: 'price_desc', label: 'Цена: по убыванию' },
+  { key: 'men', label: 'Мужские' },
+  { key: 'woman', label: 'Женские' },
 ];
 
 const SortDropdown: React.FC<{
