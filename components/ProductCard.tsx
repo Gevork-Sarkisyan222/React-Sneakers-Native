@@ -16,9 +16,11 @@ export interface ProductCardProps {
   title: string;
   imageUri: string;
   price: string;
-  isAddedToCart: boolean;
-  isFavorite: boolean;
+  isAddedToCart?: boolean;
+  isFavorite?: boolean;
   handleRemoveFavorite?: (id: number) => void;
+  removeAllButtons?: boolean;
+  noRedirect?: boolean;
 }
 
 const ProductCardComponent: React.FC<ProductCardProps> = ({
@@ -29,6 +31,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   isAddedToCart,
   isFavorite,
   handleRemoveFavorite,
+  removeAllButtons,
+  noRedirect,
 }) => {
   const dispatch = useDispatch();
   const updateAllFavorites = useSelector((state: RootState) => state.products.updateAllFavorites);
@@ -173,29 +177,34 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <TouchableOpacity className="w-[48%] mb-4 h-[260px] rounded-[40px] border border-[#f3f3f3] bg-white p-[20px] px-[22px]">
-      {/* Кнопка избранного */}
-      <TouchableOpacity
-        onPress={handleToggleFavorite}
-        disabled={isProcessingFavorite}
-        className={`w-[32px] h-[32px] z-[2] rounded-[7px] border border-[#f8f8f8] absolute top-[20px] left-[20px] items-center justify-center ${
-          favorite ? 'bg-[#FEF0F0]' : 'bg-white'
-        }`}>
-        {isProcessingFavorite ? (
-          <ActivityIndicator size="small" color="#FF8585" />
-        ) : (
-          <AntDesign name="heart" size={14} color={favorite ? '#FF8585' : '#EAEAEA'} />
-        )}
-      </TouchableOpacity>
+    <TouchableOpacity className="w-[48%] mb-4 h-[260px] rounded-[40px] border border-[#e6e6e6] bg-white p-[20px] px-[22px]">
+      {!removeAllButtons && (
+        <>
+          {/* Кнопка избранного */}
+          <TouchableOpacity
+            onPress={handleToggleFavorite}
+            disabled={isProcessingFavorite}
+            className={`w-[32px] h-[32px] z-[2] rounded-[7px] border border-[#f8f8f8] absolute top-[20px] left-[20px] items-center justify-center ${
+              favorite ? 'bg-[#FEF0F0]' : 'bg-white'
+            }`}>
+            {isProcessingFavorite ? (
+              <ActivityIndicator size="small" color="#FF8585" />
+            ) : (
+              <AntDesign name="heart" size={14} color={favorite ? '#FF8585' : '#EAEAEA'} />
+            )}
+          </TouchableOpacity>
+        </>
+      )}
 
       {/* Изображение товара */}
       <TouchableOpacity
-        onPress={() =>
-          router.push({
-            pathname: '/full-card/[id]',
-            params: { id: id.toString() },
-          })
-        }>
+        onPress={() => {
+          !noRedirect &&
+            router.push({
+              pathname: '/full-card/[id]',
+              params: { id: id.toString() },
+            });
+        }}>
         <Image
           style={{ width: 133, height: 112, marginBottom: 10 }}
           source={{
@@ -216,26 +225,30 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
           <Text className="text-[14px] font-bold text-black">{price} руб.</Text>
         </View>
 
-        {/* Кнопка добавления в корзину */}
-        <TouchableOpacity
-          onPress={handleAddToCart}
-          disabled={isProcessingCart}
-          className="w-[32px] h-[32px] rounded-[8px] border border-[#f2f2f2] items-center justify-center">
-          {isProcessingCart ? (
-            <ActivityIndicator size="small" color="#3CC755" />
-          ) : addedToCart ? (
-            <LinearGradient
-              colors={['#89F09C', '#3CC755']}
-              start={[0, 0]}
-              end={[0, 1]}
-              style={{ borderRadius: 8 }}
-              className="w-full h-full rounded-[8px] items-center justify-center">
-              <Feather name="check" size={24} color="#ffffff" />
-            </LinearGradient>
-          ) : (
-            <Feather name="plus" size={24} color="#D3D3D3" />
-          )}
-        </TouchableOpacity>
+        {!removeAllButtons && (
+          <>
+            {/* Кнопка добавления в корзину */}
+            <TouchableOpacity
+              onPress={handleAddToCart}
+              disabled={isProcessingCart}
+              className="w-[32px] h-[32px] rounded-[8px] border border-[#f2f2f2] items-center justify-center">
+              {isProcessingCart ? (
+                <ActivityIndicator size="small" color="#3CC755" />
+              ) : addedToCart ? (
+                <LinearGradient
+                  colors={['#89F09C', '#3CC755']}
+                  start={[0, 0]}
+                  end={[0, 1]}
+                  style={{ borderRadius: 8 }}
+                  className="w-full h-full rounded-[8px] items-center justify-center">
+                  <Feather name="check" size={24} color="#ffffff" />
+                </LinearGradient>
+              ) : (
+                <Feather name="plus" size={24} color="#D3D3D3" />
+              )}
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </TouchableOpacity>
   );

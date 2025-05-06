@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { Animated, Easing, View, Text, ScrollView, Image } from 'react-native';
 import Header from '@/components/Header';
 import ProductCardComponent from '@/components/ProductCard';
 import { Product } from '@/constants/Types';
@@ -8,43 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { FlatList } from 'react-native';
-
-// Наш кастомный SkeletonPlaceholder
-const SkeletonPlaceholder: React.FC<{ style?: object }> = ({ style }) => {
-  const opacity = useRef(new Animated.Value(0.3)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 0.3,
-          duration: 500,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
-  }, [opacity]);
-
-  return (
-    <Animated.View
-      style={[
-        {
-          backgroundColor: '#e1e9ee',
-          borderRadius: 4,
-        },
-        style,
-        { opacity },
-      ]}
-    />
-  );
-};
+import CardSkeleton from '@/components/skeletons/Card-Skeleton';
 
 export default function Favorites() {
   const [favoriteProducts, setFavoriteProducts] = React.useState<Product[]>([]);
@@ -70,51 +34,33 @@ export default function Favorites() {
     fetchFavoriteProducts();
   }, [updateAllFavorites]);
 
-  const handleRemoveFavorite = (id: number) => {
-    setFavoriteProducts((prevFavorites) => prevFavorites.filter((product) => product.id !== id));
-  };
-
   return (
     <SafeAreaView>
       <ScrollView>
         <View>
           <Header />
+
           <View style={{ paddingTop: 25, paddingHorizontal: 15, flex: 1 }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
+              Мои закладки
+            </Text>
+
             {isLoading ? (
               // Пока данные загружаются, отображаем скелетоны
               <View>
-                {/* Скелетон для заголовка */}
-                <SkeletonPlaceholder style={{ width: 200, height: 30, marginBottom: 20 }} />
                 {/* Сетка скелетонов для карточек */}
                 <FlatList
-                  data={Array.from({ length: 6 })}
-                  keyExtractor={(_, index) => `skeleton-${index}`}
+                  data={Array.from({ length: 4 })}
                   numColumns={2}
-                  columnWrapperStyle={{
-                    justifyContent: 'space-between',
-                  }}
-                  contentContainerStyle={{
-                    paddingHorizontal: 15,
-                    paddingTop: 25,
-                  }}
-                  renderItem={({ index }) => (
-                    <SkeletonPlaceholder
-                      style={{
-                        width: 150,
-                        height: 200,
-                        marginBottom: 20,
-                      }}
-                    />
-                  )}
+                  keyExtractor={(_, index) => `skeleton-${index}`}
+                  columnWrapperStyle={{ justifyContent: 'space-between' }}
+                  contentContainerStyle={{ paddingVertical: 8 }} // py-2
+                  renderItem={() => <CardSkeleton loading={true} />}
                 />
               </View>
             ) : favoriteProducts.length > 0 ? (
               // Если данные загрузились и есть товары, показываем их
               <View>
-                <Text
-                  style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
-                  Мои закладки
-                </Text>
                 <FlatList
                   data={favoriteProducts}
                   keyExtractor={(item) => item.id.toString()}

@@ -1,7 +1,7 @@
 import { IconSymbol } from '@/components/IconSymbol';
-import { Stack, Tabs } from 'expo-router';
-import { View } from 'react-native';
+import { Tabs } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function TabLayout() {
   return (
@@ -22,6 +22,16 @@ export default function TabLayout() {
         options={{
           title: 'Favorites',
           tabBarIcon: ({ color }) => <MaterialIcons name="favorite" size={24} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="orders"
+        options={{
+          title: 'Orders',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-circle-outline" size={27} color={color} />
+          ),
         }}
       />
     </Tabs>

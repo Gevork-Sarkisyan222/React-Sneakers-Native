@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Native Sneakers",
-    "slug": "Native Sneakers",
+    "slug": "react-sneakers-native",
     "description": "A React Native app for buying sneakers.",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -52,6 +52,7 @@
     },
     "updates": {
       "url": "https://u.expo.dev/86ff2e29-f9b4-4514-80e1-77f1fccf4d84"
-    }
+    },
+    "owner": "gevorkcoder"
   }
 }

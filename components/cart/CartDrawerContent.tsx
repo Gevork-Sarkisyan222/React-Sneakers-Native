@@ -1,14 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { Alert, Animated, Image, Platform, Pressable, Text, View } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import {
-  Drawer,
-  DrawerBackdrop,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  DrawerFooter,
-} from '@/components/ui/drawer';
+import { ActivityIndicator, Alert, Animated, Image, Pressable, Text, View } from 'react-native';
+import { DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from '@/components/ui/drawer';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Entypo from '@expo/vector-icons/Entypo';
 
@@ -18,42 +10,34 @@ import axios from 'axios';
 import { Product } from '@/constants/Types';
 import Toast from 'react-native-toast-message';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { setProducts, setRemoveAllMarks } from '@/redux/slices/products.slice';
+import { setRemoveAllMarks } from '@/redux/slices/products.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 
 interface Props {
+  cartProducts: Product[];
+  setCartProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  isLoading: boolean;
   onCloseDrawer: () => void;
 }
 
-const CartDrawerContent: React.FC<Props> = ({ onCloseDrawer }) => {
+const CartDrawerContent: React.FC<Props> = ({
+  cartProducts,
+  setCartProducts,
+  isLoading,
+  onCloseDrawer,
+}) => {
   const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
-  const [cartProducts, setCartProducts] = React.useState<Product[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+
   const dispatch = useDispatch();
   const [isOrdered, setIsOrdered] = React.useState(false);
+  const [orderId, setOrderId] = React.useState(null);
 
   const totalAmount = cartProducts.reduce((acc, product) => {
     // Удаляем пробелы и преобразуем в число
     const numericPrice = Number(product.price.replace(/\s/g, ''));
     return acc + numericPrice;
   }, 0);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get<Product[]>('https://dcc2e55f63f7f47b.mokky.dev/cart-products');
-        setCartProducts(res.data);
-      } catch (error) {
-        setCartProducts([]);
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   const handleRemoveFromCart = (productId: string, title: string) => {
     Alert.alert('Удаление товара', 'Вы действительно хотите удалить этот товар из корзины?', [
@@ -66,19 +50,10 @@ const CartDrawerContent: React.FC<Props> = ({ onCloseDrawer }) => {
         style: 'destructive',
         onPress: async () => {
           try {
-            // Параллельно выполняем оба запроса
-            // const [deleteResponse, patchResponse] = await Promise.all([
-
             const deleteResponse = await axios.delete(
               `https://dcc2e55f63f7f47b.mokky.dev/cart-products/${productId}`,
             );
 
-            // axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${productId}`, {
-            //   isAddedToCart: false,
-            // }),
-            // ]);
-
-            // if (deleteResponse.status === 200 && patchResponse.status === 200) {
             if (deleteResponse.status === 200) {
               // Обновляем состояние корзины
               setCartProducts((prevProducts) =>
@@ -122,25 +97,39 @@ const CartDrawerContent: React.FC<Props> = ({ onCloseDrawer }) => {
     ]);
   };
 
+  const [isButtonLoading, setIsButtonLoading] = React.useState(false);
+
   const handleOrder = async () => {
-    setIsOrdered(true);
-    try {
-      await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/cart-products', []);
+    setIsButtonLoading(true);
 
-      setCartProducts([]);
+    const { data } = await axios.post('https://dcc2e55f63f7f47b.mokky.dev/orders', {
+      items: cartProducts,
+    });
 
-      // for render useEffect in ProductCardComponent
-      dispatch(setRemoveAllMarks(!removeAllMarks));
+    setOrderId(data.id);
 
-      Toast.show({
-        type: 'success',
-        text1: 'Заказ успешно оформлен',
-        text2: 'Ваш заказ успешно оформлен. Спасибо за покупку!',
-        visibilityTime: 3000,
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    setTimeout(async () => {
+      setIsOrdered(true);
+
+      try {
+        await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/cart-products', []);
+
+        setCartProducts([]);
+
+        dispatch(setRemoveAllMarks(!removeAllMarks));
+
+        Toast.show({
+          type: 'success',
+          text1: 'Заказ успешно оформлен',
+          text2: 'Ваш заказ успешно оформлен. Спасибо за покупку!',
+          visibilityTime: 3000,
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsButtonLoading(false);
+      }
+    }, 1000);
   };
 
   const SkeletonItem = () => {
@@ -177,9 +166,6 @@ const CartDrawerContent: React.FC<Props> = ({ onCloseDrawer }) => {
     );
   };
 
-  // generate random number constant
-  const randomNumber = Math.floor(Math.random() * 60);
-
   return (
     <DrawerContent className="border-t border-t-2 rounded-t-[20px]">
       <SafeAreaView className="flex-1">
@@ -210,7 +196,7 @@ const CartDrawerContent: React.FC<Props> = ({ onCloseDrawer }) => {
                 Заказ оформлен!
               </Text>
               <Text className="font-[400] text-[16px] text-[#9b9b9b] text-center">
-                Ваш заказ #{randomNumber} скоро будет передан
+                Ваш заказ #{orderId} скоро будет передан
               </Text>
               <Text className="font-[400] text-[16px] text-[#9b9b9b] mb-[25px] text-center">
                 курьерской доставке
@@ -280,9 +266,18 @@ const CartDrawerContent: React.FC<Props> = ({ onCloseDrawer }) => {
 
               <Pressable
                 onPress={handleOrder}
-                className="w-full h-[55px] rounded-[18px] bg-[#9DD458] flex items-center justify-center flex-row mt-[24px]">
-                <Text className="text-white mr-[15px] text-[16px]">Оформить заказ</Text>
-                <Entypo name="chevron-small-right" size={24} color="white" />
+                disabled={isButtonLoading}
+                className={`w-full h-[55px] rounded-[18px] flex items-center justify-center flex-row mt-[24px] transition-all duration-300 ${
+                  isButtonLoading ? 'opacity-50 bg-[#aeafac]' : 'bg-[#9DD458]'
+                }`}>
+                {isButtonLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Text className="text-white mr-[15px] text-[16px]">Оформить заказ</Text>
+                    <Entypo name="chevron-small-right" size={24} color="white" />
+                  </>
+                )}
               </Pressable>
             </View>
           )}

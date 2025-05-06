@@ -1,26 +1,61 @@
-import React from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Image, Pressable, Text, View, Animated } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 // ui
-import {
-  Drawer,
-  DrawerBackdrop,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  DrawerFooter,
-} from '@/components/ui/drawer';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Feather from '@expo/vector-icons/Feather';
-import CartCard from './cart/CartCard';
+import { Drawer, DrawerBackdrop } from '@/components/ui/drawer';
 import CartDrawerContent from './cart/CartDrawerContent';
 import Toast from 'react-native-toast-message';
 import { useRouter } from 'expo-router';
+import { Product } from '@/constants/Types';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 export default function Header() {
+  const [cartProducts, setCartProducts] = React.useState<Product[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const prevCount = useRef(cartProducts.length);
   const [showDrawer, setShowDrawer] = React.useState(false);
   const router = useRouter();
+  const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get<Product[]>('https://dcc2e55f63f7f47b.mokky.dev/cart-products');
+        setCartProducts(res.data);
+      } catch (error) {
+        setCartProducts([]);
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [removeAllMarks]);
+
+  useEffect(() => {
+    if (cartProducts.length !== prevCount.current) {
+      // Пуск анимации
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.3,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      prevCount.current = cartProducts.length;
+    }
+  }, [cartProducts.length]);
 
   return (
     <>
@@ -43,10 +78,22 @@ export default function Header() {
         </View>
 
         <Pressable
+          className="relative"
           onPress={() => {
             setShowDrawer(true);
           }}>
           <FontAwesome name="shopping-cart" size={24} color="black" />
+
+          {/* badge поверх иконки */}
+          {cartProducts.length > 0 && (
+            <Animated.View
+              style={{ transform: [{ scale: scaleAnim }] }}
+              className="absolute top-[-8px] left-[-15px] w-[20px] h-[20px] flex justify-center items-center rounded-[50px] bg-blue-500 z-[10]">
+              <Animated.Text className="text-white text-[10px] font-bold">
+                {cartProducts.length}
+              </Animated.Text>
+            </Animated.View>
+          )}
         </Pressable>
       </View>
 
@@ -71,7 +118,12 @@ export default function Header() {
         </View>
 
         <DrawerBackdrop />
-        <CartDrawerContent onCloseDrawer={() => setShowDrawer(false)} />
+        <CartDrawerContent
+          cartProducts={cartProducts}
+          setCartProducts={setCartProducts}
+          isLoading={isLoading}
+          onCloseDrawer={() => setShowDrawer(false)}
+        />
       </Drawer>
     </>
   );

@@ -1,8 +1,5 @@
 import React from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-
-// ui
 import Feather from '@expo/vector-icons/Feather';
 
 interface Props {
