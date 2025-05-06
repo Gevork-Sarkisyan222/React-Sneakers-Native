@@ -64,9 +64,7 @@ export default function Header() {
         <View className="flex-row items-center space-x-4">
           <Pressable onPress={() => router.push('/')}>
             <Image
-              source={{
-                uri: 'https://s3-alpha-sig.figma.com/img/58cc/1425/9c4fc1fafb1aa931e9f4ea8af50f59db?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=IZzJFBgjdvIjbJir8TOTE65R7FLvL8ptADu4oFWoZpXmk1IfqOdOBrCea2xsL7LpLp93ZsVMAI7gM79cyy4YBrecMt5MBf499LXCkV8cf7LQLbd4aQQkrGkG5dVM6DGdee~ie22fmaK~n2epcXFV~qSABJShmlwsoHhDrnIZ1ZaS9r7mbslv3JDS0H-7J0e92zO7ApOWKJKHYEfou-L7nE0YJkcop9I~ALhaS4llEHbjUGQcayelKXP-J4eIH0tW-VNcqw7ysA~tGQZ5hcRMSzuMs-d0-p4sxtfk0UCR22DYuje29FCrWK1m51yyiowk8AlJHD59Ar1C0RiW0rQyeg__',
-              }}
+              source={require('../assets/images/sneakers.png')}
               className="w-10 h-10 mr-[10px]"
               accessibilityLabel="logo"
             />

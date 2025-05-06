@@ -84,9 +84,7 @@ export default function Favorites() {
                 style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
                 <Image
                   style={{ width: 70, height: 70 }}
-                  source={{
-                    uri: 'https://s3-alpha-sig.figma.com/img/35c8/c43c/a9c996e7c1e51afc043e2c885fbfd4b5?Expires=1744588800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=irZvlQz8OWDlXjIrx6HOr3orZSzrzh8C-0CGVupRBDCiRa3jflZdbtg3TIlZ6BWvr5PW69KJQ~O03R~8BhTKGV2QtZxV6pqD-52U5DsYYKZyhetQiXjJJSkUdO~hZpU6WnbJbf62Srw9UiCGfRJrfmhK~IvRP2MfPSfOr-L2-gIp5wqrwXoOtqg66Rl3PRZXwYOexlX1qbK77cwrVZz3wNA8pAtJEYk2aB2hkHSF8KzVnFRDe5JUdUwllZ3v30Cm725w~w7fDYN6MP3PDP0XIC~CC7HmoSOsZlYtw~7fuPdXCVtkDpkDvxjgW4kOIte7n7r2-A-ZC4fzZZ9FGF4p4Q__',
-                  }}
+                  source={require('../../assets/images/sad-smile.png')}
                 />
                 <Text style={{ fontSize: 22, fontWeight: '600', marginTop: 20, marginBottom: 9 }}>
                   Закладок нет :(

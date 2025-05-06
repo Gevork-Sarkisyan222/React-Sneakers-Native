@@ -188,8 +188,9 @@ const CartDrawerContent: React.FC<Props> = ({
               <Image
                 width={120}
                 height={120}
+                resizeMode="contain"
                 source={{
-                  uri: 'https://s3-alpha-sig.figma.com/img/92fb/2ee9/e138ce6c501b0439339df82882bbe7d2?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=RvuwXkp-A5zESQMSZZmJ7xJJ~ZoDe4wJqKwNcvwJsa-3LtNFwQOMdN3YjKKWlD0jC22RXX6hjjc9WBDk~4GaFM37aavA8Jd7Qnh91FRfMY5H~DAogSYO7bCu8KRi6boIUHcIKBGW5UD9zWSoiRHSp26JQfcLK~AKRzGrrD8qZOv9flGDJHfBMo5udNDRk9dV6BuKrNsNZ0HMyURSPD2i8UtMtMP-TVTiy1DrLHWAgOsT7vgSGQe1BRMKAmKFDv3Nz8C3XFFy~EjNf0VIoLrtX~b0y9zJO8R17dluQz7aBTSNiW~NPjZErCp9MoVo78TKfUPXj--wm-tXVevUzO96XA__',
+                  uri: 'https://store-sneakers-vue.vercel.app/order-success-icon.png ',
                 }}
               />
               <Text className="text-[22px] font-[600] text-[#87C20A] mt-[20px] mb-[9px]">
@@ -227,8 +228,9 @@ const CartDrawerContent: React.FC<Props> = ({
               <Image
                 width={120}
                 height={120}
+                resizeMode="contain"
                 source={{
-                  uri: 'https://s3-alpha-sig.figma.com/img/174b/53d6/e0efb90ef8ce4fb82d0f992b7486e782?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=gWz2SquIWzJnNFD21XZr9CRggj2fUgQMaPXGw1iqnG-aqN7CTdjefgvVEw-Jy5gkEXc~QNmOSpDyaa28fxFwHxjZJGbIh5qt~ZESZK6ainVKn7FjlfMYhnZrfaMd4zem-Vrw2KGUazidnWK9IEBn-tC3MLLrom9hXuhmfliGJGfb6M~~GBklQDsyJkDZL7AFjbnBjJmsJNfXp4hkxen3nd7syTKnwlTYquNsZMXutW9pm1LrILu1OKBNTTENQ3kuH6NF-IZwc61QhmGtWrR03aVVLrR8fghOINsvy1QYQ6x1dxEBWmiPyJocrHu9oND5BjBwwuIgHCERHux1HJ9G0g__',
+                  uri: 'https://store-sneakers-vue.vercel.app/package-icon.png',
                 }}
               />
               <Text className="text-[22px] font-[600] mt-[20px] mb-[9px]">Корзина пустая</Text>
