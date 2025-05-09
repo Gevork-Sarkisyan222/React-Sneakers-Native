@@ -1,5 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
+import {
+  Animated,
+  Easing,
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
 import Header from '@/components/Header';
 import ProductCardComponent from '@/components/ProductCard';
 import { Product } from '@/constants/Types';
@@ -58,22 +67,22 @@ export default function Orders() {
 
   const ordersProducts = data.flatMap((order) => order.items);
 
+  const fetchOrders = async () => {
+    try {
+      const res = await axios.get<{ id: number; items: Product[] }[]>(
+        'https://dcc2e55f63f7f47b.mokky.dev/orders',
+      );
+
+      setData(res.data);
+    } catch (error) {
+      console.error('Ошибка загрузки заказов:', error);
+      setData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await axios.get<{ id: number; items: Product[] }[]>(
-          'https://dcc2e55f63f7f47b.mokky.dev/orders',
-        );
-
-        setData(res.data);
-      } catch (error) {
-        console.error('Ошибка загрузки заказов:', error);
-        setData([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchOrders();
   }, [removeAllMarks]);
 
@@ -103,7 +112,10 @@ export default function Orders() {
 
   return (
     <SafeAreaView>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl colors={['#338fd4']} refreshing={isLoading} onRefresh={fetchOrders} />
+        }>
         <View>
           <Header />
           <View style={{ paddingTop: 25, paddingHorizontal: 15, flex: 1 }}>

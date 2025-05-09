@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, View, Text, ScrollView, Image } from 'react-native';
+import { Animated, Easing, View, Text, ScrollView, Image, RefreshControl } from 'react-native';
 import Header from '@/components/Header';
 import ProductCardComponent from '@/components/ProductCard';
 import { Product } from '@/constants/Types';
@@ -16,27 +16,34 @@ export default function Favorites() {
 
   const updateAllFavorites = useSelector((state: RootState) => state.products.updateAllFavorites);
 
-  useEffect(() => {
-    const fetchFavoriteProducts = async () => {
-      try {
-        const res = await axios.get<Product[]>(
-          'https://dcc2e55f63f7f47b.mokky.dev/favorite-products',
-        );
-        setFavoriteProducts(res.data);
-      } catch (error) {
-        setFavoriteProducts([]);
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchFavoriteProducts = async () => {
+    try {
+      const res = await axios.get<Product[]>(
+        'https://dcc2e55f63f7f47b.mokky.dev/favorite-products',
+      );
+      setFavoriteProducts(res.data);
+    } catch (error) {
+      setFavoriteProducts([]);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchFavoriteProducts();
   }, [updateAllFavorites]);
 
   return (
     <SafeAreaView>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            colors={['#338fd4']}
+            refreshing={isLoading}
+            onRefresh={fetchFavoriteProducts}
+          />
+        }>
         <View>
           <Header />
 

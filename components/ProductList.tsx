@@ -1,51 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   FlatList,
   Image,
   TextInputChangeEventData,
   NativeSyntheticEvent,
 } from 'react-native';
-import axios from 'axios';
 import ProductCardComponent from './ProductCard';
 import { Product } from '@/constants/Types';
-import { useDispatch, useSelector } from 'react-redux';
-import { setProducts } from '@/redux/slices/products.slice';
-import { RootState } from '@/redux/store';
 import SearchInput from './SearchInput';
 import CardSkeleton from './skeletons/Card-Skeleton';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import SortDropdown from './SortDropdown';
 import { useDebounce } from '@/hooks/useDebounce';
 
-const ProductList: React.FC = () => {
-  const products = useSelector((state: RootState) => state.products.products);
+interface Props {
+  products: Product[];
+  isLoading: boolean;
+}
+
+const ProductList: React.FC<Props> = ({ products, isLoading }) => {
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebounce(searchValue, 500);
-
-  const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(true);
-
-  // ==============================
-
-  const fetchProducts = async () => {
-    try {
-      setIsLoading(true); // Добавляем установку состояния загрузки
-      const res = await axios.get<Product[]>('https://dcc2e55f63f7f47b.mokky.dev/products');
-      dispatch(setProducts(res.data));
-    } catch (error) {
-      console.error('Ошибка при загрузке:', error);
-      dispatch(setProducts([]));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, [dispatch]);
 
   const onChangeValue = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
     setSearchValue(e.nativeEvent.text);
@@ -96,17 +72,15 @@ const ProductList: React.FC = () => {
       <SortDropdown selectedKey={selectedSort} onSelectSort={onSelectSort} />
 
       {isLoading ? (
-        <ScrollView>
-          <FlatList
-            data={Array.from({ length: 6 })}
-            numColumns={2}
-            keyExtractor={(_, index) => `skeleton-${index}`}
-            columnWrapperStyle={{ justifyContent: 'space-between' }}
-            ItemSeparatorComponent={RowSeparator}
-            contentContainerStyle={{ paddingVertical: 8 }} // py-2
-            renderItem={() => <CardSkeleton loading={true} />}
-          />
-        </ScrollView>
+        <FlatList
+          data={Array.from({ length: 6 })}
+          numColumns={2}
+          keyExtractor={(_, index) => `skeleton-${index}`}
+          columnWrapperStyle={{ justifyContent: 'space-between' }}
+          ItemSeparatorComponent={RowSeparator}
+          contentContainerStyle={{ paddingVertical: 8 }} // py-2
+          renderItem={() => <CardSkeleton loading={true} />}
+        />
       ) : (
         <FlatList
           data={sortedProducts()}

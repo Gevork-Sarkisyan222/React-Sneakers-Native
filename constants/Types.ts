@@ -14,3 +14,15 @@ export interface CartProduct {
   imageUri: string;
   price: string;
 }
+
+export interface UserInterface {
+  id: number;
+  name: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  balance: number;
+  position: string;
+  avatarUri: string;
+}
