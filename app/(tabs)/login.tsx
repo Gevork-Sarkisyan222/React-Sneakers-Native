@@ -1,8 +1,8 @@
 import { UserInterface } from '@/constants/Types';
 import axios from 'axios';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 type Props = {};
@@ -36,8 +36,20 @@ export default function Login({}: Props) {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      setEmail('');
+      setPassword('');
+    }, []),
+  );
+
   return (
     <View className="flex-1 justify-center px-6 bg-white">
+      <Image
+        resizeMode="contain"
+        source={require('../../assets/images/sneakers.png')}
+        className="w-[90px] h-[90px] mx-auto mb-8"
+      />
       <Text className="text-3xl font-bold text-center mb-8 whitespace-nowrap">
         Вход в <Text className="text-blue-500">Native Sneakers</Text>
       </Text>
