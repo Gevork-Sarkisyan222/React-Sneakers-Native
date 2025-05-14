@@ -7,21 +7,21 @@ const NotFoundScreen: React.FC = () => {
 
   return (
     <View className="flex-1 bg-white items-center justify-center p-6">
-      {/* Lottie Animation */}
+      {/* Анимация Lottie */}
 
-      {/* Title */}
-      <Text className="text-2xl font-bold text-gray-800 mt-6">Oops! Page Not Found</Text>
+      {/* Заголовок */}
+      <Text className="text-2xl font-bold text-gray-800 mt-6">Упс! Страница не найдена</Text>
 
-      {/* Description */}
+      {/* Описание */}
       <Text className="text-gray-500 text-center mt-2 px-4">
-        The page you are looking for doesn't exist or has been moved.
+        Страница, которую вы ищете, не существует или была перемещена.
       </Text>
 
-      {/* Back Button */}
+      {/* Кнопка Назад */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         className="mt-6 px-6 py-3 bg-blue-600 rounded-full">
-        <Text className="text-white font-semibold text-lg">Go Back</Text>
+        <Text className="text-white font-semibold text-lg">Назад</Text>
       </TouchableOpacity>
     </View>
   );

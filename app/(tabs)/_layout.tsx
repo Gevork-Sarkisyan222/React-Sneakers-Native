@@ -57,6 +57,13 @@ export default function TabLayout() {
           href: null,
         }}
       />
+
+      <Tabs.Screen
+        name="admin-panel"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

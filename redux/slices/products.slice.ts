@@ -6,6 +6,7 @@ export interface ProductsState {
   products: Product[];
   removeAllMarks: boolean;
   updateAllFavorites: boolean;
+  updateProductsEffect: boolean;
 }
 
 const initialState: ProductsState = {
@@ -16,6 +17,9 @@ const initialState: ProductsState = {
 
   // renders a useEffect
   updateAllFavorites: false,
+
+  // renders a useEffect
+  updateProductsEffect: false,
 };
 
 export const productsSlice = createSlice({
@@ -32,10 +36,16 @@ export const productsSlice = createSlice({
     setUpdateAllFavorites: (state, action: PayloadAction<boolean>) => {
       state.updateAllFavorites = action.payload;
     },
+
+    // renders a useEffect
+    setUpdateProductsEffect: (state, action: PayloadAction<boolean>) => {
+      state.updateProductsEffect = action.payload;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setProducts, setRemoveAllMarks, setUpdateAllFavorites } = productsSlice.actions;
+export const { setProducts, setRemoveAllMarks, setUpdateAllFavorites, setUpdateProductsEffect } =
+  productsSlice.actions;
 
 export default productsSlice.reducer;

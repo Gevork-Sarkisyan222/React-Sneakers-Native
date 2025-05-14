@@ -31,7 +31,7 @@ export default function FullCard() {
   useEffect(() => {
     const checkCartStatus = async () => {
       try {
-        const cartResponse = await axios.get(`https://dcc2e55f63f7f47b.mokky.dev/cart-products`);
+        const cartResponse = await axios.get(`https://dcc2e55f63f7f47b.mokky.dev/cart`);
         const isProductInCart = cartResponse.data.some(
           (product: CartProduct) => Number(product.id) === Number(id),
         );
@@ -78,12 +78,12 @@ export default function FullCard() {
       setCurrentProduct((prev) => ({ ...prev, isFavorite: !previousFavorite }));
 
       if (previousFavorite) {
-        await axios.delete(`https://dcc2e55f63f7f47b.mokky.dev/favorite-products/${id}`);
+        await axios.delete(`https://dcc2e55f63f7f47b.mokky.dev/favorites/${id}`);
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
           isFavorite: false,
         });
       } else {
-        const added = await axios.post('https://dcc2e55f63f7f47b.mokky.dev/favorite-products', {
+        const added = await axios.post('https://dcc2e55f63f7f47b.mokky.dev/favorites', {
           id: Number(id),
           title: currentProduct.title,
           imageUri: currentProduct.imageUri,
@@ -91,7 +91,7 @@ export default function FullCard() {
           isFavorite: true,
           isAddedToCart,
         });
-        await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/favorite-products/${added.data.id}`, {
+        await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/favorites/${added.data.id}`, {
           id: Number(id),
         });
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
@@ -117,18 +117,18 @@ export default function FullCard() {
       setCurrentProduct((prev) => ({ ...prev, isAddedToCart: !previousCart }));
 
       if (previousCart) {
-        await axios.delete(`https://dcc2e55f63f7f47b.mokky.dev/cart-products/${id}`);
+        await axios.delete(`https://dcc2e55f63f7f47b.mokky.dev/cart/${id}`);
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
           isAddedToCart: false,
         });
       } else {
-        const created = await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cart-products', {
+        const created = await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cart', {
           id: Number(id),
           title: currentProduct.title,
           imageUri: currentProduct.imageUri,
           price: currentProduct.price,
         });
-        await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/cart-products/${created.data.id}`, {
+        await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/cart/${created.data.id}`, {
           id: Number(id),
         });
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {

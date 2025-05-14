@@ -49,7 +49,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   useEffect(() => {
     const checkCartStatus = async () => {
       try {
-        const cartResponse = await axios.get(`https://dcc2e55f63f7f47b.mokky.dev/cart-products`);
+        const cartResponse = await axios.get(`https://dcc2e55f63f7f47b.mokky.dev/cart`);
         const isProductInCart = cartResponse.data.some((product: CartProduct) => product.id === id);
         setAddedToCart(isProductInCart);
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
@@ -66,9 +66,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       try {
-        const favoriteResponse = await axios.get(
-          `https://dcc2e55f63f7f47b.mokky.dev/favorite-products`,
-        );
+        const favoriteResponse = await axios.get(`https://dcc2e55f63f7f47b.mokky.dev/favorites`);
         const isProductInFavorite = favoriteResponse.data.some(
           (product: Product) => product.id === id,
         );
@@ -90,7 +88,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     setIsProcessingFavorite(true);
     try {
       if (favorite) {
-        await axios.delete(`https://dcc2e55f63f7f47b.mokky.dev/favorite-products/${id}`);
+        await axios.delete(`https://dcc2e55f63f7f47b.mokky.dev/favorites/${id}`);
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
           isFavorite: false,
         });
@@ -98,7 +96,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
         handleRemoveFavorite?.(id);
       } else {
         const addedToFavoriteProduct = await axios.post<Product>(
-          'https://dcc2e55f63f7f47b.mokky.dev/favorite-products',
+          'https://dcc2e55f63f7f47b.mokky.dev/favorites',
           {
             id,
             title,
@@ -110,7 +108,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
         );
         // Обновляем id товара в избранном
         await axios.patch(
-          `https://dcc2e55f63f7f47b.mokky.dev/favorite-products/${addedToFavoriteProduct.data.id}`,
+          `https://dcc2e55f63f7f47b.mokky.dev/favorites/${addedToFavoriteProduct.data.id}`,
           { id },
         );
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
@@ -138,14 +136,14 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     setIsProcessingCart(true);
     try {
       if (addedToCart) {
-        await axios.delete(`https://dcc2e55f63f7f47b.mokky.dev/cart-products/${id}`);
+        await axios.delete(`https://dcc2e55f63f7f47b.mokky.dev/cart/${id}`);
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
           isAddedToCart: false,
         });
         dispatch(setRemoveAllMarks(!removeAllMarks));
       } else {
         const createdProduct = await axios.post<CartProduct>(
-          'https://dcc2e55f63f7f47b.mokky.dev/cart-products',
+          'https://dcc2e55f63f7f47b.mokky.dev/cart',
           {
             id,
             title,
@@ -153,10 +151,9 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
             price,
           },
         );
-        await axios.patch(
-          `https://dcc2e55f63f7f47b.mokky.dev/cart-products/${createdProduct.data.id}`,
-          { id },
-        );
+        await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/cart/${createdProduct.data.id}`, {
+          id,
+        });
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
           isAddedToCart: true,
         });

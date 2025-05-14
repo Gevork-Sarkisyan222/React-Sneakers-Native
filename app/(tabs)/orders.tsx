@@ -21,6 +21,7 @@ import CardSkeleton from '@/components/skeletons/Card-Skeleton';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ActivityIndicator } from 'react-native';
 import { Alert } from 'react-native';
+import { useGetUser } from '@/hooks/useGetUser';
 
 // Наш кастомный SkeletonPlaceholder
 const SkeletonPlaceholder: React.FC<{ style?: object }> = ({ style }) => {
@@ -60,6 +61,7 @@ const SkeletonPlaceholder: React.FC<{ style?: object }> = ({ style }) => {
 };
 
 export default function Orders() {
+  const { user } = useGetUser({});
   const [data, setData] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isLoadingIndificator, setIsLoadingIndicator] = React.useState<boolean>(false);
@@ -124,7 +126,7 @@ export default function Orders() {
                 Мои покупки
               </Text>
 
-              {ordersProducts.length > 0 ? (
+              {ordersProducts.length > 0 && user ? (
                 <TouchableOpacity
                   onPress={isLoading ? () => {} : handleClearOrders}
                   className="self-start flex-row items-center gap-x-2 px-[10px] py-[10px] rounded-[18px] bg-[#fd6a6a] active:bg-[#f73232] text-center flex justify-center">
@@ -139,9 +141,7 @@ export default function Orders() {
                     </>
                   )}
                 </TouchableOpacity>
-              ) : (
-                ''
-              )}
+              ) : null}
             </View>
 
             {isLoadingIndificator && (
@@ -169,7 +169,7 @@ export default function Orders() {
                   </View>
                 ))}
               </View>
-            ) : ordersProducts.length > 0 ? (
+            ) : ordersProducts.length > 0 && user ? (
               // Если данные загрузились и есть товары, показываем их
               <View>
                 {data.map((order) => (
@@ -201,6 +201,17 @@ export default function Orders() {
                 <Text style={{ fontSize: 22, fontWeight: '600', marginTop: 20, marginBottom: 9 }}>
                   У вас нет заказов
                 </Text>
+                {!user && (
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: '#9b9b9b',
+                      textAlign: 'center',
+                      marginBottom: 5,
+                    }}>
+                    Авторизуйтесь потом
+                  </Text>
+                )}
                 <Text style={{ fontSize: 16, color: '#9b9b9b', textAlign: 'center' }}>
                   Оформите хотя бы один заказ.
                 </Text>

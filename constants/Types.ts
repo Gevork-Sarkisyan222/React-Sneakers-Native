@@ -23,6 +23,6 @@ export interface UserInterface {
   phone: string;
   address: string;
   balance: number;
-  position: string;
+  position: 'admin' | 'user';
   avatarUri: string;
 }

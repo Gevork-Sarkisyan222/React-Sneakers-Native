@@ -24,7 +24,7 @@ export default function Header() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get<Product[]>('https://dcc2e55f63f7f47b.mokky.dev/cart-products');
+        const res = await axios.get<Product[]>('https://dcc2e55f63f7f47b.mokky.dev/cart');
         setCartProducts(res.data);
       } catch (error) {
         setCartProducts([]);

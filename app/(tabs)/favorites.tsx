@@ -19,7 +19,7 @@ export default function Favorites() {
   const fetchFavoriteProducts = async () => {
     try {
       const res = await axios.get<Product[]>(
-        'https://dcc2e55f63f7f47b.mokky.dev/favorite-products',
+        'https://dcc2e55f63f7f47b.mokky.dev/favorites?_select=-description',
       );
       setFavoriteProducts(res.data);
     } catch (error) {

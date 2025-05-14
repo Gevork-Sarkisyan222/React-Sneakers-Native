@@ -13,6 +13,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { setRemoveAllMarks } from '@/redux/slices/products.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
+import { useGetUser } from '@/hooks/useGetUser';
 
 interface Props {
   cartProducts: Product[];
@@ -27,6 +28,7 @@ const CartDrawerContent: React.FC<Props> = ({
   isLoading,
   onCloseDrawer,
 }) => {
+  const { user } = useGetUser({});
   const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
 
   const dispatch = useDispatch();
@@ -51,7 +53,7 @@ const CartDrawerContent: React.FC<Props> = ({
         onPress: async () => {
           try {
             const deleteResponse = await axios.delete(
-              `https://dcc2e55f63f7f47b.mokky.dev/cart-products/${productId}`,
+              `https://dcc2e55f63f7f47b.mokky.dev/cart/${productId}`,
             );
 
             if (deleteResponse.status === 200) {
@@ -100,7 +102,32 @@ const CartDrawerContent: React.FC<Props> = ({
   const [isButtonLoading, setIsButtonLoading] = React.useState(false);
 
   const handleOrder = async () => {
+    if (!user) {
+      Toast.show({
+        type: 'error',
+        text1: 'Ошибка',
+        text2: 'Вы не авторизованы',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
+    if (user && user.balance < totalAmount) {
+      Toast.show({
+        type: 'error',
+        text1: 'Недостаточно средств',
+        text2: 'У вас недостаточно средств для оформления заказа',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
     setIsButtonLoading(true);
+
+    // списываем деньги с баланса
+    await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user.id}`, {
+      balance: user.balance - totalAmount,
+    });
 
     const { data } = await axios.post('https://dcc2e55f63f7f47b.mokky.dev/orders', {
       items: cartProducts,
@@ -112,7 +139,7 @@ const CartDrawerContent: React.FC<Props> = ({
       setIsOrdered(true);
 
       try {
-        await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/cart-products', []);
+        await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/cart', []);
 
         setCartProducts([]);
 

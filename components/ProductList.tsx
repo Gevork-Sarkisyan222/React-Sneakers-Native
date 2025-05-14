@@ -6,6 +6,8 @@ import {
   Image,
   TextInputChangeEventData,
   NativeSyntheticEvent,
+  Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import ProductCardComponent from './ProductCard';
 import { Product } from '@/constants/Types';
@@ -13,6 +15,7 @@ import SearchInput from './SearchInput';
 import CardSkeleton from './skeletons/Card-Skeleton';
 import SortDropdown from './SortDropdown';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useGetUser } from '@/hooks/useGetUser';
 
 interface Props {
   products: Product[];
@@ -20,6 +23,7 @@ interface Props {
 }
 
 const ProductList: React.FC<Props> = ({ products, isLoading }) => {
+  const { user, isLoading: isLoadingUser } = useGetUser({});
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebounce(searchValue, 500);
 
@@ -63,6 +67,16 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
 
   return (
     <View style={{ flex: 1, paddingTop: 25, paddingHorizontal: 15 }}>
+      {isLoadingUser ? (
+        <ActivityIndicator size="large" color="#338fd4" />
+      ) : (
+        user?.position === 'admin' && (
+          <Text style={{ fontSize: 23, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
+            Добро пожаловать, Администратор {user.name}!
+          </Text>
+        )
+      )}
+
       <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
         Все <Text style={{ color: '#338fd4' }}>новые</Text> кроссовки
       </Text>
@@ -70,6 +84,10 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
       <SearchInput value={searchValue} setValue={setSearchValue} onChangeValue={onChangeValue} />
 
       <SortDropdown selectedKey={selectedSort} onSelectSort={onSelectSort} />
+
+      {/* <Pressable className="border-[#999999 w-full h-[45px] rounded-[10px] bg-white flex-row items-center px-[15px] mb-[15px]">
+        Создать товар
+      </Pressable> */}
 
       {isLoading ? (
         <FlatList
