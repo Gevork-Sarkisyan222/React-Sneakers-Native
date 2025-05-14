@@ -22,6 +22,7 @@ import { setUpdateProductsEffect } from '@/redux/slices/products.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { useGetUser } from '@/hooks/useGetUser';
+import Controller from '@/components/Controller';
 
 interface Product {
   id: number;
@@ -41,6 +42,7 @@ export default function AdminPanel(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalTypeController, setModalTypeController] = useState<boolean>(false);
   const [editItem, setEditItem] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, 'id'>>({
     title: '',
@@ -124,6 +126,11 @@ export default function AdminPanel(): JSX.Element {
     ]);
   };
 
+  const handleOpenModalController = () => {
+    setModalTypeController(true);
+    setModalOpen(true);
+  };
+
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -191,6 +198,13 @@ export default function AdminPanel(): JSX.Element {
         </TouchableOpacity>
       </View>
 
+      <Pressable
+        onPress={handleOpenModalController}
+        className="flex-row items-center justify-center mb-[20px] bg-blue-600 px-4 py-3 rounded-2xl shadow shadow-blue-300 active:opacity-75">
+        <Feather name="settings" size={18} color="#fff" style={{ marginRight: 10 }} />
+        <Text className="text-white font-semibold text-base">Пульт приложения</Text>
+      </Pressable>
+
       <FlatList
         refreshControl={
           <RefreshControl colors={['#338fd4']} refreshing={loading} onRefresh={fetchProducts} />
@@ -236,47 +250,56 @@ export default function AdminPanel(): JSX.Element {
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
           className="flex-1 justify-center p-4">
           <View className="bg-white rounded-2xl p-6">
-            <Text className="text-xl font-semibold text-gray-800 mb-4">
-              {editItem ? 'Редактировать товар' : 'Новый товар'}
-            </Text>
-            <ScrollView>
-              <TextInput
-                placeholder="Название"
-                value={form.title}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, title: text }))}
-                className="bg-gray-100 p-3 rounded-lg mb-3"
+            {modalTypeController ? (
+              <Controller
+                onCloseModal={closeModal}
+                setModalTypeController={setModalTypeController}
               />
-              <TextInput
-                placeholder="URL картинки"
-                value={form.imageUri}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, imageUri: text }))}
-                className="bg-gray-100 p-3 rounded-lg mb-3"
-              />
-              <TextInput
-                placeholder="Цена"
-                value={form.price}
-                keyboardType="numeric"
-                onChangeText={(text) => setForm((prev) => ({ ...prev, price: text }))}
-                className="bg-gray-100 p-3 rounded-lg mb-3"
-              />
-              <TextInput
-                placeholder="Описание"
-                value={form.description}
-                multiline
-                onChangeText={(text) => setForm((prev) => ({ ...prev, description: text }))}
-                className="bg-gray-100 p-3 rounded-lg h-24 text-gray-700 mb-5"
-              />
-              <View className="flex-row justify-end space-x-4">
-                <TouchableOpacity onPress={closeModal} className="px-5 py-2">
-                  <Text className="text-gray-700 uppercase">Отмена</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleSaveItem}
-                  className="px-5 py-2 bg-blue-600 rounded-lg shadow">
-                  <Text className="text-white uppercase">Сохранить</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
+            ) : (
+              <>
+                <Text className="text-xl font-semibold text-gray-800 mb-4">
+                  {editItem ? 'Редактировать товар' : 'Новый товар'}
+                </Text>
+                <ScrollView>
+                  <TextInput
+                    placeholder="Название"
+                    value={form.title}
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, title: text }))}
+                    className="bg-gray-100 p-3 rounded-lg mb-3"
+                  />
+                  <TextInput
+                    placeholder="URL картинки"
+                    value={form.imageUri}
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, imageUri: text }))}
+                    className="bg-gray-100 p-3 rounded-lg mb-3"
+                  />
+                  <TextInput
+                    placeholder="Цена"
+                    value={form.price}
+                    keyboardType="numeric"
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, price: text }))}
+                    className="bg-gray-100 p-3 rounded-lg mb-3"
+                  />
+                  <TextInput
+                    placeholder="Описание"
+                    value={form.description}
+                    multiline
+                    onChangeText={(text) => setForm((prev) => ({ ...prev, description: text }))}
+                    className="bg-gray-100 p-3 rounded-lg h-24 text-gray-700 mb-5"
+                  />
+                  <View className="flex-row justify-end space-x-4">
+                    <TouchableOpacity onPress={closeModal} className="px-5 py-2">
+                      <Text className="text-gray-700 uppercase">Отмена</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleSaveItem}
+                      className="px-5 py-2 bg-blue-600 rounded-lg shadow">
+                      <Text className="text-white uppercase">Сохранить</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+              </>
+            )}
           </View>
         </View>
       </Modal>
