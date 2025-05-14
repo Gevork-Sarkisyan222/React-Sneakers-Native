@@ -193,14 +193,14 @@ export default function AdminPanel(): JSX.Element {
           onChangeText={setSearch}
           className="flex-1 bg-white p-3 rounded-lg shadow mr-2"
         />
-        <TouchableOpacity onPress={openAdd} className="bg-green-500 px-5 py-3 rounded-lg shadow">
+        <TouchableOpacity onPress={openAdd} className="bg-blue-600 px-5 py-3 rounded-lg shadow">
           <Feather name="plus" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
 
       <Pressable
         onPress={handleOpenModalController}
-        className="flex-row items-center justify-center mb-[20px] bg-blue-600 px-4 py-3 rounded-2xl shadow shadow-blue-300 active:opacity-75">
+        className="flex-row items-center justify-center mb-[20px] bg-[#9DD458] px-4 py-3 rounded-2xl shadow shadow-blue-300 active:opacity-75">
         <Feather name="settings" size={18} color="#fff" style={{ marginRight: 10 }} />
         <Text className="text-white font-semibold text-base">Пульт приложения</Text>
       </Pressable>
@@ -254,6 +254,7 @@ export default function AdminPanel(): JSX.Element {
               <Controller
                 onCloseModal={closeModal}
                 setModalTypeController={setModalTypeController}
+                isVisible={modalOpen}
               />
             ) : (
               <>

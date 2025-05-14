@@ -26,3 +26,19 @@ export interface UserInterface {
   position: 'admin' | 'user';
   avatarUri: string;
 }
+
+// Новый тип для payload патч-запроса
+export type SettingsPayload = Partial<{
+  summer_sale: boolean;
+  black_friday: boolean;
+  sale: boolean;
+  sale_discount: number;
+}>;
+
+export type AppSettingsType = {
+  id: number;
+  summer_sale: boolean;
+  black_friday: boolean;
+  sale: boolean;
+  sale_discount?: number;
+};
