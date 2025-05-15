@@ -36,7 +36,7 @@ export type SettingsPayload = Partial<{
 }>;
 
 export type AppSettingsType = {
-  id: number;
+  id?: number;
   summer_sale: boolean;
   black_friday: boolean;
   sale: boolean;

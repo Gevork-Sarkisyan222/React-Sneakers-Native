@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
 import ProductList from '@/components/ProductList';
-import { Product } from '@/constants/Types';
+import { AppSettingsType, Product } from '@/constants/Types';
 import { setProducts } from '@/redux/slices/products.slice';
 import { RootState } from '@/redux/store';
 import axios from 'axios';
@@ -19,8 +19,6 @@ export default function Index() {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
 
-  // ==============================
-
   // ПЕРЕМЕШИВАЕТ МАССИВ ТОВАРОВ СЛУЧАЙНЫМ ОБРАЗОМ
   const shuffleArray = (array: Product[]) => {
     return [...array].sort(() => Math.random() - 0.5);
@@ -28,7 +26,8 @@ export default function Index() {
 
   const fetchProducts = async () => {
     try {
-      setIsLoading(true); // Добавляем установку состояния загрузки
+      setIsLoading(true);
+
       const res = await axios.get<Product[]>(
         'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description',
       );
@@ -41,12 +40,6 @@ export default function Index() {
       setIsLoading(false);
     }
   };
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     fetchProducts();
-  //   }, [dispatch]),
-  // );
 
   useEffect(() => {
     fetchProducts();

@@ -184,7 +184,7 @@ export default function Orders() {
                       numColumns={2}
                       columnWrapperStyle={{ justifyContent: 'space-between' }}
                       renderItem={({ item }) => (
-                        <ProductCardComponent {...item} removeAllButtons noRedirect />
+                        <ProductCardComponent {...item} removeAllButtons noRedirect inOrderPage />
                       )}
                     />
                   </View>

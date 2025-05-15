@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setRemoveAllMarks, setUpdateAllFavorites } from '@/redux/slices/products.slice';
 import FastImage from 'react-native-fast-image';
 import { useRouter } from 'expo-router';
+import { useGetSalesInfo } from '@/hooks/useGetSalesInfo';
 
 export interface ProductCardProps {
   id: number;
@@ -21,6 +22,7 @@ export interface ProductCardProps {
   handleRemoveFavorite?: (id: number) => void;
   removeAllButtons?: boolean;
   noRedirect?: boolean;
+  inOrderPage?: boolean;
 }
 
 const ProductCardComponent: React.FC<ProductCardProps> = ({
@@ -33,7 +35,9 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   handleRemoveFavorite,
   removeAllButtons,
   noRedirect,
+  inOrderPage,
 }) => {
+  const { productSaleInfo } = useGetSalesInfo();
   const dispatch = useDispatch();
   const updateAllFavorites = useSelector((state: RootState) => state.products.updateAllFavorites);
   const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
@@ -44,6 +48,36 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   const [favorite, setFavorite] = React.useState(isFavorite);
   const [isProcessingFavorite, setIsProcessingFavorite] = React.useState(false);
   const [isProcessingCart, setIsProcessingCart] = React.useState(false);
+
+  // работа со скидкой
+  const isOnSales =
+    productSaleInfo.sale || productSaleInfo.summer_sale || productSaleInfo.black_friday;
+
+  // Убираем из строки всё, кроме цифр и точки
+  const cleanedPriceStr = price.replace(/[^0-9.]/g, '');
+  const parsedPrice = Number(cleanedPriceStr) || 0;
+
+  // Если скидка тоже приходит строкой со спецсимволами — аналогично очищаем
+  const cleanedDiscountStr = String(productSaleInfo.sale_discount).replace(/[^0-9.]/g, '');
+  const parsedDiscount = Number(cleanedDiscountStr) || 0;
+
+  // Вычисляем все три варианта
+  const blackFridaySalesPrice = Math.round(parsedPrice * 0.3); // 70% скидки
+  const summerSalesPrice = Math.round(parsedPrice * 0.6); // 40% скидки
+  const globalSalePrice = Math.round(parsedPrice * (1 - parsedDiscount / 100));
+
+  // Приоритет акций: чёрная пятница → летняя распродажа → глобальная → обычная
+  const currentPriceWithSale = (
+    productSaleInfo.black_friday
+      ? blackFridaySalesPrice
+      : productSaleInfo.summer_sale
+      ? summerSalesPrice
+      : productSaleInfo.sale
+      ? globalSalePrice
+      : parsedPrice
+  ).toString();
+
+  // =========================
 
   // Проверка статуса корзины при изменении removeAllMarks
   useEffect(() => {
@@ -101,7 +135,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
             id,
             title,
             imageUri,
-            price,
+            price: isOnSales ? currentPriceWithSale : price,
             isFavorite: true,
             isAddedToCart: addedToCart,
           },
@@ -148,7 +182,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
             id,
             title,
             imageUri,
-            price,
+            price: isOnSales ? currentPriceWithSale : price,
           },
         );
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/cart/${createdProduct.data.id}`, {
@@ -217,9 +251,23 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
 
       {/* Нижняя часть карточки */}
       <View className="flex-row items-center justify-between">
-        <View>
-          <Text className="text-[11px] font-medium text-[#bdbdbd]">Цена:</Text>
-          <Text className="text-[14px] font-bold text-black">{price} руб.</Text>
+        <View className="flex-col items-start">
+          {!inOrderPage && isOnSales && (
+            <Text className="text-[15px] font-bold text-green-500 leading-[20px]">
+              {currentPriceWithSale} руб.
+            </Text>
+          )}
+
+          <Text
+            className={`leading-[16px] ${
+              inOrderPage
+                ? 'text-[14px] text-black font-bold'
+                : isOnSales
+                ? 'line-through text-gray-400 text-[12px]'
+                : 'text-[14px] text-black font-bold'
+            }`}>
+            {price} руб.
+          </Text>
         </View>
 
         {!removeAllButtons && (

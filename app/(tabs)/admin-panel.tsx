@@ -193,7 +193,7 @@ export default function AdminPanel(): JSX.Element {
           onChangeText={setSearch}
           className="flex-1 bg-white p-3 rounded-lg shadow mr-2"
         />
-        <TouchableOpacity onPress={openAdd} className="bg-blue-600 px-5 py-3 rounded-lg shadow">
+        <TouchableOpacity onPress={openAdd} className="bg-[#9DD458] px-5 py-3 rounded-lg shadow">
           <Feather name="plus" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -294,7 +294,7 @@ export default function AdminPanel(): JSX.Element {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={handleSaveItem}
-                      className="px-5 py-2 bg-blue-600 rounded-lg shadow">
+                      className="px-5 py-2 bg-[#9DD458] rounded-lg shadow">
                       <Text className="text-white uppercase">Сохранить</Text>
                     </TouchableOpacity>
                   </View>

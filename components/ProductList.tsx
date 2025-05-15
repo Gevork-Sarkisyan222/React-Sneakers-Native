@@ -16,6 +16,9 @@ import CardSkeleton from './skeletons/Card-Skeleton';
 import SortDropdown from './SortDropdown';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useGetUser } from '@/hooks/useGetUser';
+import { useGetSalesInfo } from '@/hooks/useGetSalesInfo';
+import SaleBanner from './SaleBanner';
+import { useSalePeriodSubtitle } from '@/hooks/useSalePeriodSubtitle';
 
 interface Props {
   products: Product[];
@@ -24,6 +27,7 @@ interface Props {
 
 const ProductList: React.FC<Props> = ({ products, isLoading }) => {
   const { user, isLoading: isLoadingUser } = useGetUser({});
+  const { productSaleInfo } = useGetSalesInfo();
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebounce(searchValue, 500);
 
@@ -65,6 +69,8 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
     }
   };
 
+  const blackFridayDateSubtitle = useSalePeriodSubtitle();
+
   return (
     <View style={{ flex: 1, paddingTop: 25, paddingHorizontal: 15 }}>
       {isLoadingUser ? (
@@ -77,9 +83,47 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
         )
       )}
 
-      <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
-        Все <Text style={{ color: '#338fd4' }}>новые</Text> кроссовки
-      </Text>
+      <View className="flex-row justify-center">
+        {productSaleInfo.sale && (
+          <SaleBanner
+            title={`Акция: −${productSaleInfo.sale_discount}%`}
+            subtitle="Только сегодня!"
+            iconName="tag"
+            backgroundColor="#ffd35b"
+            imageSource={{
+              uri: 'https://as2.ftcdn.net/jpg/01/79/62/47/1000_F_179624715_ryd9YM392AMezgXMrR1yrfpKUG5wdD9L.jpg',
+            }}
+          />
+        )}
+        {productSaleInfo.summer_sale && (
+          <SaleBanner
+            title="Летняя распродажа"
+            subtitle="Всё по летним ценам!"
+            iconName="umbrella-beach"
+            backgroundColor="#00c6ff"
+            imageSource={{
+              uri: 'https://img.freepik.com/free-vector/end-summer-sale-promotion-illustration_23-2148625157.jpg?semt=ais_hybrid&w=740',
+            }}
+          />
+        )}
+        {productSaleInfo.black_friday && (
+          <SaleBanner
+            title="Чёрная пятница — до −70%"
+            subtitle={blackFridayDateSubtitle}
+            iconName="shopping-basket"
+            backgroundColor="#1a1a1a"
+            imageSource={{
+              uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKWts9Bp4FJBNkQRKzPUQEty6yGRyfxQ7X2g&s',
+            }}
+          />
+        )}
+      </View>
+
+      {!productSaleInfo.sale && !productSaleInfo.summer_sale && !productSaleInfo.black_friday && (
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
+          Все <Text style={{ color: '#338fd4' }}>новые</Text> кроссовки
+        </Text>
+      )}
 
       <SearchInput value={searchValue} setValue={setSearchValue} onChangeValue={onChangeValue} />
 
