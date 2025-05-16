@@ -3,16 +3,16 @@ import { View, TouchableOpacity, Image, Text, ActivityIndicator } from 'react-na
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { CartProduct, Product } from '@/constants/Types';
+import { AppSettingsType, CartProduct, Product } from '@/constants/Types';
 import axios from 'axios';
 import { RootState } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setRemoveAllMarks, setUpdateAllFavorites } from '@/redux/slices/products.slice';
 import FastImage from 'react-native-fast-image';
 import { useRouter } from 'expo-router';
-import { useGetSalesInfo } from '@/hooks/useGetSalesInfo';
 
 export interface ProductCardProps {
+  productSaleInfo?: AppSettingsType;
   id: number;
   title: string;
   imageUri: string;
@@ -26,6 +26,7 @@ export interface ProductCardProps {
 }
 
 const ProductCardComponent: React.FC<ProductCardProps> = ({
+  productSaleInfo,
   id,
   title,
   imageUri,
@@ -37,7 +38,6 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   noRedirect,
   inOrderPage,
 }) => {
-  const { productSaleInfo } = useGetSalesInfo();
   const dispatch = useDispatch();
   const updateAllFavorites = useSelector((state: RootState) => state.products.updateAllFavorites);
   const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
@@ -51,14 +51,14 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
 
   // работа со скидкой
   const isOnSales =
-    productSaleInfo.sale || productSaleInfo.summer_sale || productSaleInfo.black_friday;
+    productSaleInfo?.sale || productSaleInfo?.summer_sale || productSaleInfo?.black_friday;
 
   // Убираем из строки всё, кроме цифр и точки
   const cleanedPriceStr = price.replace(/[^0-9.]/g, '');
   const parsedPrice = Number(cleanedPriceStr) || 0;
 
   // Если скидка тоже приходит строкой со спецсимволами — аналогично очищаем
-  const cleanedDiscountStr = String(productSaleInfo.sale_discount).replace(/[^0-9.]/g, '');
+  const cleanedDiscountStr = String(productSaleInfo?.sale_discount).replace(/[^0-9.]/g, '');
   const parsedDiscount = Number(cleanedDiscountStr) || 0;
 
   // Вычисляем все три варианта
@@ -68,11 +68,11 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
 
   // Приоритет акций: чёрная пятница → летняя распродажа → глобальная → обычная
   const currentPriceWithSale = (
-    productSaleInfo.black_friday
+    productSaleInfo?.black_friday
       ? blackFridaySalesPrice
-      : productSaleInfo.summer_sale
+      : productSaleInfo?.summer_sale
       ? summerSalesPrice
-      : productSaleInfo.sale
+      : productSaleInfo?.sale
       ? globalSalePrice
       : parsedPrice
   ).toString();

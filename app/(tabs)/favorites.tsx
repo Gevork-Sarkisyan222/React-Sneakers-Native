@@ -9,8 +9,10 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { FlatList } from 'react-native';
 import CardSkeleton from '@/components/skeletons/Card-Skeleton';
+import { useSalesInfo } from '@/components/context/SalesInfoContext';
 
 export default function Favorites() {
+  const { productSaleInfo } = useSalesInfo();
   const [favoriteProducts, setFavoriteProducts] = React.useState<Product[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
@@ -75,6 +77,7 @@ export default function Favorites() {
                   columnWrapperStyle={{ justifyContent: 'space-between' }}
                   renderItem={({ item }) => (
                     <ProductCardComponent
+                      productSaleInfo={productSaleInfo}
                       id={item.id}
                       title={item.title}
                       imageUri={item.imageUri}

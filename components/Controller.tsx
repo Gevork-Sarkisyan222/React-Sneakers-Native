@@ -1,8 +1,8 @@
 import { AppSettingsType, SettingsPayload } from '@/constants/Types';
-import { useGetSalesInfo } from '@/hooks/useGetSalesInfo';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { View, Text, Switch, TouchableOpacity, TextInput } from 'react-native';
+import { useSalesInfo } from './context/SalesInfoContext';
 
 type Props = {
   onCloseModal: () => void;
@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default function Controller({ onCloseModal, setModalTypeController, isVisible }: Props) {
-  const { fetchSalesData } = useGetSalesInfo();
+  const { refresh: refreshSalesData } = useSalesInfo();
   const [summerSale, setSummerSale] = useState(false);
   const [blackFriday, setBlackFriday] = useState(false);
   const [promoActive, setPromoActive] = useState(false);
@@ -41,7 +41,7 @@ export default function Controller({ onCloseModal, setModalTypeController, isVis
       sale: false,
       sale_discount: 0,
     });
-    fetchSalesData();
+    refreshSalesData();
   };
 
   // ЧЁРНАЯ ПЯТНИЦА: включить, выключив остальное
@@ -58,7 +58,7 @@ export default function Controller({ onCloseModal, setModalTypeController, isVis
       sale: false,
       sale_discount: 0,
     });
-    fetchSalesData();
+    refreshSalesData();
   };
 
   // ГЛОБАЛЬНАЯ АКЦИЯ: только локально открыть input, без запроса
@@ -96,7 +96,7 @@ export default function Controller({ onCloseModal, setModalTypeController, isVis
       sale: true,
       sale_discount: Number(promoDiscount),
     });
-    fetchSalesData();
+    refreshSalesData();
 
     onCloseModal();
     setModalTypeController(false);

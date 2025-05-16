@@ -16,9 +16,9 @@ import CardSkeleton from './skeletons/Card-Skeleton';
 import SortDropdown from './SortDropdown';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useGetUser } from '@/hooks/useGetUser';
-import { useGetSalesInfo } from '@/hooks/useGetSalesInfo';
 import SaleBanner from './SaleBanner';
 import { useSalePeriodSubtitle } from '@/hooks/useSalePeriodSubtitle';
+import { useSalesInfo } from './context/SalesInfoContext';
 
 interface Props {
   products: Product[];
@@ -27,7 +27,7 @@ interface Props {
 
 const ProductList: React.FC<Props> = ({ products, isLoading }) => {
   const { user, isLoading: isLoadingUser } = useGetUser({});
-  const { productSaleInfo } = useGetSalesInfo();
+  const { productSaleInfo } = useSalesInfo();
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebounce(searchValue, 500);
 
@@ -151,6 +151,7 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
           columnWrapperStyle={{ justifyContent: 'space-between' }}
           renderItem={({ item }) => (
             <ProductCardComponent
+              productSaleInfo={productSaleInfo}
               id={item.id}
               title={item.title}
               imageUri={item.imageUri}
