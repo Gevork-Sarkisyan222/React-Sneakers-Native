@@ -41,6 +41,8 @@ const CartDrawerContent: React.FC<Props> = ({
     return acc + numericPrice;
   }, 0);
 
+  const taxCount = Math.round(totalAmount * 0.05);
+
   const handleRemoveFromCart = (productId: string, title: string) => {
     Alert.alert('Удаление товара', 'Вы действительно хотите удалить этот товар из корзины?', [
       {
@@ -126,7 +128,7 @@ const CartDrawerContent: React.FC<Props> = ({
 
     // списываем деньги с баланса
     await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user.id}`, {
-      balance: user.balance - totalAmount,
+      balance: user.balance - totalAmount - taxCount,
     });
 
     const { data } = await axios.post('https://dcc2e55f63f7f47b.mokky.dev/orders', {
@@ -290,7 +292,7 @@ const CartDrawerContent: React.FC<Props> = ({
               <View className="flex flex-row justify-between w-full">
                 <Text>Налог 5%: </Text>
                 <View className="w-full border-b border-b-[#DFDFDF] flex-1 border-dashed mx-[9px]"></View>
-                <Text className="font-bold">{Math.round(totalAmount * 0.05)} руб.</Text>
+                <Text className="font-bold">{taxCount.toLocaleString('ru-RU')} руб.</Text>
               </View>
 
               <Pressable

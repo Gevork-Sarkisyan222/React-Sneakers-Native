@@ -1,5 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, View, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ScrollView,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -12,7 +21,7 @@ import { RootState } from '@/redux/store';
 import { setRemoveAllMarks, setUpdateAllFavorites } from '@/redux/slices/products.slice';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useSalesInfo } from '@/components/context/SalesInfoContext';
-import StarRating, { StarRatingDisplay } from 'react-native-star-rating-widget';
+import { StarRatingDisplay } from 'react-native-star-rating-widget';
 import CommentsSection from '@/components/CommentsSection';
 
 export default function FullCard() {
@@ -59,6 +68,18 @@ export default function FullCard() {
       : parsedPrice
   ).toString();
 
+  // count stars
+
+  const comments = currentProduct.comments || [];
+
+  const averageRating = useMemo(() => {
+    if (comments.length === 0) {
+      return 0;
+    }
+    const total = comments.reduce((sum, c) => sum + c.stars, 0);
+    return total / comments.length;
+  }, [comments]);
+
   // Проверка статуса корзины при изменении removeAllMarks
   useEffect(() => {
     const checkCartStatus = async () => {
@@ -80,23 +101,26 @@ export default function FullCard() {
 
   // =======================
 
+  const controller = new AbortController();
+
+  const fetchProduct = async () => {
+    try {
+      const response = await axios.get<Product>(
+        `https://dcc2e55f63f7f47b.mokky.dev/products/${id}?_relations=users`,
+        { signal: controller.signal },
+      );
+      const prod = response.data;
+      setCurrentProduct(prod);
+      setIsAddedToFavorite(prod.isFavorite);
+      setIsAddedToCart(prod.isAddedToCart);
+    } catch (error) {
+      if (!axios.isCancel(error)) console.error('Ошибка загрузки продукта:', error);
+    }
+  };
+
   useEffect(() => {
     if (!id) return;
-    const controller = new AbortController();
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get<Product>(
-          `https://dcc2e55f63f7f47b.mokky.dev/products/${id}?_relations=users`,
-          { signal: controller.signal },
-        );
-        const prod = response.data;
-        setCurrentProduct(prod);
-        setIsAddedToFavorite(prod.isFavorite);
-        setIsAddedToCart(prod.isAddedToCart);
-      } catch (error) {
-        if (!axios.isCancel(error)) console.error('Ошибка загрузки продукта:', error);
-      }
-    };
+
     fetchProduct();
     return () => controller.abort();
   }, [id, updateAllFavorites, removeAllMarks]); // Возвращены зависимости
@@ -200,6 +224,31 @@ export default function FullCard() {
     }));
   };
 
+  useEffect(() => {
+    if (!currentProduct.id || comments.length === 0) return; // защита от «нулевого» патча
+
+    (async () => {
+      try {
+        await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
+          rating: averageRating,
+        });
+      } catch (e) {
+        console.error('Не удалось обновить рейтинг:', e);
+      }
+    })();
+  }, [averageRating, currentProduct.id, comments.length]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const rating = Number(currentProduct.rating);
+
+  const formattedRating = Number.isInteger(rating)
+    ? rating.toString()
+    : rating.toLocaleString('ru-RU', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      });
+
   if (!currentProduct.id) {
     return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center' }} />;
   }
@@ -208,7 +257,10 @@ export default function FullCard() {
     <SafeAreaView className="flex-1 bg-white">
       <Header />
 
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl colors={['#338fd4']} refreshing={refreshing} onRefresh={fetchProduct} />
+        }>
         <View className="flex-row items-center p-4">
           <TouchableOpacity onPress={() => router.back()} className="p-2">
             <MaterialIcons name="arrow-back" size={28} color="#333" />
@@ -249,7 +301,7 @@ export default function FullCard() {
               rating={currentProduct.rating}
             />
 
-            <Text className="mr-[5px]">{currentProduct.rating} Звезд</Text>
+            <Text className="mr-[5px]">{formattedRating} Звезд</Text>
           </View>
 
           <Text className="text-sm text-gray-700 mr-1">Цена:</Text>
