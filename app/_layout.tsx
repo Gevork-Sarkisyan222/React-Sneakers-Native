@@ -7,6 +7,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { store } from '@/redux/store';
 import { Provider } from 'react-redux';
 import { SalesInfoProvider } from '@/components/context/SalesInfoContext';
+import Toast from 'react-native-toast-message';
+import { View } from 'react-native';
 
 export default function RootLayout() {
   return (
@@ -23,6 +25,18 @@ export default function RootLayout() {
           </SafeAreaProvider>
         </GluestackUIProvider>
       </Provider>
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 999999,
+          elevation: 999999,
+        }}>
+        <Toast />
+      </View>
     </SalesInfoProvider>
   );
 }

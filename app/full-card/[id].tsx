@@ -4,15 +4,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { CartProduct, Product } from '@/constants/Types';
+import { CartProduct, Comment, Product } from '@/constants/Types';
 import Header from '@/components/Header';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { setRemoveAllMarks, setUpdateAllFavorites } from '@/redux/slices/products.slice';
 import Entypo from '@expo/vector-icons/Entypo';
+import { useSalesInfo } from '@/components/context/SalesInfoContext';
+import StarRating, { StarRatingDisplay } from 'react-native-star-rating-widget';
+import CommentsSection from '@/components/CommentsSection';
 
 export default function FullCard() {
+  const { productSaleInfo } = useSalesInfo();
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [currentProduct, setCurrentProduct] = useState<Product>({} as Product);
@@ -26,6 +30,34 @@ export default function FullCard() {
   const [isAddedToCart, setIsAddedToCart] = useState<boolean>(false);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingCart, setLoadingCart] = useState(false);
+
+  // работа со скидкой
+  const isOnSales =
+    productSaleInfo?.sale || productSaleInfo?.summer_sale || productSaleInfo?.black_friday;
+
+  // Убираем из строки всё, кроме цифр и точки
+  const cleanedPriceStr = currentProduct.price?.replace(/[^0-9.]/g, '');
+  const parsedPrice = Number(cleanedPriceStr) || 0;
+
+  // Если скидка тоже приходит строкой со спецсимволами — аналогично очищаем
+  const cleanedDiscountStr = String(productSaleInfo?.sale_discount)?.replace(/[^0-9.]/g, '');
+  const parsedDiscount = Number(cleanedDiscountStr) || 0;
+
+  // Вычисляем все три варианта
+  const blackFridaySalesPrice = Math.round(parsedPrice * 0.3); // 70% скидки
+  const summerSalesPrice = Math.round(parsedPrice * 0.6); // 40% скидки
+  const globalSalePrice = Math.round(parsedPrice * (1 - parsedDiscount / 100));
+
+  // Приоритет акций: чёрная пятница → летняя распродажа → глобальная → обычная
+  const currentPriceWithSale = (
+    productSaleInfo?.black_friday
+      ? blackFridaySalesPrice
+      : productSaleInfo?.summer_sale
+      ? summerSalesPrice
+      : productSaleInfo?.sale
+      ? globalSalePrice
+      : parsedPrice
+  ).toString();
 
   // Проверка статуса корзины при изменении removeAllMarks
   useEffect(() => {
@@ -54,7 +86,7 @@ export default function FullCard() {
     const fetchProduct = async () => {
       try {
         const response = await axios.get<Product>(
-          `https://dcc2e55f63f7f47b.mokky.dev/products/${id}`,
+          `https://dcc2e55f63f7f47b.mokky.dev/products/${id}?_relations=users`,
           { signal: controller.signal },
         );
         const prod = response.data;
@@ -87,7 +119,7 @@ export default function FullCard() {
           id: Number(id),
           title: currentProduct.title,
           imageUri: currentProduct.imageUri,
-          price: currentProduct.price,
+          price: isOnSales ? currentPriceWithSale : currentProduct.price,
           isFavorite: true,
           isAddedToCart,
         });
@@ -126,7 +158,7 @@ export default function FullCard() {
           id: Number(id),
           title: currentProduct.title,
           imageUri: currentProduct.imageUri,
-          price: currentProduct.price,
+          price: isOnSales ? currentPriceWithSale : currentProduct.price,
         });
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/cart/${created.data.id}`, {
           id: Number(id),
@@ -143,6 +175,29 @@ export default function FullCard() {
     } finally {
       setLoadingCart(false);
     }
+  };
+
+  const handleNewComment = (newComment: Comment) => {
+    setCurrentProduct((prev) => ({
+      ...prev,
+      comments: [...(prev.comments || []), newComment] as Comment[],
+    }));
+  };
+
+  const handleDeleteComment = (id: number) => {
+    setCurrentProduct((prev) => ({
+      ...prev,
+      comments: (prev.comments || []).filter((c) => c.id !== id) as Comment[],
+    }));
+  };
+
+  const handleEditComment = (id: number, editedText: string, editedStars: number) => {
+    setCurrentProduct((prev) => ({
+      ...prev,
+      comments: (prev.comments || []).map((c) =>
+        c.id === id ? { ...c, text: editedText, stars: editedStars } : c,
+      ),
+    }));
   };
 
   if (!currentProduct.id) {
@@ -184,15 +239,40 @@ export default function FullCard() {
           </TouchableOpacity>
 
           <Text className="text-2xl font-semibold mb-2 text-gray-900">{currentProduct.title}</Text>
-          <Text className="text-lg text-gray-700 mb-4">
-            Цена: {currentProduct.price || 'N/A'} ₽
+
+          {/* Компонент Рейтинг */}
+          <View className="flex-row">
+            <StarRatingDisplay
+              style={{ marginBottom: 5, marginLeft: -5 }}
+              starSize={30}
+              maxStars={5}
+              rating={currentProduct.rating}
+            />
+
+            <Text className="mr-[5px]">{currentProduct.rating} Звезд</Text>
+          </View>
+
+          <Text className="text-sm text-gray-700 mr-1">Цена:</Text>
+
+          <Text
+            className={`leading-[16px] ${
+              isOnSales
+                ? 'text-[14px] text-gray-400 line-through mr-2'
+                : 'text-[18px] text-black font-bold mt-[6px] mb-[10px]'
+            }`}>
+            {currentProduct.price} ₽.
           </Text>
+
+          {isOnSales && (
+            <Text className="text-[18px] text-green-600 font-bold">{currentPriceWithSale} ₽</Text>
+          )}
+
           <Text className="text-base text-gray-600 mb-6">{currentProduct.description}</Text>
 
           <TouchableOpacity
             onPress={handleAddToCart}
             disabled={loadingCart}
-            className="bg-[#9DD458] py-4 rounded-[18px] items-center flex flex-row justify-center gap-[12px]">
+            className="bg-[#9DD458] py-4 rounded-[18px] items-center flex flex-row justify-center gap-[12px] mb-[30px]">
             {loadingCart ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
@@ -208,6 +288,15 @@ export default function FullCard() {
               </>
             )}
           </TouchableOpacity>
+
+          {/* Секция Отзывов comments */}
+          <CommentsSection
+            productId={currentProduct.id}
+            items={currentProduct.comments}
+            onNewComment={handleNewComment}
+            onDeleteComment={handleDeleteComment}
+            onEditComment={handleEditComment}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

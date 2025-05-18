@@ -29,7 +29,7 @@ export default function Index() {
       setIsLoading(true);
 
       const res = await axios.get<Product[]>(
-        'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description',
+        'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description,-comments',
       );
       const shuffled = shuffleArray(res.data);
       dispatch(setProducts(shuffled));
@@ -60,7 +60,7 @@ export default function Index() {
         </ScrollView>
       </SafeAreaView>
 
-      <View
+      {/* <View
         style={{
           position: 'absolute',
           top: 0,
@@ -70,7 +70,7 @@ export default function Index() {
           elevation: 999999,
         }}>
         <Toast />
-      </View>
+      </View> */}
     </>
   );
 }

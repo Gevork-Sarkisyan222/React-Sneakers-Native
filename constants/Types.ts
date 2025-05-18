@@ -6,6 +6,16 @@ export interface Product {
   isFavorite: boolean;
   isAddedToCart: boolean;
   description: string;
+  rating: number;
+  comments: Comment[];
+}
+
+export interface Comment {
+  id: number;
+  user_id: number;
+  text: string;
+  created_at: string; // ISO 8601, например "2025-05-17T12:00:00Z"
+  stars: number; // от 1 до 5
 }
 
 export interface CartProduct {

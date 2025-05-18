@@ -103,7 +103,7 @@ export default function Header() {
         }}
         size="lg"
         anchor="bottom">
-        <View
+        {/* <View
           style={{
             position: 'absolute',
             top: 0,
@@ -113,7 +113,7 @@ export default function Header() {
             elevation: 999999,
           }}>
           <Toast />
-        </View>
+        </View> */}
 
         <DrawerBackdrop />
         <CartDrawerContent
