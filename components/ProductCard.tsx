@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setRemoveAllMarks, setUpdateAllFavorites } from '@/redux/slices/products.slice';
 import FastImage from 'react-native-fast-image';
 import { useRouter } from 'expo-router';
+import { useGetPriceWithSale } from '@/hooks/useGetPriceWithSale';
 
 export interface ProductCardProps {
   productSaleInfo?: AppSettingsType;
@@ -53,30 +54,12 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   const isOnSales =
     productSaleInfo?.sale || productSaleInfo?.summer_sale || productSaleInfo?.black_friday;
 
-  // Убираем из строки всё, кроме цифр и точки
-  const cleanedPriceStr = price.replace(/[^0-9.]/g, '');
-  const parsedPrice = Number(cleanedPriceStr) || 0;
-
-  // Если скидка тоже приходит строкой со спецсимволами — аналогично очищаем
-  const cleanedDiscountStr = String(productSaleInfo?.sale_discount).replace(/[^0-9.]/g, '');
-  const parsedDiscount = Number(cleanedDiscountStr) || 0;
-
-  // Вычисляем все три варианта
-  const blackFridaySalesPrice = Math.round(parsedPrice * 0.3); // 70% скидки
-  const summerSalesPrice = Math.round(parsedPrice * 0.6); // 40% скидки
-  const globalSalePrice = Math.round(parsedPrice * (1 - parsedDiscount / 100));
-
-  // Приоритет акций: чёрная пятница → летняя распродажа → глобальная → обычная
-  const currentPriceWithSale = (
-    productSaleInfo?.black_friday
-      ? blackFridaySalesPrice
-      : productSaleInfo?.summer_sale
-      ? summerSalesPrice
-      : productSaleInfo?.sale
-      ? globalSalePrice
-      : parsedPrice
-  ).toString();
-
+  const currentPriceWithSale = productSaleInfo
+    ? useGetPriceWithSale({
+        productSaleInfo,
+        currentPrice: price,
+      })
+    : null;
   // =========================
 
   // Проверка статуса корзины при изменении removeAllMarks

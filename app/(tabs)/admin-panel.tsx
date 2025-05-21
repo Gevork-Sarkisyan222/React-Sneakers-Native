@@ -23,6 +23,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { useGetUser } from '@/hooks/useGetUser';
 import Controller from '@/components/Controller';
+import { useGetPriceWithSale } from '@/hooks/useGetPriceWithSale';
+import { useSalesInfo } from '@/components/context/SalesInfoContext';
 
 interface Product {
   id: number;
@@ -34,6 +36,7 @@ interface Product {
 
 export default function AdminPanel(): JSX.Element {
   const { user } = useGetUser({ pathname: 'admin-panel' });
+  const { productSaleInfo } = useSalesInfo();
   const dispatch = useDispatch();
   const updateProducts = useSelector((state: RootState) => state.products.updateProductsEffect);
 
@@ -50,6 +53,18 @@ export default function AdminPanel(): JSX.Element {
     price: '',
     description: '',
   });
+
+  const isOnSales =
+    productSaleInfo?.sale || productSaleInfo?.summer_sale || productSaleInfo?.black_friday;
+
+  const getPriceFn = (price: string) => {
+    const currentPriceWithSale = useGetPriceWithSale({
+      productSaleInfo,
+      currentPrice: price,
+    });
+
+    return currentPriceWithSale;
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -79,6 +94,7 @@ export default function AdminPanel(): JSX.Element {
   };
 
   const openEdit = (item: Product) => {
+    console.log(item);
     setEditItem(item);
     setForm({
       title: item.title,
@@ -159,11 +175,19 @@ export default function AdminPanel(): JSX.Element {
         />
         <View className="flex-1">
           <Text className="text-xl font-semibold text-gray-800">{item.title}</Text>
-          <Text className="text-gray-600 mt-1">{item.price} ₽</Text>
+          <Text className="text-gray-600 mt-1">
+            {isOnSales ? getPriceFn(item.price) : item.price} ₽
+          </Text>
         </View>
       </View>
       <View className="flex-row justify-end gap-2">
-        <TouchableOpacity onPress={() => openEdit(item)}>
+        <TouchableOpacity
+          onPress={() =>
+            openEdit({
+              ...item,
+              price: isOnSales ? getPriceFn(item.price) : item.price,
+            })
+          }>
           <Feather name="edit" size={20} color="#3B82F6" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => deleteItem(item.id)}>

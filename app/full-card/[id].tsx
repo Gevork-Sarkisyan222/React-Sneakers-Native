@@ -23,6 +23,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { useSalesInfo } from '@/components/context/SalesInfoContext';
 import { StarRatingDisplay } from 'react-native-star-rating-widget';
 import CommentsSection from '@/components/CommentsSection';
+import { useGetPriceWithSale } from '@/hooks/useGetPriceWithSale';
 
 export default function FullCard() {
   const { productSaleInfo } = useSalesInfo();
@@ -44,29 +45,10 @@ export default function FullCard() {
   const isOnSales =
     productSaleInfo?.sale || productSaleInfo?.summer_sale || productSaleInfo?.black_friday;
 
-  // Убираем из строки всё, кроме цифр и точки
-  const cleanedPriceStr = currentProduct.price?.replace(/[^0-9.]/g, '');
-  const parsedPrice = Number(cleanedPriceStr) || 0;
-
-  // Если скидка тоже приходит строкой со спецсимволами — аналогично очищаем
-  const cleanedDiscountStr = String(productSaleInfo?.sale_discount)?.replace(/[^0-9.]/g, '');
-  const parsedDiscount = Number(cleanedDiscountStr) || 0;
-
-  // Вычисляем все три варианта
-  const blackFridaySalesPrice = Math.round(parsedPrice * 0.3); // 70% скидки
-  const summerSalesPrice = Math.round(parsedPrice * 0.6); // 40% скидки
-  const globalSalePrice = Math.round(parsedPrice * (1 - parsedDiscount / 100));
-
-  // Приоритет акций: чёрная пятница → летняя распродажа → глобальная → обычная
-  const currentPriceWithSale = (
-    productSaleInfo?.black_friday
-      ? blackFridaySalesPrice
-      : productSaleInfo?.summer_sale
-      ? summerSalesPrice
-      : productSaleInfo?.sale
-      ? globalSalePrice
-      : parsedPrice
-  ).toString();
+  const currentPriceWithSale = useGetPriceWithSale({
+    productSaleInfo,
+    currentPrice: currentProduct.price,
+  });
 
   // count stars
 
