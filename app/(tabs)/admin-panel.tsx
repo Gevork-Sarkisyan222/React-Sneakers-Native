@@ -25,6 +25,8 @@ import { useGetUser } from '@/hooks/useGetUser';
 import Controller from '@/components/Controller';
 import { useGetPriceWithSale } from '@/hooks/useGetPriceWithSale';
 import { useSalesInfo } from '@/components/context/SalesInfoContext';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import UsersList from '@/components/UsersList';
 
 interface Product {
   id: number;
@@ -45,7 +47,7 @@ export default function AdminPanel(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [modalTypeController, setModalTypeController] = useState<boolean>(false);
+  const [modalType, setModalType] = useState<'controller' | 'users-list' | null>(null);
   const [editItem, setEditItem] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, 'id'>>({
     title: '',
@@ -143,7 +145,12 @@ export default function AdminPanel(): JSX.Element {
   };
 
   const handleOpenModalController = () => {
-    setModalTypeController(true);
+    setModalType('controller');
+    setModalOpen(true);
+  };
+
+  const handleOpenModalUsersList = () => {
+    setModalType('users-list');
     setModalOpen(true);
   };
 
@@ -155,7 +162,7 @@ export default function AdminPanel(): JSX.Element {
     );
   }
 
-  if (user && user.position !== 'admin') {
+  if (user && user.position !== 'admin' && user.position !== 'superadmin') {
     return (
       <View className="flex-1 items-center justify-center">
         <Text className="text-2xl font-bold text-gray-800 mb-4">Доступ запрещен</Text>
@@ -229,6 +236,15 @@ export default function AdminPanel(): JSX.Element {
         <Text className="text-white font-semibold text-base">Пульт приложения</Text>
       </Pressable>
 
+      {user?.position === 'superadmin' && (
+        <Pressable
+          onPress={handleOpenModalUsersList}
+          className="flex-row items-center justify-center mb-[20px] bg-[#9DD458] px-4 py-3 rounded-2xl shadow shadow-blue-300 active:opacity-75 mt-[-10px]">
+          <FontAwesome6 name="users-gear" size={18} color="#fff" style={{ marginRight: 10 }} />
+          <Text className="text-white font-semibold text-base">Список пользователей</Text>
+        </Pressable>
+      )}
+
       <FlatList
         refreshControl={
           <RefreshControl colors={['#338fd4']} refreshing={loading} onRefresh={fetchProducts} />
@@ -270,16 +286,21 @@ export default function AdminPanel(): JSX.Element {
       />
 
       <Modal visible={modalOpen} animationType="slide" transparent>
-        <View
+        {/* Обёртка для фона, ловит нажатия на пустую область */}
+        <Pressable
+          className="flex-1 justify-center p-4"
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-          className="flex-1 justify-center p-4">
-          <View className="bg-white rounded-2xl p-6">
-            {modalTypeController ? (
+          onPress={closeModal}>
+          {/* Чтобы клики по внутреннему View не закрывали модалку — оборачиваем его в ещё один Pressable без обработчика */}
+          <Pressable className="bg-white rounded-2xl p-6" onPress={() => {}}>
+            {modalType === 'controller' ? (
               <Controller
                 onCloseModal={closeModal}
-                setModalTypeController={setModalTypeController}
+                setModalType={setModalType}
                 isVisible={modalOpen}
               />
+            ) : modalType === 'users-list' ? (
+              <UsersList />
             ) : (
               <>
                 <Text className="text-xl font-semibold text-gray-800 mb-4">
@@ -325,8 +346,8 @@ export default function AdminPanel(): JSX.Element {
                 </ScrollView>
               </>
             )}
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </SafeAreaView>
   );

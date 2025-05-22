@@ -6,11 +6,11 @@ import { useSalesInfo } from './context/SalesInfoContext';
 
 type Props = {
   onCloseModal: () => void;
-  setModalTypeController: (value: boolean) => void;
+  setModalType: (value: 'controller' | 'users-list' | null) => void;
   isVisible: boolean;
 };
 
-export default function Controller({ onCloseModal, setModalTypeController, isVisible }: Props) {
+export default function Controller({ onCloseModal, setModalType, isVisible }: Props) {
   const { refresh: refreshSalesData } = useSalesInfo();
   const [summerSale, setSummerSale] = useState(false);
   const [blackFriday, setBlackFriday] = useState(false);
@@ -99,7 +99,7 @@ export default function Controller({ onCloseModal, setModalTypeController, isVis
     refreshSalesData();
 
     onCloseModal();
-    setModalTypeController(false);
+    setModalType(null);
   };
 
   // ЗАГРУЗКА НАСТРОЕК ПРИ ОТКРЫТИИ МОДАЛА
@@ -182,7 +182,7 @@ export default function Controller({ onCloseModal, setModalTypeController, isVis
         <TouchableOpacity
           onPress={() => {
             onCloseModal();
-            setModalTypeController(false);
+            setModalType(null);
           }}
           className="px-5 py-2">
           <Text className="text-gray-700 uppercase">Отмена</Text>

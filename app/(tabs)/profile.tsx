@@ -233,14 +233,17 @@ export default function Profile() {
           </View>
 
           {/* Кнопка перехода в админ панель */}
-          {user.position === 'admin' && (
-            <Pressable
-              onPress={() => router.push('/admin-panel')}
-              className="bg-white rounded-xl py-3 items-center shadow-md mb-4 flex-row justify-center gap-2">
-              <Text className="text-blue-500 font-semibold text-base">Перейти в админ панель</Text>
-              <AntDesign name="arrowright" size={24} color="#338fd4" />
-            </Pressable>
-          )}
+          {user.position === 'admin' ||
+            (user.position === 'superadmin' && (
+              <Pressable
+                onPress={() => router.push('/admin-panel')}
+                className="bg-white rounded-xl py-3 items-center shadow-md mb-4 flex-row justify-center gap-2">
+                <Text className="text-blue-500 font-semibold text-base">
+                  Перейти в админ панель
+                </Text>
+                <AntDesign name="arrowright" size={24} color="#338fd4" />
+              </Pressable>
+            ))}
 
           {/* Кнопка выхода */}
           <Pressable

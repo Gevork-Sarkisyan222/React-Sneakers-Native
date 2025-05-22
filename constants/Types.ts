@@ -33,7 +33,7 @@ export interface UserInterface {
   phone: string;
   address: string;
   balance: number;
-  position: 'admin' | 'user';
+  position: 'admin' | 'user' | 'superadmin';
   avatarUri: string;
 }
 

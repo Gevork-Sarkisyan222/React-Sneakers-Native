@@ -76,11 +76,12 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
       {isLoadingUser ? (
         <ActivityIndicator size="large" color="#338fd4" />
       ) : (
-        user?.position === 'admin' && (
+        user?.position === 'admin' ||
+        (user?.position === 'superadmin' && (
           <Text style={{ fontSize: 23, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
-            Добро пожаловать, Администратор {user.name}!
+            Добро пожаловать, {user.position === 'superadmin' && 'Супер'} Администратор {user.name}!
           </Text>
-        )
+        ))
       )}
 
       <View className="flex-row justify-center">
