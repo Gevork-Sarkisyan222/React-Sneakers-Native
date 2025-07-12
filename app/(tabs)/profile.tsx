@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -12,25 +12,25 @@ import {
   Modal,
   TextInput,
   TouchableOpacity,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import { useRouter } from 'expo-router';
-import { useGetUser } from '@/hooks/useGetUser';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+import { useRouter } from "expo-router";
+import { useGetUser } from "@/hooks/useGetUser";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 export default function Profile() {
   // const [user, setUser] = React.useState<UserInterface | null>(null);
   // const [isLoading, setIsLoading] = React.useState(false);
-  const { user, isLoading, fetchUser } = useGetUser({ pathname: 'profile' });
+  const { user, isLoading, fetchUser } = useGetUser({ pathname: "profile" });
   const router = useRouter();
 
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [amount, setAmount] = React.useState('');
-  const [cardNumber, setCardNumber] = React.useState('');
+  const [amount, setAmount] = React.useState("");
+  const [cardNumber, setCardNumber] = React.useState("");
 
   // const fetchUser = async () => {
   //   setIsLoading(true);
@@ -66,30 +66,30 @@ export default function Profile() {
 
   const handleLogout = () => {
     Alert.alert(
-      'Выход из аккаунта',
-      'Вы действительно хотите выйти?',
+      "Выход из аккаунта",
+      "Вы действительно хотите выйти?",
       [
         {
-          text: 'Отмена',
-          style: 'cancel',
+          text: "Отмена",
+          style: "cancel",
         },
         {
-          text: 'Выйти',
-          style: 'destructive',
+          text: "Выйти",
+          style: "destructive",
           onPress: async () => {
             try {
-              await SecureStore.deleteItemAsync('userToken');
+              await SecureStore.deleteItemAsync("userToken");
               fetchUser();
-              Alert.alert('Выход', 'Вы успешно вышли из аккаунта');
-              router.replace('/login');
+              Alert.alert("Выход", "Вы успешно вышли из аккаунта");
+              router.replace("/login");
             } catch (error) {
-              console.error('Ошибка при выходе из аккаунта:', error);
-              Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
+              console.error("Ошибка при выходе из аккаунта:", error);
+              Alert.alert("Ошибка", "Не удалось выйти из аккаунта");
             }
           },
         },
       ],
-      { cancelable: true },
+      { cancelable: true }
     );
   };
 
@@ -98,9 +98,17 @@ export default function Profile() {
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.3, duration: 500, useNativeDriver: true }),
-      ]),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.3,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
     );
     loop.start();
     return () => loop.stop();
@@ -108,7 +116,7 @@ export default function Profile() {
 
   // Скелетон для одного блока
   const SkeletonBlock = ({ style }: { style: any }) => (
-    <Animated.View style={[style, { opacity, backgroundColor: '#E0E0E0' }]} />
+    <Animated.View style={[style, { opacity, backgroundColor: "#E0E0E0" }]} />
   );
 
   if (!user) {
@@ -118,12 +126,17 @@ export default function Profile() {
           // вот это свойство добавляет выравнивание по центру
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: 'center',
+            justifyContent: "center",
             padding: 16, // вместо p-4 на SafeAreaView
           }}
           refreshControl={
-            <RefreshControl colors={['#338fd4']} refreshing={isLoading} onRefresh={fetchUser} />
-          }>
+            <RefreshControl
+              colors={["#338fd4"]}
+              refreshing={isLoading}
+              onRefresh={fetchUser}
+            />
+          }
+        >
           {/* Скелетон аватара */}
           <View className="items-center mb-6">
             <SkeletonBlock style={styles.avatarSkeleton} />
@@ -150,15 +163,15 @@ export default function Profile() {
 
   // функция для Пополнение баланса
   const onReplenish = async () => {
-    const cleanCardNumber = cardNumber.replace(/\s+/g, '');
+    const cleanCardNumber = cardNumber.replace(/\s+/g, "");
 
     if (cleanCardNumber.length !== 16) {
-      Alert.alert('ОШИБКА', 'Номер карты должен содержать ровно 16 цифр');
+      Alert.alert("ОШИБКА", "Номер карты должен содержать ровно 16 цифр");
       return;
     }
 
     if (!amount || isNaN(Number(amount))) {
-      Alert.alert('ОШИБКА', 'Введите корректную сумму');
+      Alert.alert("ОШИБКА", "Введите корректную сумму");
       return;
     }
     // здесь можно добавить валидацию номера карты
@@ -166,14 +179,14 @@ export default function Profile() {
       await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user.id}`, {
         balance: Number(user.balance) + Number(amount),
       });
-      Alert.alert('УСПЕХ', 'Баланс успешно пополнен');
-      setAmount('');
-      setCardNumber('');
+      Alert.alert("УСПЕХ", "Баланс успешно пополнен");
+      setAmount("");
+      setCardNumber("");
       setModalVisible(false);
       fetchUser();
     } catch (error) {
-      console.error('Ошибка при пополнении баланса:', error);
-      Alert.alert('ОШИБКА', 'Не удалось пополнить баланс');
+      console.error("Ошибка при пополнении баланса:", error);
+      Alert.alert("ОШИБКА", "Не удалось пополнить баланс");
     }
   };
 
@@ -182,15 +195,23 @@ export default function Profile() {
       <SafeAreaView className="flex-1 bg-gray-100 p-4">
         <ScrollView
           refreshControl={
-            <RefreshControl refreshing={isLoading} onRefresh={fetchUser} colors={['#338fd4']} />
-          }>
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={fetchUser}
+              colors={["#338fd4"]}
+            />
+          }
+        >
           {/* Аватар и Имя */}
           <View className="items-center mb-6">
-            <Image source={{ uri: user.avatarUri }} className="w-24 h-24 rounded-full mb-3" />
+            <Image
+              source={{ uri: user.avatarUri }}
+              className="w-24 h-24 rounded-full mb-3"
+            />
             <Text className="text-2xl font-bold text-gray-900">
               {user.name} {user.lastName}
             </Text>
-            {user.position !== 'user' && (
+            {user.position !== "user" && (
               <View className="bg-blue-100 px-3 py-1 rounded-full mt-1">
                 <Text className="text-blue-800 font-medium text-sm">
                   {user.position.toUpperCase()}
@@ -225,19 +246,27 @@ export default function Profile() {
               </View>
               <TouchableOpacity
                 onPress={() => setModalVisible(true)}
-                className="bg-green-100 px-4 py-2 rounded-xl flex-row justify-center gap-[10px] items-center">
-                <FontAwesome name="credit-card" size={20} color="text-green-800" />
-                <Text className="text-green-800 font-medium">Пополнить баланс</Text>
+                className="bg-green-100 px-4 py-2 rounded-xl flex-row justify-center gap-[10px] items-center"
+              >
+                <FontAwesome
+                  name="credit-card"
+                  size={20}
+                  color="text-green-800"
+                />
+                <Text className="text-green-800 font-medium">
+                  Пополнить баланс
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Кнопка перехода в админ панель */}
-          {user.position === 'admin' ||
-            (user.position === 'superadmin' && (
+          {/* Кнопка перехода в админ панель nav */}
+          {user.position === "admin" ||
+            (user.position === "superadmin" && (
               <Pressable
-                onPress={() => router.push('/admin-panel')}
-                className="bg-white rounded-xl py-3 items-center shadow-md mb-4 flex-row justify-center gap-2">
+                onPress={() => router.push("/admin-panel")}
+                className="bg-white rounded-xl py-3 items-center shadow-md mb-4 flex-row justify-center gap-2"
+              >
                 <Text className="text-blue-500 font-semibold text-base">
                   Перейти в админ панель
                 </Text>
@@ -248,8 +277,11 @@ export default function Profile() {
           {/* Кнопка выхода */}
           <Pressable
             onPress={handleLogout}
-            className="bg-white rounded-xl py-3 items-center shadow-md flex-row justify-center gap-2">
-            <Text className="text-blue-500 font-semibold text-base">Выйти из аккаунта</Text>
+            className="bg-white rounded-xl py-3 items-center shadow-md flex-row justify-center gap-2"
+          >
+            <Text className="text-blue-500 font-semibold text-base">
+              Выйти из аккаунта
+            </Text>
             <MaterialIcons name="exit-to-app" size={24} color="#338fd4" />
           </Pressable>
         </ScrollView>
@@ -260,7 +292,8 @@ export default function Profile() {
         visible={modalVisible}
         transparent
         animationType="slide"
-        onRequestClose={() => setModalVisible(false)}>
+        onRequestClose={() => setModalVisible(false)}
+      >
         <View className="flex-1 bg-black/50 justify-center items-center">
           <View className="w-11/12 bg-white rounded-2xl p-6">
             <Text className="text-xl font-bold mb-4">Пополнить баланс</Text>
@@ -281,29 +314,33 @@ export default function Profile() {
               value={cardNumber}
               onChangeText={(text) => {
                 // 1) Убираем всё, кроме цифр
-                const digitsOnly = text.replace(/\D/g, '');
+                const digitsOnly = text.replace(/\D/g, "");
                 // 2) Обрезаем до 16 цифр
                 const limitedDigits = digitsOnly.slice(0, 16);
                 // 3) Форматируем: каждые 4 цифры + пробел
-                const formatted = limitedDigits.replace(/(.{4})/g, '$1 ').trim();
+                const formatted = limitedDigits
+                  .replace(/(.{4})/g, "$1 ")
+                  .trim();
                 setCardNumber(formatted);
               }}
               // 16 цифр + 3 пробела = 19 символов
               maxLength={19}
             />
             <Text className="text-xs text-gray-500 mb-4">
-              Native Sneakers придерживается стандарта безопасности данных платежных карт (PCI DSS)
-              при обработке данных карты. Безопасность данных вашей карты гарантирована. Все данные
-              зашифрованы и не передаются третьим лицам.
+              Native Sneakers придерживается стандарта безопасности данных
+              платежных карт (PCI DSS) при обработке данных карты. Безопасность
+              данных вашей карты гарантирована. Все данные зашифрованы и не
+              передаются третьим лицам.
             </Text>
             <View className="flex-row justify-end">
               <TouchableOpacity
                 className="mr-4 p-2"
                 onPress={() => {
                   setModalVisible(false);
-                  setAmount('');
-                  setCardNumber('');
-                }}>
+                  setAmount("");
+                  setCardNumber("");
+                }}
+              >
                 <Text className="text-gray-600">Отмена</Text>
               </TouchableOpacity>
               <TouchableOpacity className="p-2" onPress={onReplenish}>
@@ -336,7 +373,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   infoLine: {
-    width: '100%',
+    width: "100%",
     height: 16,
     borderRadius: 4,
     marginBottom: 12,
@@ -348,7 +385,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   logoutSkeleton: {
-    width: '100%',
+    width: "100%",
     height: 48,
     borderRadius: 12,
     marginTop: 16,
