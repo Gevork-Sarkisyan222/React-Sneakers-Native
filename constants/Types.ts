@@ -33,8 +33,13 @@ export interface UserInterface {
   phone: string;
   address: string;
   balance: number;
-  position: 'admin' | 'user' | 'superadmin';
+  position: "admin" | "user" | "superadmin";
   avatarUri: string;
+
+  // Новые поля блокировки:
+  isBlocked: boolean;
+  banStart?: null | string; // ISO‑строка: когда заблокировали
+  banUntil?: null | string;
 }
 
 // Новый тип для payload патч-запроса
