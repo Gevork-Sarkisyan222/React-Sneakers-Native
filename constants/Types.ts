@@ -40,6 +40,8 @@ export interface UserInterface {
   isBlocked: boolean;
   banStart?: null | string; // ISO‑строка: когда заблокировали
   banUntil?: null | string;
+  blockReason?: null | string;
+  blockedBy?: null | string;
 }
 
 // Новый тип для payload патч-запроса

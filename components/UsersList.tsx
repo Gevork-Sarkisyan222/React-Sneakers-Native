@@ -8,8 +8,10 @@ import {
   Pressable,
   Alert,
   Modal,
+  TextInput,
 } from "react-native";
 import axios from "axios";
+import { useGetUser } from "@/hooks/useGetUser";
 
 type User = {
   id: number;
@@ -26,12 +28,15 @@ type User = {
 type Props = {};
 
 const UsersList: React.FC<Props> = ({}) => {
+  const { user } = useGetUser({});
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [blockModalVisible, setBlockModalVisible] = useState(false);
   const [blockOption, setBlockOption] = useState<15 | 30 | "forever" | null>(
     null
   );
+
+  const [blockReason, setBlockReason] = useState<string>("");
 
   const [selectedBlockUserId, setSelectedBlockUserId] = useState<number | null>(
     null
@@ -131,9 +136,17 @@ const UsersList: React.FC<Props> = ({}) => {
     setBlockModalVisible(false);
     setBlockOption(null);
     setSelectedBlockUserId(null);
+    setBlockReason("");
   };
 
   const handleConfirmBlock = async () => {
+    if (blockReason === "") {
+      return Alert.alert(
+        "Ошибка",
+        "Вы не ввели причину блокировки. Пожалуйста, введите причину."
+      );
+    }
+
     if (selectedBlockUserId == null || blockOption == null) {
       return Alert.alert(
         "Ошибка",
@@ -160,6 +173,11 @@ const UsersList: React.FC<Props> = ({}) => {
           isBlocked: true,
           banStart,
           banUntil,
+          blockReason,
+          blockedBy:
+            user && user.position
+              ? `Глав.Администратором ${user.name} ${user.lastName}`
+              : "",
         }
       );
 
@@ -190,6 +208,8 @@ const UsersList: React.FC<Props> = ({}) => {
         isBlocked: false,
         banStart: null,
         banUntil: null,
+        blockReason: null,
+        blockedBy: null,
       });
 
       // Обновляем локальный стейт пользователей
@@ -216,9 +236,24 @@ const UsersList: React.FC<Props> = ({}) => {
           >
             <Pressable className="bg-white rounded-2xl p-6" onPress={() => {}}>
               <Text className="text-lg font-semibold mb-4">
+                Меню блокировки
+              </Text>
+              {/* ИНПУТ ПРИЧИНЫ БАНА */}
+              <TextInput
+                value={blockReason}
+                onChangeText={setBlockReason}
+                placeholder="Введите причину блокировки"
+                multiline
+                numberOfLines={4}
+                className="bg-white border-b-2 border-red-400 px-2 py-3 mb-4 text-base placeholder:text-red-600"
+                placeholderTextColor="#f43f5e"
+              />
+
+              <Text className="text-lg font-semibold mb-4">
                 Выберите срок блокировки
               </Text>
 
+              {/* Варианты сроков блокировки */}
               {([15, 30, "forever"] as const).map((opt) => {
                 const label = opt === "forever" ? "Навсегда" : `${opt} дней`;
                 const isSelected = blockOption === opt;
