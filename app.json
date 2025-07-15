@@ -2,6 +2,7 @@
   "expo": {
     "name": "Native Sneakers",
     "slug": "react-sneakers-native",
+    "privacy": "public",
     "description": "A React Native app for buying sneakers.",
     "version": "1.0.0",
     "orientation": "portrait",
