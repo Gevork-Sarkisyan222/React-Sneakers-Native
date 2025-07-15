@@ -18,7 +18,6 @@ import * as SecureStore from "expo-secure-store";
 import { useSalesInfo } from "./context/SalesInfoContext";
 import { router } from "expo-router";
 import Login from "@/app/(tabs)/login";
-import Register from "@/app/(tabs)/register";
 
 export function BlockedGuard({ children }: { children: React.ReactNode }) {
   const { productSaleInfo, refresh } = useSalesInfo();
@@ -93,9 +92,6 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
     console.log("first");
   }, [isLoading]);
 
-  const isAdmin =
-    currentUser?.position === "admin" || currentUser?.position === "superadmin";
-
   const timeToUnban = async () => {
     setIsUserBlocked(false);
     await axios.patch(
@@ -134,6 +130,9 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
       />
     );
   }
+
+  const isAdmin =
+    currentUser?.position === "admin" || currentUser?.position === "superadmin";
 
   if (
     !isAdmin && // не админ
