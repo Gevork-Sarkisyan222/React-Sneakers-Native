@@ -27,6 +27,7 @@ import { useGetPriceWithSale } from "@/hooks/useGetPriceWithSale";
 import { useSalesInfo } from "@/components/context/SalesInfoContext";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import UsersList from "@/components/UsersList";
+import { AppSettingsType } from "@/constants/Types";
 
 interface Product {
   id: number;
@@ -38,12 +39,13 @@ interface Product {
 
 export default function AdminPanel(): JSX.Element {
   const { user } = useGetUser({ pathname: "admin-panel" });
-  const { productSaleInfo } = useSalesInfo();
+  const { productSaleInfo, refresh } = useSalesInfo();
   const dispatch = useDispatch();
   const updateProducts = useSelector(
     (state: RootState) => state.products.updateProductsEffect
   );
 
+  const [loadingStoreStatus, setLoadingStoreStatus] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [filtered, setFiltered] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -239,6 +241,42 @@ export default function AdminPanel(): JSX.Element {
     </TouchableOpacity>
   );
 
+  const toggleStoreStatus = () => {
+    const isCurrentlyOpen = productSaleInfo.isStoreOpen;
+
+    Alert.alert(
+      isCurrentlyOpen ? "Закрыть магазин?" : "Открыть магазин?",
+      isCurrentlyOpen
+        ? "Вы действительно хотите закрыть магазин? Пользователи увидят экран с сообщением: «Мы на обновлении»."
+        : "Открыть магазин и снова разрешить покупки?",
+      [
+        { text: "Отмена", style: "cancel" },
+        {
+          text: isCurrentlyOpen ? "Закрыть магазин" : "Открыть магазин",
+          style: isCurrentlyOpen ? "destructive" : "default",
+          onPress: async () => {
+            try {
+              setLoadingStoreStatus(true); // 👉 начало загрузки
+
+              await axios.patch(
+                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
+                {
+                  isStoreOpen: !isCurrentlyOpen,
+                }
+              );
+
+              await refresh(); // 👉 ждем пока обновится состояние в контексте
+            } catch (error) {
+              Alert.alert("Ошибка", "Не удалось обновить статус магазина");
+            } finally {
+              setLoadingStoreStatus(false); // 👉 завершение загрузки
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-100 p-4">
       <View className="flex-row items-center gap-[10px] mb-4">
@@ -297,6 +335,31 @@ export default function AdminPanel(): JSX.Element {
           <Text className="text-white font-semibold text-base">
             Список пользователей
           </Text>
+        </Pressable>
+      )}
+
+      {user?.position === "superadmin" && (
+        <Pressable
+          onPress={toggleStoreStatus}
+          className="flex-row items-center justify-center mb-[20px] bg-[#9DD458] px-4 py-3 rounded-2xl shadow shadow-blue-300 active:opacity-75 mt-[-10px]"
+        >
+          {loadingStoreStatus ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <>
+              <FontAwesome6
+                style={{ marginRight: 10 }}
+                name="door-closed"
+                size={24}
+                color="white"
+              />
+              <Text className="text-white font-semibold text-base">
+                {productSaleInfo.isStoreOpen
+                  ? "Закрыть магазин"
+                  : "Открыть магазин"}
+              </Text>
+            </>
+          )}
         </Pressable>
       )}
 

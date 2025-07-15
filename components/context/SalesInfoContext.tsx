@@ -1,26 +1,37 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
-import { AppSettingsType } from '@/constants/Types';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import axios from "axios";
+import { AppSettingsType } from "@/constants/Types";
 
 interface SalesInfoContextType {
   productSaleInfo: AppSettingsType;
   refresh: () => void;
 }
 
-const SalesInfoContext = createContext<SalesInfoContextType | undefined>(undefined);
+const SalesInfoContext = createContext<SalesInfoContextType | undefined>(
+  undefined
+);
 
-export const SalesInfoProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const SalesInfoProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [productSaleInfo, setProductSaleInfo] = useState<AppSettingsType>({
     summer_sale: false,
     black_friday: false,
     sale: false,
     sale_discount: 0,
+    isStoreOpen: true,
   });
 
   const fetchSalesData = async () => {
     try {
       const { data } = await axios.get<AppSettingsType>(
-        'https://dcc2e55f63f7f47b.mokky.dev/app-settings/1',
+        "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
       );
       setProductSaleInfo(data);
     } catch (err) {
@@ -33,7 +44,9 @@ export const SalesInfoProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, []);
 
   return (
-    <SalesInfoContext.Provider value={{ productSaleInfo, refresh: fetchSalesData }}>
+    <SalesInfoContext.Provider
+      value={{ productSaleInfo, refresh: fetchSalesData }}
+    >
       {children}
     </SalesInfoContext.Provider>
   );
@@ -43,7 +56,7 @@ export const SalesInfoProvider: React.FC<{ children: ReactNode }> = ({ children 
 export function useSalesInfo(): SalesInfoContextType {
   const ctx = useContext(SalesInfoContext);
   if (!ctx) {
-    throw new Error('useSalesInfo должен вызываться внутри SalesInfoProvider');
+    throw new Error("useSalesInfo должен вызываться внутри SalesInfoProvider");
   }
   return ctx;
 }

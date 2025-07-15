@@ -13,8 +13,8 @@ import { BlockedGuard } from "@/components/BlockedGuard";
 
 export default function RootLayout() {
   return (
-    <BlockedGuard>
-      <SalesInfoProvider>
+    <SalesInfoProvider>
+      <BlockedGuard>
         <Provider store={store}>
           <GluestackUIProvider mode="light">
             <SafeAreaProvider>
@@ -40,7 +40,7 @@ export default function RootLayout() {
         >
           <Toast />
         </View>
-      </SalesInfoProvider>
-    </BlockedGuard>
+      </BlockedGuard>
+    </SalesInfoProvider>
   );
 }

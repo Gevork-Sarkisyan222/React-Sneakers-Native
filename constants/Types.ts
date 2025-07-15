@@ -58,4 +58,5 @@ export type AppSettingsType = {
   black_friday: boolean;
   sale: boolean;
   sale_discount?: number;
+  isStoreOpen: boolean;
 };
