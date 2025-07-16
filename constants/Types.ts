@@ -33,7 +33,7 @@ export interface UserInterface {
   phone: string;
   address: string;
   balance: number;
-  position: "admin" | "user" | "superadmin";
+  position: "admin" | "user" | "superadmin" | "owner";
   avatarUri: string;
 
   // Новые поля блокировки:

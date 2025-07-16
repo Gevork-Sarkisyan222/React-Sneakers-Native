@@ -193,7 +193,12 @@ export default function AdminPanel(): JSX.Element {
     );
   }
 
-  if (user && user.position !== "admin" && user.position !== "superadmin") {
+  if (
+    user &&
+    user.position !== "admin" &&
+    user.position !== "superadmin" &&
+    user.position !== "owner"
+  ) {
     return (
       <View className="flex-1 items-center justify-center">
         <Text className="text-2xl font-bold text-gray-800 mb-4">
@@ -321,7 +326,7 @@ export default function AdminPanel(): JSX.Element {
         </Text>
       </Pressable>
 
-      {user?.position === "superadmin" && (
+      {(user?.position === "superadmin" || user?.position === "owner") && (
         <Pressable
           onPress={handleOpenModalUsersList}
           className="flex-row items-center justify-center mb-[20px] bg-[#9DD458] px-4 py-3 rounded-2xl shadow shadow-blue-300 active:opacity-75 mt-[-10px]"
@@ -338,7 +343,7 @@ export default function AdminPanel(): JSX.Element {
         </Pressable>
       )}
 
-      {user?.position === "superadmin" && (
+      {(user?.position === "superadmin" || user?.position === "owner") && (
         <Pressable
           onPress={toggleStoreStatus}
           className="flex-row items-center justify-center mb-[20px] bg-[#9DD458] px-4 py-3 rounded-2xl shadow shadow-blue-300 active:opacity-75 mt-[-10px]"

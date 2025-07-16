@@ -132,7 +132,9 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
   }
 
   const isAdmin =
-    currentUser?.position === "admin" || currentUser?.position === "superadmin";
+    currentUser?.position === "admin" ||
+    currentUser?.position === "superadmin" ||
+    currentUser?.position === "owner";
 
   if (
     !isAdmin && // не админ

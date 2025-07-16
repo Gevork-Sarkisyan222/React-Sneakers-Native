@@ -42,6 +42,16 @@ const UsersList: React.FC<Props> = ({}) => {
     null
   );
 
+  // test 555 for position modal
+  const [openPositionModal, setOpenPositionModal] = useState(false);
+  const [selectedPositionUserId, setSelectedPositionUserId] = useState<
+    number | null
+  >(null);
+  const [selectedPositionOption, setSelectedPositionOption] =
+    useState<any>(null);
+  const [selectedFullName, setSelectedFullName] = useState<string | null>(null);
+  // test 555 for position modal
+
   useEffect(() => {
     // ЗАГРУЗКА СПИСКА ПОЛЬЗОВАТЕЛЕЙ
     axios
@@ -70,59 +80,23 @@ const UsersList: React.FC<Props> = ({}) => {
       return "Глав.Админ";
     } else if (user.position === "admin") {
       return "Админ";
+    } else if (user.position === "owner") {
+      return "Владелец";
     } else {
       return "";
     }
   };
 
-  // функции для пользователей и админов
-  const handleMakeAdmin = async (userId: number) => {
-    await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${userId}`, {
-      position: "admin",
-    });
-
-    setUsers((prevUsers) =>
-      prevUsers.map((user) => {
-        if (user.id === userId) {
-          return { ...user, position: "admin" };
-        }
-        return user;
-      })
-    );
-  };
-
-  const handleRemoveAdmin = (userId: number, username: string) => {
-    Alert.alert(
-      "Подтверждение",
-      `Вы точно хотите снять с поста администратора "${username}"?`,
-      [
-        {
-          text: "Отмена",
-          style: "cancel",
-        },
-        {
-          text: "Да",
-          style: "destructive",
-          onPress: async () => {
-            await axios.patch(
-              `https://dcc2e55f63f7f47b.mokky.dev/users/${userId}`,
-              {
-                position: "user",
-              }
-            );
-
-            setUsers((prevUsers) =>
-              prevUsers.map((user) => {
-                if (user.id === userId) {
-                  return { ...user, position: "user" }; // ТЫПКА здесь было "poistion" — исправил на "position"
-                }
-                return user;
-              })
-            );
-          },
-        },
-      ]
-    );
+  const renderItemPostion = (position: string) => {
+    if (position === "superadmin") {
+      return "Глав.Админ";
+    } else if (position === "admin") {
+      return "Админ";
+    } else if (position === "user") {
+      return "Пользователь";
+    } else {
+      return "";
+    }
   };
 
   const handleOpenBlockModal = (userId: number) => {
@@ -224,8 +198,137 @@ const UsersList: React.FC<Props> = ({}) => {
     }
   };
 
+  const handleOpenPositionModal = (
+    userId: number,
+    position: string,
+    fullName: string
+  ) => {
+    setOpenPositionModal(true);
+
+    // actions
+    setSelectedPositionUserId(userId);
+    setSelectedPositionOption(position);
+    setSelectedFullName(fullName);
+  };
+
+  const handleClosePositionModal = () => {
+    setOpenPositionModal(false);
+    setSelectedPositionUserId(null);
+    setSelectedPositionOption(null);
+    setSelectedFullName(null);
+  };
+
+  // функция назначение positon
+  const handleConfirmSettedPosition = async () => {
+    try {
+      await axios.patch(
+        `https://dcc2e55f63f7f47b.mokky.dev/users/${selectedPositionUserId}`,
+        {
+          position: selectedPositionOption,
+        }
+      );
+
+      // Обновляем локальный стейт пользователей после назначения
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === selectedPositionUserId
+            ? { ...u, position: selectedPositionOption }
+            : u
+        )
+      );
+
+      Alert.alert(
+        "Готово",
+        `Пользователь ${selectedFullName} назначен на позицию ${renderItemPostion(
+          selectedPositionOption
+        )}`
+      );
+
+      handleClosePositionModal();
+    } catch (error) {
+      Alert.alert("Ошибка", "Не удалось назначить пользователя на позицию");
+      console.error(error);
+    }
+  };
+
   return (
     <>
+      {/* position modal */}
+      {openPositionModal && (
+        <Modal visible animationType="slide" transparent>
+          {/* Полупрозрачный фон */}
+          <Pressable
+            className="flex-1 justify-center p-4"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+            onPress={handleClosePositionModal}
+          >
+            {/* Само модальное окно */}
+            <Pressable className="bg-white rounded-2xl p-6" onPress={() => {}}>
+              {/* Заголовок */}
+              <Text className="text-lg font-semibold mb-4">Права доступа</Text>
+
+              <Text className="text-base font-medium mb-2">
+                текущая позиция:{" "}
+                <Text
+                  className={`${
+                    selectedPositionOption === "user"
+                      ? "text-black"
+                      : "text-blue-600 "
+                  }`}
+                >
+                  {renderItemPostion(selectedPositionOption)}
+                </Text>
+              </Text>
+
+              {/* Выбор роли */}
+              <Text className="text-base font-medium mb-2">
+                Назначить позицию для: {selectedFullName}
+              </Text>
+              {(
+                [
+                  { value: "user", label: "Пользователь" },
+                  { value: "admin", label: "Администратор" },
+                  { value: "superadmin", label: "Главный администратор" },
+                ] as const
+              ).map(({ value, label }) => {
+                const isSelected = selectedPositionOption === value;
+                return (
+                  <Pressable
+                    key={value}
+                    onPress={() => setSelectedPositionOption(value)}
+                    className={`px-4 py-2 rounded-lg mb-3 border ${
+                      isSelected
+                        ? "bg-blue-600 border-blue-600"
+                        : "bg-blue-50 border-blue-300"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-semibold ${
+                        isSelected ? "text-white" : "text-blue-600"
+                      }`}
+                    >
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+
+              {/* Кнопка подтверждения */}
+              <Pressable
+                onPress={handleConfirmSettedPosition}
+                className="mt-4 bg-blue-600 px-4 py-2 rounded-lg shadow-sm active:bg-blue-700"
+              >
+                <Text className="text-center text-white font-semibold">
+                  Применить
+                </Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
+      )}
+
+      {/* end of position modal */}
+
       {/* block modal */}
       {blockModalVisible && (
         <Modal visible animationType="slide" transparent>
@@ -314,6 +417,8 @@ const UsersList: React.FC<Props> = ({}) => {
                             ? "text-black underline"
                             : item.position === "superadmin"
                             ? "text-blue-700 underline"
+                            : item.position === "owner"
+                            ? "text-red-600 underline owner-font"
                             : "text-gray-700"
                         }`}
                       >
@@ -326,55 +431,69 @@ const UsersList: React.FC<Props> = ({}) => {
                     </Text>
 
                     <View className="flex flex-row gap-[10px]">
-                      {item.position === "admin" && (
+                      {(item.position === "user" ||
+                        item.position === "admin" ||
+                        item.position === "superadmin") && (
                         <Pressable
-                          onPress={() => handleRemoveAdmin(item.id, item.name)}
-                          className="bg-red-50 border border-red-300 px-3 py-1.5 rounded-lg self-start mt-2 shadow-sm active:bg-red-100"
-                        >
-                          <Text className="text-sm text-red-600 font-semibold">
-                            Снять с поста админа
-                          </Text>
-                        </Pressable>
-                      )}
-
-                      {item.position === "user" && (
-                        <Pressable
-                          onPress={() => handleMakeAdmin(item.id)}
+                          // onPress={() => handleMakeAdmin(item.id)}
+                          onPress={() =>
+                            handleOpenPositionModal(
+                              item.id,
+                              item.position,
+                              item.name + " " + item.lastName
+                            )
+                          }
                           className="bg-blue-50 border border-blue-300 px-3 py-1.5 rounded-lg self-start mt-2 shadow-sm active:bg-blue-100"
                         >
                           <Text className="text-sm text-blue-600 font-semibold">
-                            Сделать админом
+                            {/* Сделать админом */}
+                            Выдать права{" "}
+                            {item.position !== "user" && "или понизить"}
                           </Text>
                         </Pressable>
                       )}
                     </View>
 
-                    {item.position !== "superadmin" && !item.isBlocked && (
-                      <Pressable
-                        onPress={() => handleOpenBlockModal(item.id)}
-                        className="bg-red-50 border border-red-300 px-3 py-1.5 rounded-lg self-start mt-2 shadow-sm active:bg-red-100"
-                      >
-                        <Text className="text-sm text-red-600 font-semibold">
-                          Заблокировать
-                        </Text>
-                      </Pressable>
-                    )}
+                    {!item.isBlocked &&
+                      // OWNER блокирует всех, кроме других OWNER
+                      ((user?.position === "owner" &&
+                        item.position !== "owner") ||
+                        // SUPERADMIN блокирует только админов и юзеров
+                        (user?.position === "superadmin" &&
+                          item.position !== "superadmin" &&
+                          item.position !== "owner")) && (
+                        <Pressable
+                          onPress={() => handleOpenBlockModal(item.id)}
+                          className="bg-red-50 border border-red-300 px-3 py-1.5 rounded-lg self-start mt-2 shadow-sm active:bg-red-100"
+                        >
+                          <Text className="text-sm text-red-600 font-semibold">
+                            Заблокировать
+                          </Text>
+                        </Pressable>
+                      )}
 
-                    {item.position !== "superadmin" && item.isBlocked && (
-                      <Pressable
-                        onPress={() =>
-                          handleUnblockUser(
-                            item.id,
-                            item.name + " " + item.lastName
-                          )
-                        }
-                        className="bg-red-50 border border-red-300 px-3 py-1.5 rounded-lg self-start mt-2 shadow-sm active:bg-red-100"
-                      >
-                        <Text className="text-sm text-red-600 font-semibold">
-                          Разблокировать
-                        </Text>
-                      </Pressable>
-                    )}
+                    {item.isBlocked &&
+                      // OWNER разблокирует всех, кроме других OWNER
+                      ((user?.position === "owner" &&
+                        item.position !== "owner") ||
+                        // SUPERADMIN разблокирует только админов и юзеров
+                        (user?.position === "superadmin" &&
+                          item.position !== "superadmin" &&
+                          item.position !== "owner")) && (
+                        <Pressable
+                          onPress={() =>
+                            handleUnblockUser(
+                              item.id,
+                              item.name + " " + item.lastName
+                            )
+                          }
+                          className="bg-red-50 border border-red-300 px-3 py-1.5 rounded-lg self-start mt-2 shadow-sm active:bg-red-100"
+                        >
+                          <Text className="text-sm text-red-600 font-semibold">
+                            Разблокировать
+                          </Text>
+                        </Pressable>
+                      )}
                   </View>
                 </View>
 

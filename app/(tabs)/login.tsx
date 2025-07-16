@@ -1,5 +1,6 @@
 import { UserInterface } from "@/constants/Types";
 import axios from "axios";
+import * as Updates from "expo-updates";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
@@ -23,10 +25,12 @@ export default function Login({ closedStore, setRemoveContent }: Props) {
   // СТЕЙТЫ
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   console.log(email, password);
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.post(
         "https://dcc2e55f63f7f47b.mokky.dev/auth",
@@ -45,9 +49,12 @@ export default function Login({ closedStore, setRemoveContent }: Props) {
 
       Alert.alert("Успех", "Вы успешно вошли в аккаунт");
       router.push("/");
+      closedStore && (await Updates.reloadAsync());
     } catch (error) {
       console.error("Не удалось выполнить вход:", error);
       Alert.alert("Ошибка", "Неверный email или пароль");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -57,6 +64,15 @@ export default function Login({ closedStore, setRemoveContent }: Props) {
       setPassword("");
     }, [])
   );
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text className="mt-2 text-gray-600">Пожалуйста, подождите...</Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 justify-center px-6 bg-white">

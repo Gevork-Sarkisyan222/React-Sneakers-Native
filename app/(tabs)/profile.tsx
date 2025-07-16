@@ -261,7 +261,9 @@ export default function Profile() {
           </View>
 
           {/* Кнопка перехода в админ панель nav */}
-          {(user.position === "admin" || user.position === "superadmin") && (
+          {(user.position === "admin" ||
+            user.position === "superadmin" ||
+            user.position === "owner") && (
             <Pressable
               onPress={() => router.push("/admin-panel")}
               className="bg-white rounded-xl py-3 items-center shadow-md mb-4 flex-row justify-center gap-2"
