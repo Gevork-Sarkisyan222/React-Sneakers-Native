@@ -44,6 +44,7 @@ const UsersList: React.FC<Props> = ({}) => {
 
   // test 555 for position modal
   const [openPositionModal, setOpenPositionModal] = useState(false);
+  const [savedPosName, setSavedPosName] = useState<string | null>(null);
   const [selectedPositionUserId, setSelectedPositionUserId] = useState<
     number | null
   >(null);
@@ -150,7 +151,11 @@ const UsersList: React.FC<Props> = ({}) => {
           blockReason,
           blockedBy:
             user && user.position
-              ? `Глав.Администратором ${user.name} ${user.lastName}`
+              ? `${
+                  user.position === "owner"
+                    ? "Владельцем"
+                    : "Глав.Администратором"
+                } ${user.name} ${user.lastName}`
               : "",
         }
       );
@@ -198,6 +203,15 @@ const UsersList: React.FC<Props> = ({}) => {
     }
   };
 
+  const positionOptions = [
+    { value: "user", label: "Пользователь" },
+    { value: "admin", label: "Администратор" },
+    // добавляем супер‑админа только для owner
+    ...(user?.position === "owner"
+      ? [{ value: "superadmin", label: "Главный администратор" }]
+      : []),
+  ] as const;
+
   const handleOpenPositionModal = (
     userId: number,
     position: string,
@@ -206,6 +220,7 @@ const UsersList: React.FC<Props> = ({}) => {
     setOpenPositionModal(true);
 
     // actions
+    setSavedPosName(position);
     setSelectedPositionUserId(userId);
     setSelectedPositionOption(position);
     setSelectedFullName(fullName);
@@ -213,6 +228,7 @@ const UsersList: React.FC<Props> = ({}) => {
 
   const handleClosePositionModal = () => {
     setOpenPositionModal(false);
+    setSavedPosName(null);
     setSelectedPositionUserId(null);
     setSelectedPositionOption(null);
     setSelectedFullName(null);
@@ -271,12 +287,10 @@ const UsersList: React.FC<Props> = ({}) => {
                 текущая позиция:{" "}
                 <Text
                   className={`${
-                    selectedPositionOption === "user"
-                      ? "text-black"
-                      : "text-blue-600 "
+                    savedPosName === "user" ? "text-black" : "text-blue-600"
                   }`}
                 >
-                  {renderItemPostion(selectedPositionOption)}
+                  {renderItemPostion(savedPosName ?? "")}
                 </Text>
               </Text>
 
@@ -284,13 +298,7 @@ const UsersList: React.FC<Props> = ({}) => {
               <Text className="text-base font-medium mb-2">
                 Назначить позицию для: {selectedFullName}
               </Text>
-              {(
-                [
-                  { value: "user", label: "Пользователь" },
-                  { value: "admin", label: "Администратор" },
-                  { value: "superadmin", label: "Главный администратор" },
-                ] as const
-              ).map(({ value, label }) => {
+              {positionOptions.map(({ value, label }) => {
                 const isSelected = selectedPositionOption === value;
                 return (
                   <Pressable
@@ -431,27 +439,29 @@ const UsersList: React.FC<Props> = ({}) => {
                     </Text>
 
                     <View className="flex flex-row gap-[10px]">
-                      {(item.position === "user" ||
-                        item.position === "admin" ||
-                        item.position === "superadmin") && (
-                        <Pressable
-                          // onPress={() => handleMakeAdmin(item.id)}
-                          onPress={() =>
-                            handleOpenPositionModal(
-                              item.id,
-                              item.position,
-                              item.name + " " + item.lastName
-                            )
-                          }
-                          className="bg-blue-50 border border-blue-300 px-3 py-1.5 rounded-lg self-start mt-2 shadow-sm active:bg-blue-100"
-                        >
-                          <Text className="text-sm text-blue-600 font-semibold">
-                            {/* Сделать админом */}
-                            Выдать права{" "}
-                            {item.position !== "user" && "или понизить"}
-                          </Text>
-                        </Pressable>
-                      )}
+                      {item.id !== user?.id &&
+                        (item.position === "user" ||
+                          item.position === "admin" ||
+                          item.position === "superadmin") && (
+                          <Pressable
+                            // onPress={() => handleMakeAdmin(item.id)}
+                            onPress={() =>
+                              handleOpenPositionModal(
+                                item.id,
+                                item.position,
+                                item.name + " " + item.lastName
+                              )
+                            }
+                            className="bg-blue-50 border border-blue-300 px-3 py-1.5 rounded-lg self-start mt-2 shadow-sm active:bg-blue-100"
+                          >
+                            <Text className="text-sm text-blue-600 font-semibold">
+                              {/* Сделать админом */}
+                              {item.position === "user"
+                                ? "Выдать права"
+                                : "Повысить/Понизить права"}
+                            </Text>
+                          </Pressable>
+                        )}
                     </View>
 
                     {!item.isBlocked &&

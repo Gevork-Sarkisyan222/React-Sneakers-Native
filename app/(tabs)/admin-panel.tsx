@@ -28,6 +28,7 @@ import { useSalesInfo } from "@/components/context/SalesInfoContext";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import UsersList from "@/components/UsersList";
 import { AppSettingsType } from "@/constants/Types";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 interface Product {
   id: number;
@@ -287,13 +288,15 @@ export default function AdminPanel(): JSX.Element {
       <View className="flex-row items-center gap-[10px] mb-4">
         {/* back icon */}
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => router.push("/profile")}
           className="bg-white p-2 rounded-full shadow-md shadow-gray-300 active:opacity-60"
         >
           <Feather name="arrow-left" size={20} color="#333" />
         </Pressable>
 
-        <Text className="text-2xl font-bold text-gray-800">Админ-панель</Text>
+        <Text className="text-2xl font-bold text-gray-800">
+          Админ-панель {user?.position === "owner" && "+ владелец"}
+        </Text>
       </View>
 
       <View className="flex-row mb-4 items-center">
@@ -365,6 +368,23 @@ export default function AdminPanel(): JSX.Element {
               </Text>
             </>
           )}
+        </Pressable>
+      )}
+
+      {user?.position === "owner" && (
+        <Pressable
+          onPress={() => router.push("/store-finance")}
+          className="flex-row items-center justify-center mb-[20px] bg-[#9DD458] px-4 py-3 rounded-2xl shadow shadow-blue-300 active:opacity-75 mt-[-10px]"
+        >
+          <FontAwesome
+            style={{ marginRight: 10 }}
+            name="money"
+            size={24}
+            color="white"
+          />
+          <Text className="text-white font-semibold text-base">
+            Финансы магазина
+          </Text>
         </Pressable>
       )}
 
