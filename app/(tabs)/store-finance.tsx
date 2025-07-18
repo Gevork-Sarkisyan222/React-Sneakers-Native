@@ -24,6 +24,7 @@ import { useGetUser } from "@/hooks/useGetUser";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { LinearGradient } from "expo-linear-gradient";
+import StatsChart from "@/components/StatsChart";
 
 type Props = {};
 
@@ -34,6 +35,8 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
   const [totalBudget, setTotalBudget] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const [monthsIncomeArray, setMonthsIncomeArray] = useState([]);
+
   // modal state
   const [withdrawAmountModal, setWithdrawAmountModal] = useState(false);
   // in modal select amount to withdraw
@@ -42,10 +45,17 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
   const fetchBudgetData = useCallback(async () => {
     try {
       setIsRefreshing(true);
+
       const res = await axios.get(
         "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
       );
+
+      const monthsIncomeArray = Array.isArray(res.data.months_income)
+        ? res.data.months_income
+        : [];
+
       setTotalBudget(res.data.store_budget);
+      setMonthsIncomeArray(monthsIncomeArray);
     } catch (error) {
       console.error("Error fetching budget data:", error);
     } finally {
@@ -78,7 +88,6 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
           item.year === thisYear && item.month === thisMonth
       );
 
-      // fallback на store_budget или 0
       const rawIncome = record?.income ?? 0;
 
       // округляем и сохраняем
@@ -274,7 +283,7 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
           {/* Статистика месяца */}
           <View className="bg-white rounded-2xl p-6 shadow mb-6">
             <Text className="text-lg font-semibold text-gray-700 mb-4">
-              Статистика за месяц
+              Статистика за текущий месяц
             </Text>
             <View className="flex-row justify-between">
               <View className="items-start">
@@ -299,28 +308,7 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
           </View>
 
           {/* Дополнительные показатели */}
-          <View>
-            <Text className="text-lg font-semibold text-gray-700 mb-4">
-              Показатели
-            </Text>
-            {/* Пример кнопок-фильтров */}
-            <View className="flex-row mb-4 space-x-3 gap-[10px]">
-              <TouchableOpacity className="bg-green-100 px-4 py-2 rounded-full">
-                <Text className="text-green-800">Год</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-blue-100 px-4 py-2 rounded-full">
-                <Text className="text-blue-800">Квартал</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-gray-200 px-4 py-2 rounded-full">
-                <Text className="text-gray-700">Месяц</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Заглушка для графика */}
-            <View className="h-40 bg-white rounded-2xl shadow flex items-center justify-center">
-              <Text className="text-gray-400">Здесь будет график</Text>
-            </View>
-          </View>
+          <StatsChart data={monthsIncomeArray} />
 
           {/* Кнопка действий */}
           <View className="mt-8 mb-4">

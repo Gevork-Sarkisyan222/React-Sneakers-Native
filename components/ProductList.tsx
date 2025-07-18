@@ -19,6 +19,8 @@ import { useGetUser } from "@/hooks/useGetUser";
 import SaleBanner from "./SaleBanner";
 import { useSalePeriodSubtitle } from "@/hooks/useSalePeriodSubtitle";
 import { useSalesInfo } from "./context/SalesInfoContext";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 
 interface Props {
   products: Product[];
@@ -99,8 +101,8 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
             {user.position === "superadmin"
               ? "Супер администратор"
               : user.position === "owner"
-              ? "Владелец"
-              : "Администратор"}{" "}
+                ? "Владелец"
+                : "Администратор"}{" "}
             {user.name}!
           </Text>
         )
@@ -141,6 +143,30 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
           />
         )}
       </View>
+
+      {user && (
+        <Pressable
+          onPress={() => router.push("/cases-open")}
+          className="w-full h-[50px] rounded-[12px] overflow-hidden mb-4"
+          style={{ elevation: 4 }}
+        >
+          <LinearGradient
+            colors={["#fcd34d", "#fb923c", "#f43f5e", "#8b5cf6"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 12,
+            }}
+          >
+            <Text className="text-white font-bold text-[16px] tracking-wider">
+              🎁 ОТКРЫТЬ КЕЙСЫ
+            </Text>
+          </LinearGradient>
+        </Pressable>
+      )}
 
       {!productSaleInfo.sale &&
         !productSaleInfo.summer_sale &&

@@ -78,6 +78,13 @@ export default function TabLayout() {
           href: null,
         }}
       />
+
+      <Tabs.Screen
+        name="cases-open"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
