@@ -29,6 +29,7 @@ type Props = {};
 
 const StoreFinancePage: React.FC<Props> = ({}) => {
   const { user } = useGetUser({});
+
   // from mokky server
   const [totalBudget, setTotalBudget] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -37,10 +38,6 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
   const [withdrawAmountModal, setWithdrawAmountModal] = useState(false);
   // in modal select amount to withdraw
   const [withdrawAmount, setWithdrawAmount] = useState<string>("");
-
-  const monthlyIncome = 8000;
-  const monthlyExpenses = 5600;
-  const profit = monthlyIncome - monthlyExpenses;
 
   const fetchBudgetData = useCallback(async () => {
     try {
@@ -56,21 +53,55 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
     }
   }, []);
 
+  const fetchCurrentMonthIncome = useCallback(async () => {
+    const today = new Date();
+    const thisYear = today.getFullYear();
+    const thisMonth = today.getMonth() + 1; // JS: 0–11 → 1–12
+
+    try {
+      setIsRefreshing(true);
+
+      // Получаем одиночный объект с настройками
+      const res = await axios.get(
+        "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+      );
+      const settings = res.data;
+
+      // Берём массив месяцев
+      const monthsIncomeArray = Array.isArray(settings.months_income)
+        ? settings.months_income
+        : [];
+
+      // Ищем запись за текущий год и месяц
+      const record = monthsIncomeArray.find(
+        (item: { year: number; month: number; income: number }) =>
+          item.year === thisYear && item.month === thisMonth
+      );
+
+      // fallback на store_budget или 0
+      const rawIncome = record?.income ?? 0;
+
+      // округляем и сохраняем
+      const incomeRounded = Math.round(rawIncome);
+      setCurrentMonthIncome(incomeRounded);
+    } catch (error) {
+      console.error("Error fetching budget data:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
   useLayoutEffect(() => {
     fetchBudgetData();
   }, [fetchBudgetData]);
 
-  // const withdrawBudget = useCallback(async () => {
-  //   try {
-  //     await axios.put("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
-  //       store_budget: 0,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error withdrawing budget:", error);
-  //   }
-  // }, []);
+  useLayoutEffect(() => {
+    fetchCurrentMonthIncome();
+  }, [fetchCurrentMonthIncome]);
 
-  // send to email or phone sms
+  const [currentMonthIncome, setCurrentMonthIncome] = useState(0);
+  const monthlyExpenses = Math.round(currentMonthIncome * 0.3);
+  const profit = Math.round(currentMonthIncome - monthlyExpenses);
 
   // Заглушка обработки снятия
   const handleWithdraw = async (amount: number) => {
@@ -83,8 +114,6 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
       Alert.alert("Ошибка", "Введите корректную сумму");
       return;
     }
-
-    // const gelAmount = Math.round(amount * 0.035 * 100) / 100;
 
     try {
       await axios.patch("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
@@ -251,7 +280,7 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
               <View className="items-start">
                 <Text className="text-sm text-gray-500">Доход</Text>
                 <Text className="text-2xl font-bold text-blue-600 mt-1">
-                  {monthlyIncome.toLocaleString()} ₽
+                  {currentMonthIncome.toLocaleString()} ₽
                 </Text>
               </View>
               <View className="items-start">
@@ -296,7 +325,10 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
           {/* Кнопка действий */}
           <View className="mt-8 mb-4">
             <TouchableOpacity
-              onPress={fetchBudgetData}
+              onPress={() => {
+                fetchBudgetData();
+                fetchCurrentMonthIncome();
+              }}
               disabled={isRefreshing}
               className={`py-3 rounded-xl shadow flex-row justify-center items-center ${
                 isRefreshing ? "bg-gray-300" : "bg-blue-600"

@@ -173,6 +173,44 @@ const CartDrawerContent: React.FC<Props> = ({
       store_budget: updatedBudget,
     });
 
+    const today = new Date();
+    const thisYear = today.getFullYear();
+    const thisMonth = today.getMonth() + 1; // JS: 0–11 → 1–12
+
+    // Получаем одиночный объект с настройками
+    const monthRes = await axios.get(
+      "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+    );
+    const settings = monthRes.data;
+
+    // Берём массив месяцев
+    const monthsIncomeArray = Array.isArray(settings.months_income)
+      ? settings.months_income
+      : [];
+
+    // Ищем запись за текущий год и месяц
+    const findedRecord = monthsIncomeArray.find(
+      (item: { year: number; month: number; income: number }) =>
+        item.year === thisYear && item.month === thisMonth
+    );
+
+    // вычисляем новый массив months_income
+    const updatedMonthsIncome = findedRecord
+      ? monthsIncomeArray.map((item: any) =>
+          item.year === thisYear && item.month === thisMonth
+            ? { ...item, income: item.income + totalAmount + taxCount }
+            : item
+        )
+      : [
+          ...monthsIncomeArray,
+          { year: thisYear, month: thisMonth, income: totalAmount + taxCount },
+        ];
+
+    // один PATCH-запрос
+    await axios.patch("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
+      months_income: updatedMonthsIncome,
+    });
+
     setOrderId(data.id);
 
     setTimeout(async () => {
