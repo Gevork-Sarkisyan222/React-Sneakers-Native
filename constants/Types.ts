@@ -60,3 +60,23 @@ export type AppSettingsType = {
   sale_discount?: number;
   isStoreOpen: boolean;
 };
+
+export type SneakerCase = {
+  id: string;
+  title: string;
+  rarity: "common" | "rare" | "epic" | "legendary";
+  price: number;
+  itemsInside: number;
+  imageUrl: string;
+  items: CaseItem[];
+};
+
+export type ItemRarity = "common" | "rare" | "epic" | "legendary";
+
+export type CaseItem = {
+  item_id: number;
+  item_title: string;
+  item_imageUrl: string;
+  item_price: number;
+  item_rarity: ItemRarity;
+};

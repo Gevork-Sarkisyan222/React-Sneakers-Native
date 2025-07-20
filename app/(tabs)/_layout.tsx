@@ -85,6 +85,13 @@ export default function TabLayout() {
           href: null,
         }}
       />
+
+      <Tabs.Screen
+        name="case/[rarity]"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
