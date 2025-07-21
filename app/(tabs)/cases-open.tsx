@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -233,6 +233,67 @@ const CasesOpenPage = () => {
     return buyedCases.find((caseItem) => caseItem.rarity === item.rarity);
   };
 
+  const [showFreeCase, setShowFreeCase] = React.useState(false);
+
+  const [timeToOpenFreeCaseMs, setTimeToOpenFreeCaseMs] =
+    React.useState<number>(0); // в мс
+  const [countdown, setCountdown] = React.useState<string>("00:00:00");
+
+  const checkFreeCaseDate = async () => {
+    try {
+      // 1. Получаем текущее время в миллисекундах
+      const nowMs = Date.now();
+
+      // 2. Запрашиваем из API ISO‑строку с целью
+      const res = await axios.get(
+        "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+      );
+      const isoString: string = res.data.timeToOpenFreeCase;
+
+      // 3. Парсим её в миллисекунды и сохраняем для таймера
+      const targetMs = Date.parse(isoString);
+      setTimeToOpenFreeCaseMs(targetMs);
+
+      // 4. Сравниваем, если сейчас >= цели — кейс доступен
+      if (nowMs >= targetMs) {
+        setShowFreeCase(true);
+      } else {
+        setShowFreeCase(false);
+      }
+    } catch (error) {
+      console.error("Ошибка при проверке даты free case:", error);
+      setShowFreeCase(false);
+    }
+  };
+
+  useEffect(() => {
+    checkFreeCaseDate();
+    // te guzes hane зависимостн-eren updateCases
+  }, [updateCases]);
+
+  React.useEffect(() => {
+    if (!timeToOpenFreeCaseMs) return;
+
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    const interval = setInterval(() => {
+      const diff = timeToOpenFreeCaseMs - Date.now();
+      if (diff <= 0) {
+        // время наступило
+        setShowFreeCase(true);
+        setCountdown("00:00:00");
+        clearInterval(interval);
+      } else {
+        const hours = Math.floor(diff / 3_600_000);
+        const minutes = Math.floor((diff % 3_600_000) / 60_000);
+        const seconds = Math.floor((diff % 60_000) / 1000);
+        setCountdown(`${pad(hours)}:${pad(minutes)}:${pad(seconds)}`);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timeToOpenFreeCaseMs]);
+
   return (
     <LinearGradient
       colors={["#f0f4f8", "#e2e8f0", "#dbeafe"]}
@@ -249,7 +310,10 @@ const CasesOpenPage = () => {
             <RefreshControl
               colors={["#338fd4"]}
               refreshing={isLoading}
-              onRefresh={fetchBuyedCases}
+              onRefresh={() => {
+                checkFreeCaseDate();
+                fetchBuyedCases();
+              }}
             />
           }
           className="p-4"
@@ -276,14 +340,26 @@ const CasesOpenPage = () => {
             </Text>
             <View className="bg-black/30 rounded-full px-4 py-2 mb-4">
               <Text className="text-amber-300 text-center font-bold">
-                Следующий кейс через: 03:42:18
+                {!showFreeCase
+                  ? `Следующий кейс через: ${countdown}`
+                  : "Кейс доступен!"}
               </Text>
             </View>
-            <TouchableOpacity className="bg-amber-400 rounded-full py-3">
-              <Text className="text-gray-900 text-center font-bold">
-                ОТКРЫТЬ КЕЙС
-              </Text>
-            </TouchableOpacity>
+            {showFreeCase && (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "/case/[rarity]",
+                    params: { rarity: "common".toString(), freeCase: "yes" },
+                  })
+                }
+                className="bg-amber-400 rounded-full py-3"
+              >
+                <Text className="text-gray-900 text-center font-bold">
+                  ОТКРЫТЬ КЕЙС
+                </Text>
+              </TouchableOpacity>
+            )}
           </LinearGradient>
 
           {/* Список кейсов */}

@@ -33,8 +33,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.4;
-const DUMMY_IMAGE =
-  "https://media.istockphoto.com/id/1407127841/photo/white-sneaker-with-colored-accents-on-a-green-gradient-background-mens-fashion-sport-shoe-air.jpg?s=612x612&w=0&k=20&c=h4PYQPT0vzv3QOgAHql4eSdbnfHdmgm5ewURKdzqk6c=";
+
 const ITEM_MARGIN = 20; // отступ справа
 
 export default function CasePage() {
@@ -46,14 +45,17 @@ export default function CasePage() {
     (state: RootState) => state.products.updateCases
   );
   const dispatch = useDispatch();
-  const { rarity } = useLocalSearchParams();
+  const { rarity, freeCase } = useLocalSearchParams();
   const [currentCase, setCurrentCase] = React.useState<SneakerCase | null>(
     null
   );
+  const [isLoadingToRedirect, setIsLoadingToRedirect] = React.useState(false);
   const [caseItems, setCaseItems] = React.useState<CaseItem[]>([]);
   // const [isScrollEnabled, setIsScrollEnabled] = React.useState(false);
   const [winnedItem, setWinnedItem] = React.useState<CaseItem | null>(null);
   const [resultModal, setResultModal] = React.useState<boolean>(false);
+
+  const DUMMY_IMAGE = currentCase?.backgroundImage;
 
   const carouselRef = useRef<any | null>(null);
 
@@ -98,7 +100,7 @@ export default function CasePage() {
     };
   }, [rarity]);
 
-  if (!currentCase)
+  if (!currentCase || isLoadingToRedirect)
     return (
       <View
         style={{
@@ -155,6 +157,21 @@ export default function CasePage() {
         return "#F59E0B"; // yellow-500
       default:
         return "#6B7280"; // gray-500
+    }
+  };
+
+  const getArrowColor = (rarity: SneakerCase["rarity"]): string => {
+    switch (rarity) {
+      case "common":
+        return "#D1D5DB"; // gray-300
+      case "rare":
+        return "white";
+      case "epic":
+        return "white";
+      case "legendary":
+        return "white";
+      default:
+        return "#6B7280";
     }
   };
 
@@ -287,6 +304,25 @@ export default function CasePage() {
       console.error(err);
     }
 
+    // if free case
+
+    if (freeCase === "yes") {
+      // Получаем текущий момент
+      const now = new Date();
+
+      // Добавляем 24 часа (24 * 60 * 60 * 1000 мс)
+      const plus24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+      // Приводим к ISO‑строке (например, '2025-07-22T18:44:08.152Z')
+      const timeToOpenFreeCase = plus24h.toISOString();
+
+      // Делаем PATCH-запрос
+      await axios.patch("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
+        timeToOpenFreeCase,
+      });
+    }
+    // end if free case
+
     // 3) Показываем модальное окно после полного завершения анимации
     setTimeout(() => {
       setResultModal(true);
@@ -298,15 +334,18 @@ export default function CasePage() {
     .map((_, i) => caseItems[i % caseItems.length]);
 
   const onCloseResultModal = async () => {
+    setIsLoadingToRedirect(true);
     setResultModal(false);
     setWinnedItem(null);
 
     // Перебрасываем user на /cases-open после открытия кейса потом он если захочет еще купит но после одного раза нет
-    router.push("/cases-open");
     await axios.delete(
       `https://dcc2e55f63f7f47b.mokky.dev/cases/${currentCase.id}`
     );
     dispatch(setUpdateCases(!updateCases));
+    router.push("/cases-open");
+
+    setIsLoadingToRedirect(false);
   };
 
   return (
@@ -437,7 +476,7 @@ export default function CasePage() {
               name="long-arrow-down"
               size={100}
               // color="#2563EB"
-              color={getRarityTextColor(currentCase.rarity)}
+              color={getArrowColor(currentCase.rarity)}
               style={{
                 position: "absolute",
                 top: -100,

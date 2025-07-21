@@ -68,6 +68,7 @@ export type SneakerCase = {
   price: number;
   itemsInside: number;
   imageUrl: string;
+  backgroundImage: string;
   items: CaseItem[];
 };
 
