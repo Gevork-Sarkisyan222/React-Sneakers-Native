@@ -1,4 +1,4 @@
-import React, { use, useLayoutEffect } from "react";
+import React, { useLayoutEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -9,7 +9,6 @@ import {
   Platform,
   StatusBar,
   Alert,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,6 +18,9 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useGetUser } from "@/hooks/useGetUser";
 import { router } from "expo-router";
 import { SneakerCase } from "@/constants/Types";
+import { cases } from "@/constants/cases";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const RenderCaseSkeleton = () => {
   return Array.from({ length: 4 }).map((_, index) => (
@@ -57,6 +59,9 @@ const CasesOpenPage = () => {
   const { user } = useGetUser({});
   const [buyedCases, setBuyedCases] = React.useState<SneakerCase[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const updateCases = useSelector(
+    (state: RootState) => state.products.updateCases
+  );
 
   const fetchBuyedCases = async () => {
     setIsLoading(true);
@@ -75,278 +80,7 @@ const CasesOpenPage = () => {
 
   useLayoutEffect(() => {
     fetchBuyedCases();
-  }, []);
-
-  const cases: SneakerCase[] = [
-    {
-      id: "1",
-      title: "Обычный Кейс",
-      rarity: "common",
-      price: 2999,
-      itemsInside: 19,
-      imageUrl:
-        "https://images.meesho.com/images/products/534430220/ixjox_512.webp",
-      items: [
-        {
-          item_id: 1,
-          item_title: "500 ₽",
-          item_imageUrl:
-            "https://cdn-icons-png.flaticon.com/512/7630/7630510.png",
-          item_price: 500,
-          item_rarity: "common",
-        },
-        {
-          item_id: 2,
-          item_title: "Мужские Кроссовки Nike Air Max 275",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/126/31109902_940x940.webp?v=1744360723",
-          item_price: 3999,
-          item_rarity: "rare",
-        },
-        {
-          item_id: 3,
-          item_title: "1000 ₽",
-          item_imageUrl:
-            "https://cdn-icons-png.flaticon.com/512/7630/7630510.png",
-          item_price: 1000,
-          item_rarity: "common",
-        },
-        {
-          item_id: 4,
-          item_title: "Кроссовки Easy Rider Mix PUMA White-PUMA Black",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/127/39902501_940x940.webp?v=1744365729",
-          item_price: 2500,
-          item_rarity: "common",
-        },
-        {
-          item_id: 5,
-          item_title: "Ничего не выиграл",
-          item_imageUrl:
-            "https://media.istockphoto.com/id/1667499762/ru/векторная/открытая-картонная-коробка.jpg?s=612x612&w=0&k=20&c=rwu4QQDiUIJiV5uhieMXdXJlaj638I4FGHqWJwt2sTI=",
-          item_price: 0,
-          item_rarity: "common",
-        },
-        {
-          item_id: 6,
-          item_title: "4000 ₽",
-          item_imageUrl:
-            "https://cdn-icons-png.flaticon.com/512/7630/7630510.png",
-          item_price: 4000,
-          item_rarity: "rare",
-        },
-        {
-          item_id: 7,
-          item_title: "Кроссовки Style Rider Hyper Prep",
-          item_imageUrl:
-            "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/405745/01/fnd/PNA/fmt/png/Style-Rider-Hyper-Prep",
-          item_price: 3500,
-          item_rarity: "common",
-        },
-        {
-          item_id: 8,
-          item_title: "Кроссовки KING 21",
-          item_imageUrl:
-            "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/106696/01/fnd/PNA/fmt/png/KING-21-IT-Unisex",
-          item_price: 2599,
-          item_rarity: "common",
-        },
-        {
-          item_id: 9,
-          item_title: "Кроссовки GV Special",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/127/39837402_940x940.webp?v=1744364040",
-          item_price: 5999,
-          item_rarity: "epic",
-        },
-        {
-          item_id: 10,
-          item_title: "300 ₽",
-          item_imageUrl:
-            "https://cdn-icons-png.flaticon.com/512/7630/7630510.png",
-          item_price: 300,
-          item_rarity: "common",
-        },
-        {
-          item_id: 11,
-          item_title: "Кроссовки Easy Rider Mix PUMA White-PUMA Black",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/127/39902501_940x940.webp?v=1744365729",
-          item_price: 2500,
-          item_rarity: "common",
-        },
-        {
-          item_id: 12,
-          item_title: "3000 ₽",
-          item_imageUrl:
-            "https://cdn-icons-png.flaticon.com/512/7630/7630510.png",
-          item_price: 3000,
-          item_rarity: "rare",
-        },
-        {
-          item_id: 13,
-          item_title: "Кроссовки Easy Rider Mix PUMA White-PUMA Black",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/127/39902501_940x940.webp?v=1744365729",
-          item_price: 2500,
-          item_rarity: "common",
-        },
-        {
-          item_id: 14,
-          item_title: "Ничего не выиграл",
-          item_imageUrl:
-            "https://media.istockphoto.com/id/1667499762/ru/векторная/открытая-картонная-коробка.jpg?s=612x612&w=0&k=20&c=rwu4QQDiUIJiV5uhieMXdXJlaj638I4FGHqWJwt2sTI=",
-          item_price: 0,
-          item_rarity: "common",
-        },
-        {
-          item_id: 15,
-          item_title: "Кроссовки Scend Pro WTR PUMA Black-PUMA Silver",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/96/31039901_940x940.webp?v=1744361177",
-          item_price: 7999,
-          item_rarity: "epic",
-        },
-        {
-          item_id: 16,
-          item_title: "All-Pro NITRO™ 2 Shammgod",
-          item_imageUrl:
-            "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/312308/01/fnd/PNA/fmt/png/All-Pro-NITRO%E2%84%A2-2-Shammgod",
-          item_price: 3100,
-          item_rarity: "common",
-        },
-        {
-          item_id: 17,
-          item_title: "Кроссовки Clyde Club Las Vegas",
-          item_imageUrl:
-            "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/404670/01/fnd/PNA/fmt/png/Clyde-Club-Flagship-Unisex",
-          item_price: 2999,
-          item_rarity: "common",
-        },
-        {
-          item_id: 18,
-          item_title: "1000 ₽",
-          item_imageUrl:
-            "https://cdn-icons-png.flaticon.com/512/7630/7630510.png",
-          item_price: 1000,
-          item_rarity: "common",
-        },
-        {
-          item_id: 19,
-          item_title: "Ничего не выиграл",
-          item_imageUrl:
-            "https://media.istockphoto.com/id/1667499762/ru/векторная/открытая-картонная-коробка.jpg?s=612x612&w=0&k=20&c=rwu4QQDiUIJiV5uhieMXdXJlaj638I4FGHqWJwt2sTI=",
-          item_price: 0,
-          item_rarity: "common",
-        },
-      ],
-    },
-    {
-      id: "2",
-      title: "Лимитированный Кейс",
-      rarity: "legendary",
-      price: 11999,
-      itemsInside: 3,
-      imageUrl:
-        "https://media.istockphoto.com/id/1471122805/photo/pair-of-yellow-sneakers-on-yellow-background-copy-space.jpg?s=612x612&w=0&k=20&c=BxoQVxQMfjSGBxAlcqHVIHjKOqiVnnwbelmvs9-Xq6k=",
-      items: [
-        {
-          item_id: 1,
-          item_title: "Мужские Кроссовки Nike Air Max 275",
-          item_imageUrl:
-            "https://store-sneakers-vue.vercel.app/sneakers/sneakers-2.jpg",
-          item_price: 3999,
-          item_rarity: "common",
-        },
-        {
-          item_id: 2,
-          item_title: "Кроссовки Scend Pro WTR PUMA Black-PUMA Silver",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/96/31039901_940x940.webp?v=1744361177",
-          item_price: 4970,
-          item_rarity: "common",
-        },
-        {
-          item_id: 3,
-          item_title: "Кроссовки Easy Rider Mix PUMA White-PUMA Black",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/127/39902501_940x940.webp?v=1744365729",
-          item_price: 2599,
-          item_rarity: "common",
-        },
-      ],
-    },
-    {
-      id: "3",
-      title: "Редкий Кейс",
-      rarity: "rare",
-      price: 8999,
-      itemsInside: 3,
-      imageUrl:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfY15nTEavNrnRDE2_--mbMuol1ZRtzcNKuA&s",
-      items: [
-        {
-          item_id: 1,
-          item_title: "Мужские Кроссовки Nike Air Max 275",
-          item_imageUrl:
-            "https://store-sneakers-vue.vercel.app/sneakers/sneakers-2.jpg",
-          item_price: 3999,
-          item_rarity: "common",
-        },
-        {
-          item_id: 2,
-          item_title: "Кроссовки Scend Pro WTR PUMA Black-PUMA Silver",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/96/31039901_940x940.webp?v=1744361177",
-          item_price: 4970,
-          item_rarity: "common",
-        },
-        {
-          item_id: 3,
-          item_title: "Кроссовки Easy Rider Mix PUMA White-PUMA Black",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/127/39902501_940x940.webp?v=1744365729",
-          item_price: 2599,
-          item_rarity: "common",
-        },
-      ],
-    },
-    {
-      id: "4",
-      title: "Премиум Кейс",
-      rarity: "epic",
-      price: 16999,
-      itemsInside: 3,
-      imageUrl:
-        "https://brand.assets.adidas.com/image/upload/f_auto,q_auto:best,fl_lossy/if_w_gt_800,w_800/shoes_men_tcc_d_44a809233a.jpg",
-      items: [
-        {
-          item_id: 1,
-          item_title: "Мужские Кроссовки Nike Air Max 275",
-          item_imageUrl:
-            "https://store-sneakers-vue.vercel.app/sneakers/sneakers-2.jpg",
-          item_price: 3999,
-          item_rarity: "common",
-        },
-        {
-          item_id: 2,
-          item_title: "Кроссовки Scend Pro WTR PUMA Black-PUMA Silver",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/96/31039901_940x940.webp?v=1744361177",
-          item_price: 4970,
-          item_rarity: "common",
-        },
-        {
-          item_id: 3,
-          item_title: "Кроссовки Easy Rider Mix PUMA White-PUMA Black",
-          item_imageUrl:
-            "https://pumageorgia.ge/uploads/md/webp/127/39902501_940x940.webp?v=1744365729",
-          item_price: 2599,
-          item_rarity: "common",
-        },
-      ],
-    },
-  ];
+  }, [updateCases]);
 
   const getRarityColor = (rarity: SneakerCase["rarity"]) => {
     switch (rarity) {
@@ -407,6 +141,73 @@ const CasesOpenPage = () => {
                 `https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`,
                 {
                   balance: user?.balance - item.price,
+                }
+              );
+
+              // 1. Получаем текущий бюджет
+              const res = await axios.get(
+                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+              );
+              const currentBudget = res.data.store_budget || 0;
+
+              const buyedCasePrice = item.price;
+
+              // 2. Прибавляем новую сумму
+              const updatedBudget = currentBudget + buyedCasePrice;
+
+              // 3. Обновляем бюджет
+              await axios.patch(
+                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
+                {
+                  store_budget: updatedBudget,
+                }
+              );
+
+              const today = new Date();
+              const thisYear = today.getFullYear();
+              const thisMonth = today.getMonth() + 1; // JS: 0–11 → 1–12
+
+              // Получаем одиночный объект с настройками
+              const monthRes = await axios.get(
+                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+              );
+              const settings = monthRes.data;
+
+              // Берём массив месяцев
+              const monthsIncomeArray = Array.isArray(settings.months_income)
+                ? settings.months_income
+                : [];
+
+              // Ищем запись за текущий год и месяц
+              const findedRecord = monthsIncomeArray.find(
+                (item: { year: number; month: number; income: number }) =>
+                  item.year === thisYear && item.month === thisMonth
+              );
+
+              // вычисляем новый массив months_income
+              const updatedMonthsIncome = findedRecord
+                ? monthsIncomeArray.map((item: any) =>
+                    item.year === thisYear && item.month === thisMonth
+                      ? {
+                          ...item,
+                          income: item.income + buyedCasePrice,
+                        }
+                      : item
+                  )
+                : [
+                    ...monthsIncomeArray,
+                    {
+                      year: thisYear,
+                      month: thisMonth,
+                      income: buyedCasePrice,
+                    },
+                  ];
+
+              // один PATCH-запрос
+              await axios.patch(
+                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
+                {
+                  months_income: updatedMonthsIncome,
                 }
               );
 

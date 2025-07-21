@@ -1,7 +1,13 @@
-import { CaseItem, SneakerCase } from "@/constants/Types";
+import { CartProduct, CaseItem, SneakerCase } from "@/constants/Types";
+import { useGetUser } from "@/hooks/useGetUser";
+import {
+  setRemoveAllMarks,
+  setUpdateCases,
+} from "@/redux/slices/products.slice";
+import { RootState } from "@/redux/store";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import axios from "axios";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import {
   View,
@@ -22,6 +28,8 @@ import {
   Animated,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
+import Toast from "react-native-toast-message";
+import { useDispatch, useSelector } from "react-redux";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.4;
@@ -30,6 +38,14 @@ const DUMMY_IMAGE =
 const ITEM_MARGIN = 20; // отступ справа
 
 export default function CasePage() {
+  const { user } = useGetUser({});
+  const removeAllMarks = useSelector(
+    (state: RootState) => state.products.removeAllMarks
+  );
+  const updateCases = useSelector(
+    (state: RootState) => state.products.updateCases
+  );
+  const dispatch = useDispatch();
   const { rarity } = useLocalSearchParams();
   const [currentCase, setCurrentCase] = React.useState<SneakerCase | null>(
     null
@@ -214,10 +230,65 @@ export default function CasePage() {
       });
     }, duration + 50);
 
+    const wonItem = caseItems[finalIndex % caseItems.length];
+    setWinnedItem(wonItem);
+
+    try {
+      if (wonItem?.item_type === "shoe") {
+        await axios.post<CartProduct>(
+          "https://dcc2e55f63f7f47b.mokky.dev/cart",
+          {
+            id: wonItem.item_id,
+            title: wonItem.item_title,
+            imageUri: wonItem.item_imageUrl,
+            price: String(0),
+          }
+        );
+
+        setTimeout(() => {
+          Toast.show({
+            type: "success",
+            text1: "Поздравляем!",
+            text2: "Выигранный товар добавлен в корзину 👟",
+            position: "top", // или "top"
+            visibilityTime: 3000, // 3 секунды
+          });
+        }, duration + 300);
+
+        dispatch(setRemoveAllMarks(!removeAllMarks));
+      }
+
+      if (wonItem?.item_type === "money") {
+        if (!user) return;
+
+        await axios.patch(
+          `https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`,
+          {
+            balance: user?.balance + wonItem.item_price,
+          }
+        );
+
+        setTimeout(() => {
+          Toast.show({
+            type: "success",
+            text1: "Поздравляем!",
+            text2: `Ваш баланс пополнен на ${wonItem.item_price}` + "₽",
+            position: "top", // или "top"
+            visibilityTime: 3000, // 3 секунды
+          });
+        }, duration + 300);
+      }
+
+      if (wonItem?.item_type === "empty") {
+        console.log("К сожалению вы нечего не выиграли");
+      }
+    } catch (err) {
+      Alert.alert("Ошибка", "Не удалось открыть кейс");
+      console.error(err);
+    }
+
     // 3) Показываем модальное окно после полного завершения анимации
     setTimeout(() => {
-      const wonItem = caseItems[finalIndex % caseItems.length];
-      setWinnedItem(wonItem);
       setResultModal(true);
     }, duration + 300); // Добавляем небольшую задержку для плавности
   };
@@ -226,9 +297,16 @@ export default function CasePage() {
     .fill(null)
     .map((_, i) => caseItems[i % caseItems.length]);
 
-  const onCloseResultModal = () => {
+  const onCloseResultModal = async () => {
     setResultModal(false);
     setWinnedItem(null);
+
+    // Перебрасываем user на /cases-open после открытия кейса потом он если захочет еще купит но после одного раза нет
+    router.push("/cases-open");
+    await axios.delete(
+      `https://dcc2e55f63f7f47b.mokky.dev/cases/${currentCase.id}`
+    );
+    dispatch(setUpdateCases(!updateCases));
   };
 
   return (
@@ -267,34 +345,41 @@ export default function CasePage() {
             {/* Контент */}
             <View className="p-6">
               <Text className="text-xl font-bold mb-2 text-gray-800">
-                {winnedItem?.item_price === 0
+                {winnedItem?.item_type === "empty"
                   ? "К сожалению вы нечего не выиграли"
                   : " 🎉 Ты получил!"}
               </Text>
-              <Text className={`text-lg font-semibold mb-4 text-gray-700`}>
-                {winnedItem?.item_price === 0
+              <Text
+                className={`text-lg font-semibold text-gray-700 ${winnedItem?.item_type === "shoe" ? "mb-1" : "mb-4"}`}
+              >
+                {winnedItem?.item_type === "empty"
                   ? "Попробуйте ещё раз"
                   : winnedItem?.item_title || "Неизвестный предмет"}
               </Text>
 
-              {/* Редкость */}
-              {winnedItem?.item_price !== 0 && (
-                <View
-                  className={`
-        self-start px-3 py-1 rounded-full mb-6 ${getRarityBgColor(winnedItem?.item_rarity ?? "common")}`}
-                >
-                  <Text
-                    className={`text-sm font-medium ${
-                      winnedItem?.item_rarity === "common"
-                        ? "text-black"
-                        : "text-white"
-                    })}
-`}
-                  >
-                    {getWinnedItemName(winnedItem?.item_rarity ?? "common")}
-                  </Text>
-                </View>
+              {winnedItem?.item_type === "shoe" && (
+                <Text className={`text-lg font-semibold mb-4 text-gray-700`}>
+                  Цена которого {winnedItem?.item_price} ₽
+                </Text>
               )}
+
+              {/* Редкость */}
+              {winnedItem?.item_type !== "empty" &&
+                winnedItem?.item_type !== "money" && (
+                  <View
+                    className={`self-start px-3 py-1 rounded-full mb-6 ${getRarityBgColor(winnedItem?.item_rarity ?? "common")}`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${
+                        winnedItem?.item_rarity === "common"
+                          ? "text-black"
+                          : "text-white"
+                      }`}
+                    >
+                      {getWinnedItemName(winnedItem?.item_rarity ?? "common")}
+                    </Text>
+                  </View>
+                )}
 
               {/* Кнопка */}
               <Pressable

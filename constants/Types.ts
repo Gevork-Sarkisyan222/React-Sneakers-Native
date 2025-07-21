@@ -79,4 +79,5 @@ export type CaseItem = {
   item_imageUrl: string;
   item_price: number;
   item_rarity: ItemRarity;
+  item_type: string;
 };
