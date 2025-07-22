@@ -13,18 +13,12 @@ import {
   View,
   Text,
   ImageBackground,
-  ScrollView,
   Image,
   Dimensions,
   TouchableOpacity,
   ActivityIndicator,
-  FlatList,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
   Alert,
-  Easing,
   Pressable,
-  Modal,
   Animated,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
@@ -45,7 +39,7 @@ export default function CasePage() {
     (state: RootState) => state.products.updateCases
   );
   const dispatch = useDispatch();
-  const { rarity, freeCase } = useLocalSearchParams();
+  const { rarity, type } = useLocalSearchParams();
   const [currentCase, setCurrentCase] = React.useState<SneakerCase | null>(
     null
   );
@@ -87,7 +81,10 @@ export default function CasePage() {
   const fetchCurrentCase = async () => {
     const res = await axios.get("https://dcc2e55f63f7f47b.mokky.dev/cases");
 
-    const findRes = res.data.find((item: any) => item.rarity === rarity);
+    const findRes = res.data.find(
+      (item: SneakerCase) => item.rarity === rarity && item.type === type
+    );
+
     setCurrentCase(findRes);
     setCaseItems(findRes.items);
   };
@@ -98,7 +95,7 @@ export default function CasePage() {
     return () => {
       setCurrentCase(null);
     };
-  }, [rarity]);
+  }, [rarity, type]);
 
   if (!currentCase || isLoadingToRedirect)
     return (
@@ -306,7 +303,7 @@ export default function CasePage() {
 
     // if free case
 
-    if (freeCase === "yes") {
+    if (type === "free") {
       // Получаем текущий момент
       const now = new Date();
 
@@ -458,7 +455,9 @@ export default function CasePage() {
                 color: getRarityTextColor(currentCase.rarity),
               }}
             >
-              {currentCase.title}
+              {currentCase.type === "free"
+                ? "Бесплатный кейс"
+                : currentCase.title}
             </Text>
           </Text>
 

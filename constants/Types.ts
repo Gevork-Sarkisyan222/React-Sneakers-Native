@@ -63,6 +63,7 @@ export type AppSettingsType = {
 
 export type SneakerCase = {
   id: string;
+  type?: "free" | "paid";
   title: string;
   rarity: "common" | "rare" | "epic" | "legendary";
   price: number;

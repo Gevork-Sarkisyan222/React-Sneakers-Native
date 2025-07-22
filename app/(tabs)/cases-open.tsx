@@ -230,7 +230,10 @@ const CasesOpenPage = () => {
   };
 
   const caseBuyed = (item: SneakerCase) => {
-    return buyedCases.find((caseItem) => caseItem.rarity === item.rarity);
+    return buyedCases.find(
+      (caseItem) =>
+        caseItem.rarity === item.rarity && caseItem.type === item.type
+    );
   };
 
   const [showFreeCase, setShowFreeCase] = React.useState(false);
@@ -271,6 +274,30 @@ const CasesOpenPage = () => {
     // te guzes hane зависимостн-eren updateCases
   }, [updateCases]);
 
+  const handleAddFreeCase = async (item: SneakerCase) => {
+    try {
+      // Получаем все кейсы
+      const res = await axios.get("https://dcc2e55f63f7f47b.mokky.dev/cases");
+      const existingCases: SneakerCase[] = res.data;
+
+      // Проверяем: есть ли уже такой бесплатный кейс с той же редкостью
+      const alreadyExists = existingCases.some(
+        (c) => c.rarity === item.rarity && c.type === "free"
+      );
+
+      if (alreadyExists) {
+        console.log("Такой бесплатный кейс уже добавлен.");
+        return;
+      }
+
+      // Добавляем кейс, если его нет
+      await axios.post("https://dcc2e55f63f7f47b.mokky.dev/cases", item);
+      console.log("Бесплатный кейс успешно добавлен.");
+    } catch (err) {
+      console.error("Ошибка при добавлении бесплатного кейса:", err);
+    }
+  };
+
   React.useEffect(() => {
     if (!timeToOpenFreeCaseMs) return;
 
@@ -293,6 +320,10 @@ const CasesOpenPage = () => {
 
     return () => clearInterval(interval);
   }, [timeToOpenFreeCaseMs]);
+
+  const commonCase = cases.find(
+    (item) => item.rarity === "common" && item.type === "free"
+  );
 
   return (
     <LinearGradient
@@ -345,14 +376,15 @@ const CasesOpenPage = () => {
                   : "Кейс доступен!"}
               </Text>
             </View>
-            {showFreeCase && (
+            {showFreeCase && commonCase && (
               <TouchableOpacity
-                onPress={() =>
+                onPress={async () => {
+                  await handleAddFreeCase(commonCase);
                   router.push({
                     pathname: "/case/[rarity]",
-                    params: { rarity: "common".toString(), freeCase: "yes" },
-                  })
-                }
+                    params: { rarity: "common", type: "free" },
+                  }); // затем перейти
+                }}
                 className="bg-amber-400 rounded-full py-3"
               >
                 <Text className="text-gray-900 text-center font-bold">
@@ -367,97 +399,104 @@ const CasesOpenPage = () => {
             {isLoading ? (
               <RenderCaseSkeleton />
             ) : (
-              cases.map((item) => (
-                <View
-                  key={item.id}
-                  className="bg-white rounded-2xl overflow-hidden shadow-xl mb-5"
-                >
-                  {/* Полоса редкости */}
-                  <View className={`${getRarityColor(item.rarity)} px-4 py-2`}>
-                    <Text className="text-center font-bold text-white">
-                      {getRarityText(item.rarity)}
-                    </Text>
-                  </View>
-
-                  {/* Контент кейса */}
-                  <View className="flex-row p-4 items-center">
-                    {/* Изображение кейса */}
-                    <View className="relative">
-                      <Image
-                        source={{
-                          uri: item.imageUrl,
-                        }}
-                        className="w-24 h-24 rounded-xl"
-                        resizeMode="cover"
-                      />
+              cases
+                .filter((item) => item.type !== "free")
+                .map((item) => (
+                  <View
+                    key={item.id}
+                    className="bg-white rounded-2xl overflow-hidden shadow-xl mb-5"
+                  >
+                    {/* Полоса редкости */}
+                    <View
+                      className={`${getRarityColor(item.rarity)} px-4 py-2`}
+                    >
+                      <Text className="text-center font-bold text-white">
+                        {getRarityText(item.rarity)}
+                      </Text>
                     </View>
 
-                    {/* Информация о кейсе */}
-                    <View className="flex-1 ml-4">
-                      <Text className="text-lg font-bold text-gray-900">
-                        {item.title}
-                      </Text>
-                      <Text className="text-gray-500 mt-1">
-                        Содержит {item.itemsInside} пар
-                      </Text>
-
-                      <View className="flex-row justify-between items-center mt-3">
-                        <Text className="text-xl font-bold text-gray-900">
-                          {item.price} ₽
-                        </Text>
-                        <View
-                          className={` ${caseBuyed(item) ? "bg-none" : "bg-green-500"} rounded-full px-3 py-1`}
-                        >
-                          <Text className="flex-row items-center space-x-1">
-                            {caseBuyed(item) ? (
-                              <View className="flex-row items-center gap-[5px]">
-                                <Feather
-                                  name="check"
-                                  size={16}
-                                  color="#22c55e"
-                                />{" "}
-                                {/* green-500 */}
-                                <Text className="text-green-500 text-[12.5px] font-bold">
-                                  КУПЛЕНО
-                                </Text>
-                              </View>
-                            ) : (
-                              <Text className="text-white text-xs font-bold">
-                                НОВИНКА
-                              </Text>
-                            )}
-                          </Text>
-                        </View>
+                    {/* Контент кейса */}
+                    <View className="flex-row p-4 items-center">
+                      {/* Изображение кейса */}
+                      <View className="relative">
+                        <Image
+                          source={{
+                            uri: item.imageUrl,
+                          }}
+                          className="w-24 h-24 rounded-xl"
+                          resizeMode="cover"
+                        />
                       </View>
 
-                      {/* Кнопка покупки */}
-                      <TouchableOpacity
-                        onPress={() =>
-                          caseBuyed(item)
-                            ? router.push({
-                                pathname: "/case/[rarity]",
-                                params: { rarity: item.rarity.toString() },
-                              })
-                            : handleBuyCase(item)
-                        }
-                        className={`mt-3 ${getRarityColor(item.rarity)} rounded-xl py-3 flex-row items-center justify-center gap-2`}
-                      >
-                        <Text className="text-white text-center font-bold text-base uppercase">
-                          {caseBuyed(item) ? "ОТКРЫТЬ КЕЙС" : "КУПИТЬ"}{" "}
+                      {/* Информация о кейсе */}
+                      <View className="flex-1 ml-4">
+                        <Text className="text-lg font-bold text-gray-900">
+                          {item.title}
+                        </Text>
+                        <Text className="text-gray-500 mt-1">
+                          Содержит {item.itemsInside} пар
                         </Text>
 
-                        {caseBuyed(item) && (
-                          <FontAwesome5
-                            name="lock-open"
-                            size={17}
-                            color="white"
-                          />
-                        )}
-                      </TouchableOpacity>
+                        <View className="flex-row justify-between items-center mt-3">
+                          <Text className="text-xl font-bold text-gray-900">
+                            {item.price} ₽
+                          </Text>
+                          <View
+                            className={` ${caseBuyed(item) ? "bg-none" : "bg-green-500"} rounded-full px-3 py-1`}
+                          >
+                            <Text className="flex-row items-center space-x-1">
+                              {caseBuyed(item) ? (
+                                <View className="flex-row items-center gap-[5px]">
+                                  <Feather
+                                    name="check"
+                                    size={16}
+                                    color="#22c55e"
+                                  />{" "}
+                                  {/* green-500 */}
+                                  <Text className="text-green-500 text-[12.5px] font-bold">
+                                    КУПЛЕНО
+                                  </Text>
+                                </View>
+                              ) : (
+                                <Text className="text-white text-xs font-bold">
+                                  НОВИНКА
+                                </Text>
+                              )}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Кнопка покупки */}
+                        <TouchableOpacity
+                          onPress={() =>
+                            caseBuyed(item)
+                              ? router.push({
+                                  pathname: "/case/[rarity]",
+                                  params: {
+                                    rarity: item.rarity.toString(),
+                                    type: "paid",
+                                  },
+                                })
+                              : handleBuyCase(item)
+                          }
+                          className={`mt-3 ${getRarityColor(item.rarity)} rounded-xl py-3 flex-row items-center justify-center gap-2`}
+                        >
+                          <Text className="text-white text-center font-bold text-base uppercase">
+                            {caseBuyed(item) ? "ОТКРЫТЬ КЕЙС" : "КУПИТЬ"}{" "}
+                          </Text>
+
+                          {caseBuyed(item) && (
+                            <FontAwesome5
+                              name="lock-open"
+                              size={17}
+                              color="white"
+                            />
+                          )}
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
-                </View>
-              ))
+                ))
             )}
           </View>
         </ScrollView>
