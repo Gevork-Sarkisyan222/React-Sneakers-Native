@@ -1,16 +1,18 @@
-import React, { useEffect, useRef } from 'react';
-import { Image, Pressable, Text, View, Animated } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import React, { useEffect, useRef } from "react";
+import { Image, Pressable, Text, View, Animated } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 // ui
-import { Drawer, DrawerBackdrop } from '@/components/ui/drawer';
-import CartDrawerContent from './cart/CartDrawerContent';
-import Toast from 'react-native-toast-message';
-import { useRouter } from 'expo-router';
-import { Product } from '@/constants/Types';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/store';
+import { Drawer, DrawerBackdrop } from "@/components/ui/drawer";
+import CartDrawerContent from "./cart/CartDrawerContent";
+import Toast from "react-native-toast-message";
+import { useRouter } from "expo-router";
+import { Product } from "@/constants/Types";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Entypo from "@expo/vector-icons/Entypo";
 
 export default function Header() {
   const [cartProducts, setCartProducts] = React.useState<Product[]>([]);
@@ -19,12 +21,16 @@ export default function Header() {
   const prevCount = useRef(cartProducts.length);
   const [showDrawer, setShowDrawer] = React.useState(false);
   const router = useRouter();
-  const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
+  const removeAllMarks = useSelector(
+    (state: RootState) => state.products.removeAllMarks
+  );
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get<Product[]>('https://dcc2e55f63f7f47b.mokky.dev/cart');
+        const res = await axios.get<Product[]>(
+          "https://dcc2e55f63f7f47b.mokky.dev/cart"
+        );
         setCartProducts(res.data);
       } catch (error) {
         setCartProducts([]);
@@ -62,37 +68,47 @@ export default function Header() {
       <View className="px-4 py-5 flex-row items-center justify-between border-b border-[#eaeaea]">
         {/* Logo and title */}
         <View className="flex-row items-center space-x-4">
-          <Pressable onPress={() => router.push('/')}>
+          <Pressable onPress={() => router.push("/")}>
             <Image
-              source={require('../assets/images/sneakers.png')}
+              source={require("../assets/images/sneakers.png")}
               className="w-10 h-10 mr-[10px]"
               accessibilityLabel="logo"
             />
           </Pressable>
           <View>
             <Text className="text-black text-sm font-bold">REACT SNEAKERS</Text>
-            <Text className="text-[#9d9d9d] text-sm font-normal">Магазин лучших кроссовок</Text>
+            <Text className="text-[#9d9d9d] text-sm font-normal">
+              Магазин лучших кроссовок
+            </Text>
           </View>
         </View>
 
-        <Pressable
-          className="relative"
-          onPress={() => {
-            setShowDrawer(true);
-          }}>
-          <FontAwesome name="shopping-cart" size={24} color="black" />
+        <View className="flex-row items-center gap-[22px]">
+          <Pressable onPress={() => router.push("/chat")}>
+            <Entypo name="chat" size={24} color="black" />
+          </Pressable>
 
-          {/* badge поверх иконки */}
-          {cartProducts.length > 0 && (
-            <Animated.View
-              style={{ transform: [{ scale: scaleAnim }] }}
-              className="absolute top-[-8px] left-[-15px] w-[20px] h-[20px] flex justify-center items-center rounded-[50px] bg-blue-500 z-[10]">
-              <Animated.Text className="text-white text-[10px] font-bold">
-                {cartProducts.length}
-              </Animated.Text>
-            </Animated.View>
-          )}
-        </Pressable>
+          <Pressable
+            className="relative"
+            onPress={() => {
+              setShowDrawer(true);
+            }}
+          >
+            <FontAwesome name="shopping-cart" size={24} color="black" />
+
+            {/* badge поверх иконки */}
+            {cartProducts.length > 0 && (
+              <Animated.View
+                style={{ transform: [{ scale: scaleAnim }] }}
+                className="absolute top-[-8px] left-[-15px] w-[20px] h-[20px] flex justify-center items-center rounded-[50px] bg-blue-500 z-[10]"
+              >
+                <Animated.Text className="text-white text-[10px] font-bold">
+                  {cartProducts.length}
+                </Animated.Text>
+              </Animated.View>
+            )}
+          </Pressable>
+        </View>
       </View>
 
       {/* cart drawer */}
@@ -102,7 +118,8 @@ export default function Header() {
           setShowDrawer(false);
         }}
         size="lg"
-        anchor="bottom">
+        anchor="bottom"
+      >
         {/* <View
           style={{
             position: 'absolute',

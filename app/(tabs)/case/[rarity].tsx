@@ -44,6 +44,7 @@ export default function CasePage() {
     null
   );
   const [isLoadingToRedirect, setIsLoadingToRedirect] = React.useState(false);
+  const [isSpinning, setIsSpinning] = React.useState(false);
   const [caseItems, setCaseItems] = React.useState<CaseItem[]>([]);
   // const [isScrollEnabled, setIsScrollEnabled] = React.useState(false);
   const [winnedItem, setWinnedItem] = React.useState<CaseItem | null>(null);
@@ -226,6 +227,7 @@ export default function CasePage() {
 
   const handleOpenCase = async () => {
     if (!carouselRef.current || caseItems.length === 0) return;
+    setIsSpinning(true);
 
     const winningIndex = Math.floor(Math.random() * caseItems.length);
     const loops = 5;
@@ -341,6 +343,8 @@ export default function CasePage() {
     );
     dispatch(setUpdateCases(!updateCases));
     router.push("/cases-open");
+
+    setIsSpinning(false);
 
     setIsLoadingToRedirect(false);
   };
@@ -530,7 +534,7 @@ export default function CasePage() {
 
           {/* Open Case Button */}
           <TouchableOpacity
-            onPress={handleOpenCase}
+            onPress={isSpinning ? undefined : handleOpenCase}
             className={`absolute bottom-16 ${getRarityBgColor(currentCase.rarity)} px-16 py-4 rounded-full shadow-lg`}
             style={{
               shadowColor: "#000",
@@ -553,7 +557,7 @@ export default function CasePage() {
                 textShadowRadius: 2,
               }}
             >
-              Открыть
+              {isSpinning ? "Открываеться..." : "Открыть"}
             </Text>
           </TouchableOpacity>
         </View>
