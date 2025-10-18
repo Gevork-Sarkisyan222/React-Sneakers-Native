@@ -10,8 +10,11 @@ import { SalesInfoProvider } from "@/components/context/SalesInfoContext";
 import Toast from "react-native-toast-message";
 import { View } from "react-native";
 import { BlockedGuard } from "@/components/BlockedGuard";
+import { useSettleEndedAuctions } from "@/hooks/useSettleEndedAuctions";
 
 export default function RootLayout() {
+  useSettleEndedAuctions();
+
   return (
     <SalesInfoProvider>
       <BlockedGuard>

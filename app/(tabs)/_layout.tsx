@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function TabLayout() {
   return (
@@ -37,6 +38,16 @@ export default function TabLayout() {
           title: "Orders",
           tabBarIcon: ({ color }) => (
             <FontAwesome5 name="book" size={22} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="auction"
+        options={{
+          title: "Auction",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="gavel" size={24} color={color} />
           ),
         }}
       />

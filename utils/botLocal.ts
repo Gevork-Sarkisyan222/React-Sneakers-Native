@@ -1,24 +1,30 @@
-// utils/botLocal.ts
-import { pipeline } from "@xenova/transformers";
+import axios from "axios";
 
-let chatBot: any = null;
-export const getBotReply = async (message: string) => {
-  if (!chatBot) {
-    chatBot = await pipeline(
-      "text-generation",
-      "Xenova/distilgpt2",
-      {
-        quantized: true,
+export async function generateBotResponse(history: any) {
+  // Format chat history for API request
+  const formattedHistory = history.map(({ role, parts }: any) => ({
+    role,
+    parts: parts || [
+      { text: role === "user" ? history.text : history.response },
+    ],
+  }));
+
+  const requestBody = { contents: formattedHistory };
+
+  const API_URL =
+    "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=AIzaSyBADeAx-1MtrUZIgazRLRL99BiglQiXwpo";
+
+  try {
+    const response = await axios.post(API_URL, requestBody, {
+      headers: {
+        "Content-Type": "application/json",
       },
-      // четвёртый аргумент — базовая ссылка для загрузки моделей
-      "https://cdn.jsdelivr.net/gh/xenova/transformers.js@main/"
-    );
-  }
+    });
 
-  const prompt = `Ты — консультант по имени Арман.\nПользователь: ${message}\nАрман:`;
-  const out = await chatBot(prompt, {
-    max_new_tokens: 80,
-    temperature: 0.7,
-  });
-  return out.generated_text.split("\n")[0].trim();
-};
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.error?.message || "Something went wrong!";
+    throw new Error(errorMessage);
+  }
+}

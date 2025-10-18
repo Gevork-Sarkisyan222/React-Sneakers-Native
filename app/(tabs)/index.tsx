@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import ProductList from "@/components/ProductList";
 import { AppSettingsType, Product } from "@/constants/Types";
+import { useSettleEndedAuctions } from "@/hooks/useSettleEndedAuctions";
 import { setProducts } from "@/redux/slices/products.slice";
 import { RootState } from "@/redux/store";
 import axios from "axios";
@@ -46,6 +47,8 @@ export default function Index() {
   useEffect(() => {
     fetchProducts();
   }, [dispatch, updateProducts]);
+
+  // useSettleEndedAuctions();
 
   return (
     <>
