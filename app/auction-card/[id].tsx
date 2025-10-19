@@ -19,6 +19,7 @@ import { useGetUser } from "@/hooks/useGetUser";
 import { setUpdateAuction } from "@/redux/slices/auction.slice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { sendToFinance } from "@/utils/finance";
 
 /** =========================
  * Типы
@@ -179,6 +180,10 @@ const SingleAuctionScreen: React.FC = () => {
       );
     }
 
+    if (!user?.id) {
+      return Alert.alert("Ошибка", "Войдите в аккаунт, чтобы сделать ставку.");
+    }
+
     // Оптимистично обновим
     const next: AuctionItem = {
       ...item,
@@ -188,20 +193,40 @@ const SingleAuctionScreen: React.FC = () => {
 
     try {
       setPlacing(true);
+
+      // 1) тянем свежие данные пользователя и проверяем баланс
+      const { data: freshUser } = await axios.get<{ balance: number }>(
+        `${API_USERS}/${user.id}`
+      );
+      const balance = Number(freshUser?.balance ?? 0);
+
+      if (balance < value) {
+        // Денег недостаточно — выходим без изменений
+        setPlacing(false);
+        return Alert.alert(
+          "Недостаточно средств",
+          `На балансе ${priceFmt(balance)} ₽, нужно минимум ${priceFmt(value)} ₽.`
+        );
+      }
+
+      // 2) только теперь делаем оптимистичное обновление UI
       setItem(next);
       setMyBid("");
 
+      // 3) и PATCH аукциона
       await axios.patch(`${API_AUCTION}/${item.id}`, {
         currentPrice: value,
         bets: next.bets,
       });
 
-      await axios.patch(
-        `https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`,
-        {
-          balance: user && user.balance - value,
-        }
-      );
+      // await axios.patch(
+      //   `https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`,
+      //   {
+      //     balance: user && user.balance - value,
+      //   }
+      // );
+
+      // await sendToFinance(value);
 
       dispatch(setUpdateAuction(!updateAuction));
     } catch (e) {

@@ -27,6 +27,7 @@ import { setRemoveAllMarks } from "@/redux/slices/products.slice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useGetUser } from "@/hooks/useGetUser";
+import { sendToFinance } from "@/utils/finance";
 
 interface Props {
   cartProducts: Product[];
@@ -159,57 +160,61 @@ const CartDrawerContent: React.FC<Props> = ({
       }
     );
 
+    const priceToGive = totalAmount + taxCount;
+
+    await sendToFinance(priceToGive);
+
     // 1. Получаем текущий бюджет
-    const res = await axios.get(
-      "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-    );
-    const currentBudget = res.data.store_budget || 0;
+    // const res = await axios.get(
+    //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+    // );
+    // const currentBudget = res.data.store_budget || 0;
 
-    // 2. Прибавляем новую сумму
-    const updatedBudget = currentBudget + totalAmount + taxCount;
+    // // 2. Прибавляем новую сумму
+    // const updatedBudget = currentBudget + totalAmount + taxCount;
 
-    // 3. Обновляем бюджет
-    await axios.patch("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
-      store_budget: updatedBudget,
-    });
+    // // 3. Обновляем бюджет
+    // await axios.patch("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
+    //   store_budget: updatedBudget,
+    // });
 
-    const today = new Date();
-    const thisYear = today.getFullYear();
-    const thisMonth = today.getMonth() + 1; // JS: 0–11 → 1–12
+    // const today = new Date();
+    // const thisYear = today.getFullYear();
+    // const thisMonth = today.getMonth() + 1; // JS: 0–11 → 1–12
 
-    // Получаем одиночный объект с настройками
-    const monthRes = await axios.get(
-      "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-    );
-    const settings = monthRes.data;
+    // // Получаем одиночный объект с настройками
+    // const monthRes = await axios.get(
+    //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+    // );
+    // const settings = monthRes.data;
 
-    // Берём массив месяцев
-    const monthsIncomeArray = Array.isArray(settings.months_income)
-      ? settings.months_income
-      : [];
+    // // Берём массив месяцев
+    // const monthsIncomeArray = Array.isArray(settings.months_income)
+    //   ? settings.months_income
+    //   : [];
 
-    // Ищем запись за текущий год и месяц
-    const findedRecord = monthsIncomeArray.find(
-      (item: { year: number; month: number; income: number }) =>
-        item.year === thisYear && item.month === thisMonth
-    );
+    // // Ищем запись за текущий год и месяц
+    // const findedRecord = monthsIncomeArray.find(
+    //   (item: { year: number; month: number; income: number }) =>
+    //     item.year === thisYear && item.month === thisMonth
+    // );
 
-    // вычисляем новый массив months_income
-    const updatedMonthsIncome = findedRecord
-      ? monthsIncomeArray.map((item: any) =>
-          item.year === thisYear && item.month === thisMonth
-            ? { ...item, income: item.income + totalAmount + taxCount }
-            : item
-        )
-      : [
-          ...monthsIncomeArray,
-          { year: thisYear, month: thisMonth, income: totalAmount + taxCount },
-        ];
+    // // вычисляем новый массив months_income
+    // const updatedMonthsIncome = findedRecord
+    //   ? monthsIncomeArray.map((item: any) =>
+    //       item.year === thisYear && item.month === thisMonth
+    //         ? { ...item, income: item.income + totalAmount + taxCount }
+    //         : item
+    //     )
+    //   : [
+    //       ...monthsIncomeArray,
+    //       { year: thisYear, month: thisMonth, income: totalAmount + taxCount },
+    //     ];
 
-    // один PATCH-запрос
-    await axios.patch("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
-      months_income: updatedMonthsIncome,
-    });
+    // // один PATCH-запрос
+    // await axios.patch("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
+    //   months_income: updatedMonthsIncome,
+    // });
 
     setOrderId(data.id);
 

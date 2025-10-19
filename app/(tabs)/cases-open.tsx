@@ -21,6 +21,7 @@ import { SneakerCase } from "@/constants/Types";
 import { cases } from "@/constants/cases";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { sendToFinance } from "@/utils/finance";
 
 const RenderCaseSkeleton = () => {
   return Array.from({ length: 4 }).map((_, index) => (
@@ -144,72 +145,75 @@ const CasesOpenPage = () => {
                 }
               );
 
+              await sendToFinance(item.price);
+
               // 1. Получаем текущий бюджет
-              const res = await axios.get(
-                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-              );
-              const currentBudget = res.data.store_budget || 0;
 
-              const buyedCasePrice = item.price;
+              // const res = await axios.get(
+              //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+              // );
+              // const currentBudget = res.data.store_budget || 0;
 
-              // 2. Прибавляем новую сумму
-              const updatedBudget = currentBudget + buyedCasePrice;
+              // const buyedCasePrice = item.price;
 
-              // 3. Обновляем бюджет
-              await axios.patch(
-                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
-                {
-                  store_budget: updatedBudget,
-                }
-              );
+              // // 2. Прибавляем новую сумму
+              // const updatedBudget = currentBudget + buyedCasePrice;
 
-              const today = new Date();
-              const thisYear = today.getFullYear();
-              const thisMonth = today.getMonth() + 1; // JS: 0–11 → 1–12
+              // // 3. Обновляем бюджет
+              // await axios.patch(
+              //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
+              //   {
+              //     store_budget: updatedBudget,
+              //   }
+              // );
 
-              // Получаем одиночный объект с настройками
-              const monthRes = await axios.get(
-                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-              );
-              const settings = monthRes.data;
+              // const today = new Date();
+              // const thisYear = today.getFullYear();
+              // const thisMonth = today.getMonth() + 1; // JS: 0–11 → 1–12
 
-              // Берём массив месяцев
-              const monthsIncomeArray = Array.isArray(settings.months_income)
-                ? settings.months_income
-                : [];
+              // // Получаем одиночный объект с настройками
+              // const monthRes = await axios.get(
+              //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
+              // );
+              // const settings = monthRes.data;
 
-              // Ищем запись за текущий год и месяц
-              const findedRecord = monthsIncomeArray.find(
-                (item: { year: number; month: number; income: number }) =>
-                  item.year === thisYear && item.month === thisMonth
-              );
+              // // Берём массив месяцев
+              // const monthsIncomeArray = Array.isArray(settings.months_income)
+              //   ? settings.months_income
+              //   : [];
 
-              // вычисляем новый массив months_income
-              const updatedMonthsIncome = findedRecord
-                ? monthsIncomeArray.map((item: any) =>
-                    item.year === thisYear && item.month === thisMonth
-                      ? {
-                          ...item,
-                          income: item.income + buyedCasePrice,
-                        }
-                      : item
-                  )
-                : [
-                    ...monthsIncomeArray,
-                    {
-                      year: thisYear,
-                      month: thisMonth,
-                      income: buyedCasePrice,
-                    },
-                  ];
+              // // Ищем запись за текущий год и месяц
+              // const findedRecord = monthsIncomeArray.find(
+              //   (item: { year: number; month: number; income: number }) =>
+              //     item.year === thisYear && item.month === thisMonth
+              // );
 
-              // один PATCH-запрос
-              await axios.patch(
-                "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
-                {
-                  months_income: updatedMonthsIncome,
-                }
-              );
+              // // вычисляем новый массив months_income
+              // const updatedMonthsIncome = findedRecord
+              //   ? monthsIncomeArray.map((item: any) =>
+              //       item.year === thisYear && item.month === thisMonth
+              //         ? {
+              //             ...item,
+              //             income: item.income + buyedCasePrice,
+              //           }
+              //         : item
+              //     )
+              //   : [
+              //       ...monthsIncomeArray,
+              //       {
+              //         year: thisYear,
+              //         month: thisMonth,
+              //         income: buyedCasePrice,
+              //       },
+              //     ];
+
+              // // один PATCH-запрос
+              // await axios.patch(
+              //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
+              //   {
+              //     months_income: updatedMonthsIncome,
+              //   }
+              // );
 
               Alert.alert(
                 "Успех",

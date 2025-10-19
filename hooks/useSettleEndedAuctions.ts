@@ -1,6 +1,7 @@
-// useSettleEndedAuctions.ts
+// hooks/useSettleEndedAuctions.ts
 import { useEffect } from "react";
 import axios from "axios";
+import { sendToFinance } from "@/utils/finance";
 
 // Типы — подгони под свои при необходимости
 type AuctionBet = { userId: number; price: number };
@@ -15,8 +16,17 @@ type AuctionItem = {
   issued?: boolean; // будет появляться после выдачи приза
 };
 
+type User = {
+  id: number;
+  name: string;
+  lastName: string;
+  balance: number;
+  // ...другие поля не обязательны
+};
+
 const AUCTIONS_URL = "https://dcc2e55f63f7f47b.mokky.dev/auction";
 const CART_URL = "https://dcc2e55f63f7f47b.mokky.dev/cart";
+const USERS_URL = "https://dcc2e55f63f7f47b.mokky.dev/users";
 
 // В текущем рантайме не дублируем выдачу
 const processed = new Set<number>();
@@ -56,7 +66,46 @@ const buildCartPayloadFromAuction = (a: AuctionItem) => ({
   price: "0", // победитель уже «заплатил» — цена 0
 });
 
-/** Выдаём товар победителю (в общую корзину) и помечаем аукцион issued:true */
+/** Получаем пользователя (сначала по /users/:id, fallback по /users) */
+const getUserById = async (userId: number): Promise<User | null> => {
+  try {
+    const { data } = await axios.get<User>(`${USERS_URL}/${userId}`);
+    if (data && typeof data.id === "number") return data;
+  } catch {
+    // fallback: ищем в списке
+    try {
+      const { data } = await axios.get<User[]>(USERS_URL);
+      const found = Array.isArray(data)
+        ? data.find((u) => u.id === userId)
+        : null;
+      if (found) return found;
+    } catch {
+      /* ignore */
+    }
+  }
+  return null;
+};
+
+/** Списываем у пользователя сумму (с защитой от отрицательного баланса) */
+const debitUserBalance = async (userId: number, amount: number) => {
+  if (!Number.isFinite(amount) || amount <= 0)
+    throw new Error("Invalid debit amount");
+
+  const user = await getUserById(userId);
+  if (!user) throw new Error(`User ${userId} not found`);
+
+  const current = Number(user.balance ?? 0);
+  const next = current - amount;
+
+  // Если не хочешь уходить в минус — раскомментируй следующую строку:
+  // const safeNext = Math.max(0, next);
+  const safeNext = next;
+
+  await axios.patch(`${USERS_URL}/${userId}`, { balance: safeNext });
+  return safeNext;
+};
+
+/** Выдаём товар победителю, списываем деньги и отправляем в финансы */
 const settleAuction = async (a: AuctionItem) => {
   if (processed.has(a.id)) return;
   if (a.issued === true) {
@@ -66,14 +115,26 @@ const settleAuction = async (a: AuctionItem) => {
 
   const winner = findWinnerBid(a);
   if (!winner) {
+    // Нет победителя — помечаем как обработанный в этом рантайме и выходим
     processed.add(a.id);
     return;
   }
 
   try {
-    const payload = buildCartPayloadFromAuction(a);
+    const value = Number(winner.price);
+    if (!Number.isFinite(value) || value <= 0) {
+      processed.add(a.id);
+      return;
+    }
 
-    // Защита от дублей между перезапусками (корзина общая)
+    // 1) Списываем у победителя
+    await debitUserBalance(winner.userId, value);
+
+    // 2) Отправляем в финансы
+    await sendToFinance(value);
+
+    // 3) Закидываем товар в корзину (idempotent по наличию)
+    const payload = buildCartPayloadFromAuction(a);
     const exists = await cartHasItem(payload.title, payload.imageUri);
     if (!exists) {
       await axios.post(CART_URL, payload, {
@@ -81,7 +142,7 @@ const settleAuction = async (a: AuctionItem) => {
       });
     }
 
-    // Помечаем аукцион как «выдан»
+    // 4) Помечаем аукцион как «выдан»
     try {
       await axios.patch(
         `${AUCTIONS_URL}/${a.id}`,
@@ -93,8 +154,17 @@ const settleAuction = async (a: AuctionItem) => {
     }
 
     processed.add(a.id);
-    console.log("[SETTLED]", a.id, "winner price:", winner.price);
+    console.log(
+      "[SETTLED]",
+      a.id,
+      "winner user:",
+      winner.userId,
+      "price:",
+      value
+    );
   } catch (e) {
+    // Если что-то пошло не так — не помечаем processed/issued,
+    // чтобы повторить попытку в следующем цикле/перезапуске
     console.warn("[SETTLE ERROR]", a.id, e);
   }
 };
