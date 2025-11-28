@@ -1,16 +1,16 @@
-import React from "react";
-import { Stack } from "expo-router";
-import "@/app/global.css";
-import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { store } from "@/redux/store";
-import { Provider } from "react-redux";
-import { SalesInfoProvider } from "@/components/context/SalesInfoContext";
-import Toast from "react-native-toast-message";
-import { View } from "react-native";
-import { BlockedGuard } from "@/components/BlockedGuard";
-import { useSettleEndedAuctions } from "@/hooks/useSettleEndedAuctions";
+import React from 'react';
+import { Stack } from 'expo-router';
+import '@/app/global.css';
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { store } from '@/redux/store';
+import { Provider } from 'react-redux';
+import { SalesInfoProvider } from '@/components/context/SalesInfoContext';
+import Toast from 'react-native-toast-message';
+import { View } from 'react-native';
+import { BlockedGuard } from '@/components/BlockedGuard';
+import { useSettleEndedAuctions } from '@/hooks/useSettleEndedAuctions';
 
 export default function RootLayout() {
   useSettleEndedAuctions();
@@ -33,14 +33,13 @@ export default function RootLayout() {
 
         <View
           style={{
-            position: "absolute",
+            position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             zIndex: 999999,
             elevation: 999999,
-          }}
-        >
+          }}>
           <Toast />
         </View>
       </BlockedGuard>
