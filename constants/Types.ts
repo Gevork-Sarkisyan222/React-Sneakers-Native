@@ -33,7 +33,7 @@ export interface UserInterface {
   phone: string;
   address: string;
   balance: number;
-  position: "admin" | "user" | "superadmin" | "owner";
+  position: 'admin' | 'user' | 'superadmin' | 'owner';
   avatarUri: string;
 
   // Новые поля блокировки:
@@ -63,9 +63,9 @@ export type AppSettingsType = {
 
 export type SneakerCase = {
   id: string;
-  type?: "free" | "paid";
+  type?: 'free' | 'paid';
   title: string;
-  rarity: "common" | "rare" | "epic" | "legendary";
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
   price: number;
   itemsInside: number;
   imageUrl: string;
@@ -73,7 +73,7 @@ export type SneakerCase = {
   items: CaseItem[];
 };
 
-export type ItemRarity = "common" | "rare" | "epic" | "legendary";
+export type ItemRarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 export type CaseItem = {
   item_id: number;
@@ -83,3 +83,29 @@ export type CaseItem = {
   item_rarity: ItemRarity;
   item_type: string;
 };
+
+export interface DailyTasks {
+  id: string;
+  type: string;
+  enter_app: string;
+  collect_3_products: string;
+  make_review: string;
+  buyed_opened_cases: string;
+  buy_3_product: string;
+  start_time: string;
+  end_time: string;
+}
+
+export interface WeeklyTasks {
+  id: string;
+  type: string;
+  enter_app_6_days: string;
+  buy_6_product: string;
+  buyed_opened_20_cases: string;
+  collect_15_products: string;
+  make_5_review: string;
+  win_3_rare_in_cases: string;
+  start_time: string;
+  end_time: string;
+  last_enter_date: string;
+}

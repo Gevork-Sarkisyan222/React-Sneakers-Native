@@ -128,10 +128,56 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
           `https://dcc2e55f63f7f47b.mokky.dev/favorites/${addedToFavoriteProduct.data.id}`,
           { id },
         );
+
         await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${id}`, {
           isFavorite: true,
         });
+
         dispatch(setUpdateAllFavorites(!updateAllFavorites));
+
+        try {
+          // Берём ТОЛЬКО нужные задачи по id
+          const [dailyRes, weeklyRes] = await Promise.all([
+            axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/1'), // daily
+            axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/2'), // weekly
+          ]);
+
+          const daily = dailyRes.data;
+          const weekly = weeklyRes.data;
+
+          const currentDailyCollect = Number(daily?.collect_3_products ?? 0);
+          const currentWeeklyCollect = Number(weekly?.collect_15_products ?? 0);
+
+          const requests: Promise<any>[] = [];
+
+          // --- DAILY: collect_3_products (максимум 3) ---
+          if (currentDailyCollect < 3) {
+            const newDailyCollect = currentDailyCollect + 1;
+
+            requests.push(
+              axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/1', {
+                collect_3_products: newDailyCollect,
+              }),
+            );
+          }
+
+          // --- WEEKLY: collect_15_products (максимум 15) ---
+          if (currentWeeklyCollect < 15) {
+            const newWeeklyCollect = currentWeeklyCollect + 1;
+
+            requests.push(
+              axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/2', {
+                collect_15_products: newWeeklyCollect,
+              }),
+            );
+          }
+
+          if (requests.length > 0) {
+            await Promise.all(requests);
+          }
+        } catch (err) {
+          console.error('Ошибка обновления collect_3_products / collect_15_products:', err);
+        }
       }
     } catch (error) {
       console.error('Ошибка при переключении избранного:', error);
@@ -246,8 +292,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
               inOrderPage
                 ? 'text-[14px] text-black font-bold'
                 : isOnSales
-                ? 'line-through text-gray-400 text-[12px]'
-                : 'text-[14px] text-black font-bold'
+                  ? 'line-through text-gray-400 text-[12px]'
+                  : 'text-[14px] text-black font-bold'
             }`}>
             {price} руб.
           </Text>

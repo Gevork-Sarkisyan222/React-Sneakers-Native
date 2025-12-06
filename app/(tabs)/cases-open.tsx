@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -10,25 +10,22 @@ import {
   StatusBar,
   Alert,
   RefreshControl,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import axios from "axios";
-import Feather from "@expo/vector-icons/Feather";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { useGetUser } from "@/hooks/useGetUser";
-import { router } from "expo-router";
-import { SneakerCase } from "@/constants/Types";
-import { cases } from "@/constants/cases";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { sendToFinance } from "@/utils/finance";
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import axios from 'axios';
+import Feather from '@expo/vector-icons/Feather';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useGetUser } from '@/hooks/useGetUser';
+import { router } from 'expo-router';
+import { SneakerCase } from '@/constants/Types';
+import { cases } from '@/constants/cases';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { sendToFinance } from '@/utils/finance';
 
 const RenderCaseSkeleton = () => {
   return Array.from({ length: 4 }).map((_, index) => (
-    <View
-      key={index}
-      className="bg-white rounded-2xl overflow-hidden shadow-xl mb-5"
-    >
+    <View key={index} className="bg-white rounded-2xl overflow-hidden shadow-xl mb-5">
       {/* Верхняя полоса (редкость) */}
       <View className="bg-gray-300 px-4 py-2" />
 
@@ -60,17 +57,13 @@ const CasesOpenPage = () => {
   const { user } = useGetUser({});
   const [buyedCases, setBuyedCases] = React.useState<SneakerCase[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const updateCases = useSelector(
-    (state: RootState) => state.products.updateCases
-  );
+  const updateCases = useSelector((state: RootState) => state.products.updateCases);
 
   const fetchBuyedCases = async () => {
     setIsLoading(true);
 
     try {
-      const { data } = await axios.get(
-        "https://dcc2e55f63f7f47b.mokky.dev/cases"
-      );
+      const { data } = await axios.get('https://dcc2e55f63f7f47b.mokky.dev/cases');
       setBuyedCases(data);
     } catch (err) {
       console.error(err);
@@ -83,31 +76,31 @@ const CasesOpenPage = () => {
     fetchBuyedCases();
   }, [updateCases]);
 
-  const getRarityColor = (rarity: SneakerCase["rarity"]) => {
+  const getRarityColor = (rarity: SneakerCase['rarity']) => {
     switch (rarity) {
-      case "common":
-        return "bg-gray-300";
-      case "rare":
-        return "bg-blue-600";
-      case "epic":
-        return "bg-purple-500";
-      case "legendary":
-        return "bg-yellow-500";
+      case 'common':
+        return 'bg-gray-300';
+      case 'rare':
+        return 'bg-blue-600';
+      case 'epic':
+        return 'bg-purple-500';
+      case 'legendary':
+        return 'bg-yellow-500';
       default:
-        return "bg-gray-500";
+        return 'bg-gray-500';
     }
   };
 
-  const getRarityText = (rarity: SneakerCase["rarity"]) => {
+  const getRarityText = (rarity: SneakerCase['rarity']) => {
     switch (rarity) {
-      case "common":
-        return "ОБЫЧНЫЙ";
-      case "rare":
-        return "РЕДКИЙ";
-      case "epic":
-        return "ЭПИЧЕСКИЙ";
-      case "legendary":
-        return "ЛЕГЕНДАРНЫЙ";
+      case 'common':
+        return 'ОБЫЧНЫЙ';
+      case 'rare':
+        return 'РЕДКИЙ';
+      case 'epic':
+        return 'ЭПИЧЕСКИЙ';
+      case 'legendary':
+        return 'ЛЕГЕНДАРНЫЙ';
       default:
         return rarity;
     }
@@ -117,134 +110,105 @@ const CasesOpenPage = () => {
     if (!item || !user) return;
 
     Alert.alert(
-      "Подтверждение",
-      "Вы действительно хотите купить этот кейс за " + item.price + " ₽ ?",
+      'Подтверждение',
+      'Вы действительно хотите купить этот кейс за ' + item.price + ' ₽ ?',
       [
         {
-          text: "Отмена",
-          style: "cancel",
+          text: 'Отмена',
+          style: 'cancel',
         },
         {
-          text: "Купить",
+          text: 'Купить',
           onPress: async () => {
             try {
               setIsLoading(true);
 
-              if (user.balance < item.price)
-                return Alert.alert("Ошибка", "Недостаточно средств");
+              if (user.balance < item.price) return Alert.alert('Ошибка', 'Недостаточно средств');
 
-              await axios.post(
-                "https://dcc2e55f63f7f47b.mokky.dev/cases",
-                item
-              );
+              await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cases', item);
 
-              await axios.patch(
-                `https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`,
-                {
-                  balance: user?.balance - item.price,
-                }
-              );
+              await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`, {
+                balance: user?.balance - item.price,
+              });
 
               await sendToFinance(item.price);
 
-              // 1. Получаем текущий бюджет
+              Alert.alert('Успех', `${item.title} успешно куплен за ${item.price} ₽`);
+              await fetchBuyedCases();
 
-              // const res = await axios.get(
-              //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-              // );
-              // const currentBudget = res.data.store_budget || 0;
+              await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cases', item);
 
-              // const buyedCasePrice = item.price;
+              await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`, {
+                balance: user?.balance - item.price,
+              });
 
-              // // 2. Прибавляем новую сумму
-              // const updatedBudget = currentBudget + buyedCasePrice;
+              await sendToFinance(item.price);
 
-              // // 3. Обновляем бюджет
-              // await axios.patch(
-              //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
-              //   {
-              //     store_budget: updatedBudget,
-              //   }
-              // );
+              // Обновляем список купленных кейсов
+              await fetchBuyedCases();
 
-              // const today = new Date();
-              // const thisYear = today.getFullYear();
-              // const thisMonth = today.getMonth() + 1; // JS: 0–11 → 1–12
+              // === Обновляем прогресс квестов по кейсам ===
+              try {
+                const [dailyRes, weeklyRes] = await Promise.all([
+                  axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/1'), // daily
+                  axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/2'), // weekly
+                ]);
 
-              // // Получаем одиночный объект с настройками
-              // const monthRes = await axios.get(
-              //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-              // );
-              // const settings = monthRes.data;
+                const daily = dailyRes.data;
+                const weekly = weeklyRes.data;
 
-              // // Берём массив месяцев
-              // const monthsIncomeArray = Array.isArray(settings.months_income)
-              //   ? settings.months_income
-              //   : [];
+                const currentDailyCases = Number(daily?.buyed_opened_cases ?? 0);
+                const currentWeeklyCases = Number(weekly?.buyed_opened_20_cases ?? 0);
 
-              // // Ищем запись за текущий год и месяц
-              // const findedRecord = monthsIncomeArray.find(
-              //   (item: { year: number; month: number; income: number }) =>
-              //     item.year === thisYear && item.month === thisMonth
-              // );
+                const requests: Promise<any>[] = [];
 
-              // // вычисляем новый массив months_income
-              // const updatedMonthsIncome = findedRecord
-              //   ? monthsIncomeArray.map((item: any) =>
-              //       item.year === thisYear && item.month === thisMonth
-              //         ? {
-              //             ...item,
-              //             income: item.income + buyedCasePrice,
-              //           }
-              //         : item
-              //     )
-              //   : [
-              //       ...monthsIncomeArray,
-              //       {
-              //         year: thisYear,
-              //         month: thisMonth,
-              //         income: buyedCasePrice,
-              //       },
-              //     ];
+                // DAILY: buyed_opened_cases (максимум 1)
+                if (currentDailyCases < 1) {
+                  requests.push(
+                    axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/1', {
+                      buyed_opened_cases: currentDailyCases + 1,
+                    }),
+                  );
+                }
 
-              // // один PATCH-запрос
-              // await axios.patch(
-              //   "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1",
-              //   {
-              //     months_income: updatedMonthsIncome,
-              //   }
-              // );
+                // WEEKLY: buyed_opened_20_cases (максимум 20)
+                if (currentWeeklyCases < 20) {
+                  requests.push(
+                    axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/2', {
+                      buyed_opened_20_cases: currentWeeklyCases + 1,
+                    }),
+                  );
+                }
 
-              Alert.alert(
-                "Успех",
-                `${item.title} успешно куплен за ${item.price} ₽`
-              );
-              fetchBuyedCases();
+                if (requests.length > 0) {
+                  await Promise.all(requests);
+                }
+              } catch (err) {
+                console.error('Ошибка обновления прогресса кейсов:', err);
+              }
             } catch (err) {
               console.error(err);
-              Alert.alert("Ошибка", "Не удалось купить кейс");
+              Alert.alert('Ошибка', 'Не удалось купить кейс');
             } finally {
               setIsLoading(false);
             }
           },
-          style: "default",
+          style: 'default',
         },
-      ]
+      ],
     );
   };
 
   const caseBuyed = (item: SneakerCase) => {
     return buyedCases.find(
-      (caseItem) =>
-        caseItem.rarity === item.rarity && caseItem.type === item.type
+      (caseItem) => caseItem.rarity === item.rarity && caseItem.type === item.type,
     );
   };
 
   const [showFreeCase, setShowFreeCase] = React.useState(false);
 
-  const [timeToOpenFreeCaseMs, setTimeToOpenFreeCaseMs] =
-    React.useState<number>(0); // в мс
-  const [countdown, setCountdown] = React.useState<string>("00:00:00");
+  const [timeToOpenFreeCaseMs, setTimeToOpenFreeCaseMs] = React.useState<number>(0); // в мс
+  const [countdown, setCountdown] = React.useState<string>('00:00:00');
 
   const checkFreeCaseDate = async () => {
     try {
@@ -252,9 +216,7 @@ const CasesOpenPage = () => {
       const nowMs = Date.now();
 
       // 2. Запрашиваем из API ISO‑строку с целью
-      const res = await axios.get(
-        "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-      );
+      const res = await axios.get('https://dcc2e55f63f7f47b.mokky.dev/app-settings/1');
       const isoString: string = res.data.timeToOpenFreeCase;
 
       // 3. Парсим её в миллисекунды и сохраняем для таймера
@@ -268,7 +230,7 @@ const CasesOpenPage = () => {
         setShowFreeCase(false);
       }
     } catch (error) {
-      console.error("Ошибка при проверке даты free case:", error);
+      console.error('Ошибка при проверке даты free case:', error);
       setShowFreeCase(false);
     }
   };
@@ -281,38 +243,38 @@ const CasesOpenPage = () => {
   const handleAddFreeCase = async (item: SneakerCase) => {
     try {
       // Получаем все кейсы
-      const res = await axios.get("https://dcc2e55f63f7f47b.mokky.dev/cases");
+      const res = await axios.get('https://dcc2e55f63f7f47b.mokky.dev/cases');
       const existingCases: SneakerCase[] = res.data;
 
       // Проверяем: есть ли уже такой бесплатный кейс с той же редкостью
       const alreadyExists = existingCases.some(
-        (c) => c.rarity === item.rarity && c.type === "free"
+        (c) => c.rarity === item.rarity && c.type === 'free',
       );
 
       if (alreadyExists) {
-        console.log("Такой бесплатный кейс уже добавлен.");
+        console.log('Такой бесплатный кейс уже добавлен.');
         return;
       }
 
       // Добавляем кейс, если его нет
-      await axios.post("https://dcc2e55f63f7f47b.mokky.dev/cases", item);
-      console.log("Бесплатный кейс успешно добавлен.");
+      await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cases', item);
+      console.log('Бесплатный кейс успешно добавлен.');
     } catch (err) {
-      console.error("Ошибка при добавлении бесплатного кейса:", err);
+      console.error('Ошибка при добавлении бесплатного кейса:', err);
     }
   };
 
   React.useEffect(() => {
     if (!timeToOpenFreeCaseMs) return;
 
-    const pad = (n: number) => String(n).padStart(2, "0");
+    const pad = (n: number) => String(n).padStart(2, '0');
 
     const interval = setInterval(() => {
       const diff = timeToOpenFreeCaseMs - Date.now();
       if (diff <= 0) {
         // время наступило
         setShowFreeCase(true);
-        setCountdown("00:00:00");
+        setCountdown('00:00:00');
         clearInterval(interval);
       } else {
         const hours = Math.floor(diff / 3_600_000);
@@ -325,25 +287,19 @@ const CasesOpenPage = () => {
     return () => clearInterval(interval);
   }, [timeToOpenFreeCaseMs]);
 
-  const commonCase = cases.find(
-    (item) => item.rarity === "common" && item.type === "free"
-  );
+  const commonCase = cases.find((item) => item.rarity === 'common' && item.type === 'free');
 
   return (
-    <LinearGradient
-      colors={["#f0f4f8", "#e2e8f0", "#dbeafe"]}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={['#f0f4f8', '#e2e8f0', '#dbeafe']} style={{ flex: 1 }}>
       <SafeAreaView
         className="flex-1"
         style={{
-          paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-        }}
-      >
+          paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+        }}>
         <ScrollView
           refreshControl={
             <RefreshControl
-              colors={["#338fd4"]}
+              colors={['#338fd4']}
               refreshing={isLoading}
               onRefresh={() => {
                 checkFreeCaseDate();
@@ -353,8 +309,7 @@ const CasesOpenPage = () => {
           }
           className="p-4"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 }}
-        >
+          contentContainerStyle={{ paddingBottom: 24 }}>
           <Text className="text-[25px] font-bold text-black mb-1 text-center uppercase">
             🔥 Sneakers Cases 🔥
           </Text>
@@ -364,20 +319,15 @@ const CasesOpenPage = () => {
 
           {/* Промо-баннер */}
           <LinearGradient
-            colors={["#8E44AD", "#3498DB", "#00FFAA"]}
-            style={{ borderRadius: 16, padding: 16, marginBottom: 16 }}
-          >
-            <Text className="text-white text-xl font-bold mb-2 text-center">
-              БЕСПЛАТНЫЙ КЕЙС
-            </Text>
+            colors={['#8E44AD', '#3498DB', '#00FFAA']}
+            style={{ borderRadius: 16, padding: 16, marginBottom: 16 }}>
+            <Text className="text-white text-xl font-bold mb-2 text-center">БЕСПЛАТНЫЙ КЕЙС</Text>
             <Text className="text-gray-300 text-center mb-4">
               Открывайте бесплатный кейс каждые 24 часа
             </Text>
             <View className="bg-black/30 rounded-full px-4 py-2 mb-4">
               <Text className="text-amber-300 text-center font-bold">
-                {!showFreeCase
-                  ? `Следующий кейс через: ${countdown}`
-                  : "Кейс доступен!"}
+                {!showFreeCase ? `Следующий кейс через: ${countdown}` : 'Кейс доступен!'}
               </Text>
             </View>
             {showFreeCase && commonCase && (
@@ -385,15 +335,12 @@ const CasesOpenPage = () => {
                 onPress={async () => {
                   await handleAddFreeCase(commonCase);
                   router.push({
-                    pathname: "/case/[rarity]",
-                    params: { rarity: "common", type: "free" },
+                    pathname: '/case/[rarity]',
+                    params: { rarity: 'common', type: 'free' },
                   }); // затем перейти
                 }}
-                className="bg-amber-400 rounded-full py-3"
-              >
-                <Text className="text-gray-900 text-center font-bold">
-                  ОТКРЫТЬ КЕЙС
-                </Text>
+                className="bg-amber-400 rounded-full py-3">
+                <Text className="text-gray-900 text-center font-bold">ОТКРЫТЬ КЕЙС</Text>
               </TouchableOpacity>
             )}
           </LinearGradient>
@@ -404,16 +351,13 @@ const CasesOpenPage = () => {
               <RenderCaseSkeleton />
             ) : (
               cases
-                .filter((item) => item.type !== "free")
+                .filter((item) => item.type !== 'free')
                 .map((item) => (
                   <View
                     key={item.id}
-                    className="bg-white rounded-2xl overflow-hidden shadow-xl mb-5"
-                  >
+                    className="bg-white rounded-2xl overflow-hidden shadow-xl mb-5">
                     {/* Полоса редкости */}
-                    <View
-                      className={`${getRarityColor(item.rarity)} px-4 py-2`}
-                    >
+                    <View className={`${getRarityColor(item.rarity)} px-4 py-2`}>
                       <Text className="text-center font-bold text-white">
                         {getRarityText(item.rarity)}
                       </Text>
@@ -434,37 +378,24 @@ const CasesOpenPage = () => {
 
                       {/* Информация о кейсе */}
                       <View className="flex-1 ml-4">
-                        <Text className="text-lg font-bold text-gray-900">
-                          {item.title}
-                        </Text>
-                        <Text className="text-gray-500 mt-1">
-                          Содержит {item.itemsInside} пар
-                        </Text>
+                        <Text className="text-lg font-bold text-gray-900">{item.title}</Text>
+                        <Text className="text-gray-500 mt-1">Содержит {item.itemsInside} пар</Text>
 
                         <View className="flex-row justify-between items-center mt-3">
-                          <Text className="text-xl font-bold text-gray-900">
-                            {item.price} ₽
-                          </Text>
+                          <Text className="text-xl font-bold text-gray-900">{item.price} ₽</Text>
                           <View
-                            className={` ${caseBuyed(item) ? "bg-none" : "bg-green-500"} rounded-full px-3 py-1`}
-                          >
+                            className={` ${caseBuyed(item) ? 'bg-none' : 'bg-green-500'} rounded-full px-3 py-1`}>
                             <Text className="flex-row items-center space-x-1">
                               {caseBuyed(item) ? (
                                 <View className="flex-row items-center gap-[5px]">
-                                  <Feather
-                                    name="check"
-                                    size={16}
-                                    color="#22c55e"
-                                  />{" "}
+                                  <Feather name="check" size={16} color="#22c55e" />{' '}
                                   {/* green-500 */}
                                   <Text className="text-green-500 text-[12.5px] font-bold">
                                     КУПЛЕНО
                                   </Text>
                                 </View>
                               ) : (
-                                <Text className="text-white text-xs font-bold">
-                                  НОВИНКА
-                                </Text>
+                                <Text className="text-white text-xs font-bold">НОВИНКА</Text>
                               )}
                             </Text>
                           </View>
@@ -475,26 +406,21 @@ const CasesOpenPage = () => {
                           onPress={() =>
                             caseBuyed(item)
                               ? router.push({
-                                  pathname: "/case/[rarity]",
+                                  pathname: '/case/[rarity]',
                                   params: {
                                     rarity: item.rarity.toString(),
-                                    type: "paid",
+                                    type: 'paid',
                                   },
                                 })
                               : handleBuyCase(item)
                           }
-                          className={`mt-3 ${getRarityColor(item.rarity)} rounded-xl py-3 flex-row items-center justify-center gap-2`}
-                        >
+                          className={`mt-3 ${getRarityColor(item.rarity)} rounded-xl py-3 flex-row items-center justify-center gap-2`}>
                           <Text className="text-white text-center font-bold text-base uppercase">
-                            {caseBuyed(item) ? "ОТКРЫТЬ КЕЙС" : "КУПИТЬ"}{" "}
+                            {caseBuyed(item) ? 'ОТКРЫТЬ КЕЙС' : 'КУПИТЬ'}{' '}
                           </Text>
 
                           {caseBuyed(item) && (
-                            <FontAwesome5
-                              name="lock-open"
-                              size={17}
-                              color="white"
-                            />
+                            <FontAwesome5 name="lock-open" size={17} color="white" />
                           )}
                         </TouchableOpacity>
                       </View>

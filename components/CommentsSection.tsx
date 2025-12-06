@@ -163,7 +163,47 @@ export default function CommentsSection({
         comments: updatedComments,
       });
 
-      // 4) Уведомляем пользователя
+      // 4) Обновляем прогресс daily/weekly за отзывы
+      try {
+        const [dailyRes, weeklyRes] = await Promise.all([
+          axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/1'), // daily
+          axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/2'), // weekly
+        ]);
+
+        const daily = dailyRes.data;
+        const weekly = weeklyRes.data;
+
+        const currentDailyReviews = Number(daily?.make_review ?? 0);
+        const currentWeeklyReviews = Number(weekly?.make_5_review ?? 0);
+
+        const requests: Promise<any>[] = [];
+
+        // DAILY: make_review (максимум 1)
+        if (currentDailyReviews < 1) {
+          requests.push(
+            axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/1', {
+              make_review: currentDailyReviews + 1,
+            }),
+          );
+        }
+
+        // WEEKLY: make_5_review (максимум 5)
+        if (currentWeeklyReviews < 5) {
+          requests.push(
+            axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/2', {
+              make_5_review: currentWeeklyReviews + 1,
+            }),
+          );
+        }
+
+        if (requests.length > 0) {
+          await Promise.all(requests);
+        }
+      } catch (err) {
+        console.error('Ошибка обновления прогресса по отзывам:', err);
+      }
+
+      // 5) Уведомляем пользователя
       Toast.show({
         type: 'success',
         text1: 'Спасибо',
@@ -171,10 +211,10 @@ export default function CommentsSection({
         visibilityTime: 3000,
       });
 
-      // 5) Уведомляем родителя, чтобы он добавил комментарий в своё состояние
+      // 6) Уведомляем родителя, чтобы он добавил комментарий в своё состояние
       onNewComment(newComment);
 
-      // 6) Очищаем форму
+      // 7) Очищаем форму
       setComment('');
       setRating(0);
     } catch (err) {

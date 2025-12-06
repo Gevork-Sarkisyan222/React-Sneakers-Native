@@ -1,5 +1,5 @@
 // components/BlockedGuard.tsx
-import React, { useLayoutEffect } from "react";
+import React, { useLayoutEffect } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -10,20 +10,18 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
-} from "react-native";
-import { BlockedScreen } from "@/components/BlockedScreen";
-import { UserInterface } from "@/constants/Types";
-import axios from "axios";
-import * as SecureStore from "expo-secure-store";
-import { useSalesInfo } from "./context/SalesInfoContext";
-import { router } from "expo-router";
-import Login from "@/app/(tabs)/login";
+} from 'react-native';
+import { BlockedScreen } from '@/components/BlockedScreen';
+import { UserInterface } from '@/constants/Types';
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+import { useSalesInfo } from './context/SalesInfoContext';
+import { router } from 'expo-router';
+import Login from '@/app/(tabs)/login';
 
 export function BlockedGuard({ children }: { children: React.ReactNode }) {
   const { productSaleInfo, refresh } = useSalesInfo();
-  const [currentUser, setCurrentUser] = React.useState<UserInterface | null>(
-    null
-  );
+  const [currentUser, setCurrentUser] = React.useState<UserInterface | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isUserBlocked, setIsUserBlocked] = React.useState(false);
 
@@ -34,16 +32,16 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
   const fetchCurrentUser = async () => {
     setIsLoading(true);
     try {
-      const token = await SecureStore.getItemAsync("userToken");
-      if (!token) throw new Error("Token not found");
+      const token = await SecureStore.getItemAsync('userToken');
+      if (!token) throw new Error('Token not found');
 
       const { data } = await axios.get<UserInterface>(
-        "https://dcc2e55f63f7f47b.mokky.dev/auth_me",
+        'https://dcc2e55f63f7f47b.mokky.dev/auth_me',
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setCurrentUser(data);
@@ -58,30 +56,30 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     Alert.alert(
-      "Выход из аккаунта",
-      "Вы действительно хотите выйти?",
+      'Выход из аккаунта',
+      'Вы действительно хотите выйти?',
       [
         {
-          text: "Отмена",
-          style: "cancel",
+          text: 'Отмена',
+          style: 'cancel',
         },
         {
-          text: "Выйти",
-          style: "destructive",
+          text: 'Выйти',
+          style: 'destructive',
           onPress: async () => {
             try {
-              await SecureStore.deleteItemAsync("userToken");
+              await SecureStore.deleteItemAsync('userToken');
               // fetchUser();
               setRemoveContent(true);
-              Alert.alert("Выход", "Вы успешно вышли из аккаунта");
+              Alert.alert('Выход', 'Вы успешно вышли из аккаунта');
             } catch (error) {
-              console.error("Ошибка при выходе из аккаунта:", error);
-              Alert.alert("Ошибка", "Не удалось выйти из аккаунта");
+              console.error('Ошибка при выходе из аккаунта:', error);
+              Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
             }
           },
         },
       ],
-      { cancelable: true }
+      { cancelable: true },
     );
   };
 
@@ -89,21 +87,18 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
     fetchCurrentUser();
     refresh();
 
-    console.log("first");
+    console.log('first');
   }, [isLoading]);
 
   const timeToUnban = async () => {
     setIsUserBlocked(false);
-    await axios.patch(
-      `https://dcc2e55f63f7f47b.mokky.dev/users/${currentUser?.id}`,
-      {
-        isBlocked: false,
-        banStart: null,
-        banUntil: null,
-        blockReason: null,
-        blockedBy: null,
-      }
-    );
+    await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${currentUser?.id}`, {
+      isBlocked: false,
+      banStart: null,
+      banUntil: null,
+      blockReason: null,
+      blockedBy: null,
+    });
   };
 
   useLayoutEffect(() => {
@@ -124,7 +119,7 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
   if (isUserBlocked) {
     return (
       <BlockedScreen
-        adminName={currentUser?.blockedBy ?? "Н/Д"}
+        adminName={currentUser?.blockedBy ?? 'Н/Д'}
         reason={currentUser?.blockReason ?? undefined}
         banUntil={currentUser?.banUntil ?? undefined}
       />
@@ -132,21 +127,21 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
   }
 
   const isAdmin =
-    currentUser?.position === "admin" ||
-    currentUser?.position === "superadmin" ||
-    currentUser?.position === "owner";
+    currentUser?.position === 'admin' ||
+    currentUser?.position === 'superadmin' ||
+    currentUser?.position === 'owner';
 
   if (
     !isAdmin && // не админ
     productSaleInfo.isStoreOpen === false && // магазин закрыт
-    currentUser?.position === "user" // и это обычный пользователь
+    currentUser?.position === 'user' // и это обычный пользователь
   ) {
     return (
       !removeContent && (
         <View className="flex-1 justify-center items-center bg-white px-6">
           <Image
             source={{
-              uri: "https://www.pngplay.com/wp-content/uploads/9/Maintenance-PNG-Pic-Background.png",
+              uri: 'https://www.pngplay.com/wp-content/uploads/9/Maintenance-PNG-Pic-Background.png',
             }}
             style={{ width: 200, height: 200 }}
             resizeMode="contain"
@@ -158,9 +153,8 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
             Магазин временно недоступен. Мы скоро вернёмся!
           </Text>
           <TouchableOpacity
-            onPress={() => Linking.openURL("https://t.me/gevork_sarkisyan")}
-            className="bg-blue-600 px-4 py-2 rounded-xl mt-4"
-          >
+            onPress={() => Linking.openURL('https://t.me/gevork_sarkisyan')}
+            className="bg-blue-600 px-4 py-2 rounded-xl mt-4">
             <Text className="text-white text-base font-semibold text-center">
               Узнать подробности
             </Text>
@@ -168,8 +162,7 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
 
           <TouchableOpacity
             onPress={handleLogout}
-            className="bg-blue-600 px-4 py-2 rounded-xl mt-4"
-          >
+            className="bg-blue-600 px-4 py-2 rounded-xl mt-4">
             <Text className="text-white text-base font-semibold text-center">
               Выйти из аккаунта
             </Text>
