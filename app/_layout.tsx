@@ -72,6 +72,8 @@ export default function RootLayout() {
             make_review: 0, // "Оставь отзыв"
             buyed_opened_cases: 0, // "Кейсовый спринт"
             buy_3_product: 0, // "Сделай 3 покупки"
+
+            claimed: false,
           }),
         );
       } else {
@@ -115,6 +117,8 @@ export default function RootLayout() {
             collect_15_products: 0,
             make_5_review: 0,
             win_3_rare_in_cases: 0,
+
+            claimed: false,
           }),
         );
       } else {

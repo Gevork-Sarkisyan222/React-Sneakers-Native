@@ -94,6 +94,7 @@ export interface DailyTasks {
   buy_3_product: string;
   start_time: string;
   end_time: string;
+  claimed: boolean;
 }
 
 export interface WeeklyTasks {
@@ -108,4 +109,5 @@ export interface WeeklyTasks {
   start_time: string;
   end_time: string;
   last_enter_date: string;
+  claimed: boolean;
 }
