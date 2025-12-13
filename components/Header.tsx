@@ -1,12 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, Text, View, Animated } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 // ui
 import { Drawer, DrawerBackdrop } from '@/components/ui/drawer';
 import CartDrawerContent from './cart/CartDrawerContent';
-import Toast from 'react-native-toast-message';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Product } from '@/constants/Types';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
@@ -15,6 +14,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useGetUser } from '@/hooks/useGetUser';
+import { DailyTasks, WeeklyTasks } from '@/constants/Types'; // если есть
 
 export default function Header() {
   const { user } = useGetUser({});
@@ -25,6 +25,80 @@ export default function Header() {
   const [showDrawer, setShowDrawer] = React.useState(false);
   const router = useRouter();
   const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
+  const [tasks, setTasks] = useState([]);
+
+  const [dailyTask, setDailyTask] = useState<DailyTasks | null>(null);
+  const [weeklyTask, setWeeklyTask] = useState<WeeklyTasks | null>(null);
+
+  const [allTasksCompleted, setAllTasksCompleted] = useState(false);
+  const [hasIncompleteTasks, setHasIncompleteTasks] = useState(false);
+
+  const isDailyCompleted = (d: any) => {
+    const enterAppCompleted = Number(d?.enter_app ?? 0) >= 1;
+    const collect3Done = Number(d?.collect_3_products ?? 0) >= 3;
+    const reviewsDone = Number(d?.make_review ?? 0) >= 1;
+    const casesDone = Number(d?.buyed_opened_cases ?? 0) >= 1;
+    const buysDone = Number(d?.buy_3_product ?? 0) >= 3;
+
+    return enterAppCompleted && collect3Done && reviewsDone && casesDone && buysDone;
+  };
+
+  const isWeeklyCompleted = (w: any) => {
+    const weeklyEnterDone = Number(w?.enter_app_6_days ?? 0) >= 6;
+    const collect15Done = Number(w?.collect_15_products ?? 0) >= 15;
+    const reviews5Done = Number(w?.make_5_review ?? 0) >= 5;
+    const cases20Done = Number(w?.buyed_opened_20_cases ?? 0) >= 20;
+    const buys6Done = Number(w?.buy_6_product ?? 0) >= 6;
+    const rareWinsDone = Number(w?.win_3_rare_in_cases ?? 0) >= 3;
+
+    return (
+      weeklyEnterDone && collect15Done && reviews5Done && cases20Done && buys6Done && rareWinsDone
+    );
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!user?.id) {
+        setDailyTask(null);
+        setWeeklyTask(null);
+        setAllTasksCompleted(false);
+        setHasIncompleteTasks(false);
+        return;
+      }
+
+      const controller = new AbortController();
+
+      const fetchTasks = async () => {
+        try {
+          const [dailyRes, weeklyRes] = await Promise.all([
+            axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/1', { signal: controller.signal }),
+            axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/2', { signal: controller.signal }),
+          ]);
+
+          const daily = dailyRes.data;
+          const weekly = weeklyRes.data;
+
+          setDailyTask(daily);
+          setWeeklyTask(weekly);
+
+          const allDone = isDailyCompleted(daily) && isWeeklyCompleted(weekly);
+          setAllTasksCompleted(allDone);
+          setHasIncompleteTasks(!allDone);
+        } catch (e: any) {
+          // если ушли со страницы — abort, это не ошибка
+          if (e?.name === 'CanceledError') return;
+
+          console.error('tasks fetch error:', e);
+          setAllTasksCompleted(false);
+          setHasIncompleteTasks(false);
+        }
+      };
+
+      fetchTasks();
+
+      return () => controller.abort();
+    }, [user?.id]),
+  );
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -61,8 +135,6 @@ export default function Header() {
       prevCount.current = cartProducts.length;
     }
   }, [cartProducts.length]);
-
-  const hasIncompleteTasks = true;
 
   return (
     <>
@@ -102,6 +174,14 @@ export default function Header() {
                 )}
               </View>
             </Pressable>
+          )}
+
+          {allTasksCompleted && (
+            <View className="absolute top-[-9px] left-[18px]">
+              <View className="h-5 w-5 rounded-full bg-emerald-500 items-center justify-center shadow">
+                <MaterialCommunityIcons name="check" size={14} color="#fff" />
+              </View>
+            </View>
           )}
 
           <Pressable onPress={() => router.push('/chat')}>

@@ -3,18 +3,9 @@ import { useGetUser } from '@/hooks/useGetUser';
 import { setRemoveAllMarks } from '@/redux/slices/products.slice';
 import { RootState } from '@/redux/store';
 import axios from 'axios';
-import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-  Animated,
-  Modal,
-  Image,
-} from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Animated, Modal, Image } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
@@ -32,7 +23,6 @@ type TaskCardProps = {
 };
 
 const getProgressPercent = (text: string): number => {
-  // Ищем что-то вида "1 / 3", "2/5", "10 / 10"
   const match = text.match(/(\d+)\s*\/\s*(\d+)/);
   if (!match) return 0;
 
@@ -41,7 +31,6 @@ const getProgressPercent = (text: string): number => {
   if (!total || Number.isNaN(current) || Number.isNaN(total)) return 0;
 
   const value = (current / total) * 100;
-  // Ограничим от 0 до 100 на всякий случай
   return Math.max(0, Math.min(100, value));
 };
 
@@ -57,7 +46,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const progress = getProgressPercent(progressText);
   const claimed = Boolean(claimed_reward);
 
-  // если приз забран — делаем всё “заглушенным”
   const containerBg = claimed
     ? 'bg-slate-100 border-slate-200'
     : accent
@@ -85,14 +73,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   return (
     <View className={`mb-3 rounded-2xl border p-4 flex-row items-center gap-3 ${containerBg}`}>
-      {/* Иконка слева */}
       <View className={`h-11 w-11 rounded-2xl items-center justify-center ${iconBg}`}>
         <Text className={`text-xl ${claimed ? 'opacity-60' : ''}`}>
           {type === 'daily' ? '🌅' : '📅'}
         </Text>
       </View>
 
-      {/* Текст */}
       <View className="flex-1">
         <View className="flex-row items-center justify-between mb-1">
           <Text className={`text-base font-semibold ${titleColor}`} numberOfLines={1}>
@@ -160,7 +146,7 @@ function TasksPage({}: Props) {
   const [dailyTasksRes, setDailyTasksRes] = React.useState<DailyTasks[]>([]);
   const [weeklyTasksRes, setWeeklyTasksRes] = React.useState<WeeklyTasks[]>([]);
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const { data } = await axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks');
 
@@ -171,11 +157,15 @@ function TasksPage({}: Props) {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    fetchTasks();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      fetchTasks();
+
+      return () => {};
+    }, [fetchTasks]),
+  );
 
   const dailyTasks = dailyTasksRes[0];
   const weeklyTasks = weeklyTasksRes[0];
@@ -404,6 +394,8 @@ function TasksPage({}: Props) {
         claimed: true,
       });
 
+      fetchTasks();
+
       Toast.show({
         type: 'success',
         text1: 'Награда получена 🎉',
@@ -481,6 +473,8 @@ function TasksPage({}: Props) {
       await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/2', {
         claimed: true,
       });
+
+      fetchTasks();
 
       Toast.show({
         type: 'success',
