@@ -83,9 +83,12 @@ export default function Register({}: Props) {
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-white px-6 py-8">
       <Text className="text-3xl font-bold text-center mt-5">Регистрация в</Text>
-      <Text className="text-blue-500 text-3xl font-bold text-center mb-8">Native Sneakers</Text>
+      <Text className="text-blue-500 text-3xl font-bold text-center mb-2">Native Sneakers</Text>
+      <Text className="text-center text-[#333] text-[13px] mb-8">
+        Это демо/учебная симуляция. Не вводите реальные данные. Данные сохраняются в тестовой базе.
+      </Text>
 
-      <Text className="text-sm font-medium mb-2">Имя</Text>
+      <Text className="text-sm font-medium mb-2">Имя (не реальный)</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-4"
         placeholder="Ваше имя"
@@ -93,7 +96,7 @@ export default function Register({}: Props) {
         onChangeText={setName}
       />
 
-      <Text className="text-sm font-medium mb-2">Фамилия</Text>
+      <Text className="text-sm font-medium mb-2">Фамилия (не реальный)</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-4"
         placeholder="Ваша фамилия"
@@ -101,17 +104,17 @@ export default function Register({}: Props) {
         onChangeText={setLastName}
       />
 
-      <Text className="text-sm font-medium mb-2">Email</Text>
+      <Text className="text-sm font-medium mb-2">Email (Demo для теста и практики)</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-4"
-        placeholder="Ваша почта"
+        placeholder="demo@example.com (Demo)"
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
       />
 
-      <Text className="text-sm font-medium mb-2">Пароль</Text>
+      <Text className="text-sm font-medium mb-2">Пароль (Demo, не используйте реальный)</Text>
       <View className="relative mb-6">
         <TextInput
           className="border border-gray-300 rounded-lg p-3"
@@ -135,7 +138,7 @@ export default function Register({}: Props) {
         onChangeText={setAvatarUri}
       />
 
-      <Text className="text-sm font-medium mb-2">Телефон</Text>
+      <Text className="text-sm font-medium mb-2">Телефон (Demo для теста и практики)</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-4"
         placeholder="+7XXXXXXXXXX"
@@ -145,10 +148,10 @@ export default function Register({}: Props) {
         maxLength={12}
       />
 
-      <Text className="text-sm font-medium mb-2">Адрес</Text>
+      <Text className="text-sm font-medium mb-2">Адрес (Demo для теста и практики)</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-4"
-        placeholder="Ваш адрес проживания"
+        placeholder="Адрес проживания (не реальный)"
         value={address}
         onChangeText={setAddress}
       />

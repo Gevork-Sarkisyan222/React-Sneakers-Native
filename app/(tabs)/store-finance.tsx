@@ -1,12 +1,7 @@
-import Feather from "@expo/vector-icons/Feather";
-import axios from "axios";
-import { router } from "expo-router";
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import Feather from '@expo/vector-icons/Feather';
+import axios from 'axios';
+import { router } from 'expo-router';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -17,14 +12,14 @@ import {
   Modal,
   TextInput,
   Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import * as Updates from "expo-updates";
-import { useGetUser } from "@/hooks/useGetUser";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { LinearGradient } from "expo-linear-gradient";
-import StatsChart from "@/components/StatsChart";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Updates from 'expo-updates';
+import { useGetUser } from '@/hooks/useGetUser';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { LinearGradient } from 'expo-linear-gradient';
+import StatsChart from '@/components/StatsChart';
 
 type Props = {};
 
@@ -40,24 +35,20 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
   // modal state
   const [withdrawAmountModal, setWithdrawAmountModal] = useState(false);
   // in modal select amount to withdraw
-  const [withdrawAmount, setWithdrawAmount] = useState<string>("");
+  const [withdrawAmount, setWithdrawAmount] = useState<string>('');
 
   const fetchBudgetData = useCallback(async () => {
     try {
       setIsRefreshing(true);
 
-      const res = await axios.get(
-        "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-      );
+      const res = await axios.get('https://dcc2e55f63f7f47b.mokky.dev/app-settings/1');
 
-      const monthsIncomeArray = Array.isArray(res.data.months_income)
-        ? res.data.months_income
-        : [];
+      const monthsIncomeArray = Array.isArray(res.data.months_income) ? res.data.months_income : [];
 
       setTotalBudget(res.data.store_budget);
       setMonthsIncomeArray(monthsIncomeArray);
     } catch (error) {
-      console.error("Error fetching budget data:", error);
+      console.error('Error fetching budget data:', error);
     } finally {
       setIsRefreshing(false);
     }
@@ -72,20 +63,16 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
       setIsRefreshing(true);
 
       // Получаем одиночный объект с настройками
-      const res = await axios.get(
-        "https://dcc2e55f63f7f47b.mokky.dev/app-settings/1"
-      );
+      const res = await axios.get('https://dcc2e55f63f7f47b.mokky.dev/app-settings/1');
       const settings = res.data;
 
       // Берём массив месяцев
-      const monthsIncomeArray = Array.isArray(settings.months_income)
-        ? settings.months_income
-        : [];
+      const monthsIncomeArray = Array.isArray(settings.months_income) ? settings.months_income : [];
 
       // Ищем запись за текущий год и месяц
       const record = monthsIncomeArray.find(
         (item: { year: number; month: number; income: number }) =>
-          item.year === thisYear && item.month === thisMonth
+          item.year === thisYear && item.month === thisMonth,
       );
 
       const rawIncome = record?.income ?? 0;
@@ -94,7 +81,7 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
       const incomeRounded = Math.round(rawIncome);
       setCurrentMonthIncome(incomeRounded);
     } catch (error) {
-      console.error("Error fetching budget data:", error);
+      console.error('Error fetching budget data:', error);
     } finally {
       setIsRefreshing(false);
     }
@@ -115,27 +102,27 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
   // Заглушка обработки снятия
   const handleWithdraw = async (amount: number) => {
     if (amount > totalBudget) {
-      Alert.alert("Ошибка", "Недостаточно средств");
+      Alert.alert('Ошибка', 'Недостаточно средств');
       return;
     }
 
     if (!amount) {
-      Alert.alert("Ошибка", "Введите корректную сумму");
+      Alert.alert('Ошибка', 'Введите корректную сумму');
       return;
     }
 
     try {
-      await axios.patch("https://dcc2e55f63f7f47b.mokky.dev/app-settings/1", {
+      await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/app-settings/1', {
         store_budget: totalBudget - amount,
       });
 
-      Alert.alert("Успех", "Средства успешно сняты");
-      await axios.post("https://email-send-server.vercel.app/api/send-email", {
+      Alert.alert('Успех', 'Средства успешно сняты');
+      await axios.post('https://email-send-server.vercel.app/api/send-email', {
         amount,
       });
       fetchBudgetData();
     } catch (err) {
-      Alert.alert("Ошибка", "Не удалось снять средства");
+      Alert.alert('Ошибка', 'Не удалось снять средства');
       console.error(err);
     } finally {
       handleCloseWithdrawModal();
@@ -144,10 +131,10 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
 
   const handleCloseWithdrawModal = () => {
     setWithdrawAmountModal(false);
-    setWithdrawAmount("");
+    setWithdrawAmount('');
   };
 
-  if (user?.position !== "owner") return null;
+  if (user?.position !== 'owner') return null;
 
   return (
     <>
@@ -156,21 +143,19 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
           {/* Затенённый фон */}
           <Pressable
             className="flex-1 justify-center items-center"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-            onPress={handleCloseWithdrawModal}
-          >
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+            onPress={handleCloseWithdrawModal}>
             {/* Карточка модалки */}
             <Pressable onPress={() => {}}>
               <View className="w-11/12 max-w-sm bg-white rounded-2xl overflow-hidden shadow-xl">
                 {/* Хедер с градиентом */}
                 <LinearGradient
-                  colors={["#4C9EEB", "#367AD8"]}
+                  colors={['#4C9EEB', '#367AD8']}
                   start={[0, 0]}
                   end={[1, 0]}
-                  className="py-4 px-6"
-                >
+                  className="py-4 px-6">
                   <Text className="text-center text-lg font-bold text-white">
-                    Снять средства
+                    Снять средства (Demo)
                   </Text>
                 </LinearGradient>
 
@@ -197,11 +182,8 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
 
                     <TouchableOpacity
                       className="px-4 py-3 bg-indigo-50 rounded-lg shadow-inner"
-                      onPress={() => setWithdrawAmount(totalBudget.toString())}
-                    >
-                      <Text className="text-blue-600 font-semibold">
-                        Вся сумма
-                      </Text>
+                      onPress={() => setWithdrawAmount(totalBudget.toString())}>
+                      <Text className="text-blue-600 font-semibold">Вся сумма</Text>
                     </TouchableOpacity>
                   </View>
 
@@ -212,17 +194,15 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
                   <View className="flex-row justify-between gap-4">
                     <TouchableOpacity
                       className="flex-1 py-3 bg-gray-100 rounded-lg items-center"
-                      onPress={handleCloseWithdrawModal}
-                    >
+                      onPress={handleCloseWithdrawModal}>
                       <Text className="text-gray-700 font-medium">Отмена</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       className="flex-1 py-3 bg-blue-600 rounded-lg items-center shadow"
                       onPress={() => {
                         handleWithdraw(Number(withdrawAmount));
-                      }}
-                    >
-                      <Text className="text-white font-semibold">Снять</Text>
+                      }}>
+                      <Text className="text-white font-semibold">Снять (Demo)</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -237,26 +217,29 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
           <View className="flex-row items-start gap-4">
             {/* КНОПКА НАЗАД */}
             <Pressable
-              onPress={() => router.push("/admin-panel")}
-              className="bg-white w-10 h-10 items-center justify-center rounded-full shadow-md shadow-gray-300 active:opacity-60 mb-4"
-            >
+              onPress={() => router.push('/admin-panel')}
+              className="bg-white w-10 h-10 items-center justify-center rounded-full shadow-md shadow-gray-300 active:opacity-60 mb-4">
               <Feather name="arrow-left" size={20} color="#333" />
             </Pressable>
 
             {/* Заголовок */}
             <View className="mb-6">
-              <Text className="text-[22px] font-bold text-gray-900">
-                Финансы вашего магазина
-              </Text>
-              <Text className="text-gray-600 mt-1">Обзор бюджета и метрик</Text>
+              <Text className="text-[22px] font-bold text-gray-900">Финансы вашего магазина</Text>
+              <Text className="text-gray-600 mt-1">Обзор бюджета и метрик (demo)</Text>
             </View>
           </View>
 
           {/* Карточка общего бюджета */}
           <View className="bg-white rounded-2xl p-6 shadow mb-6">
-            <Text className="text-lg font-semibold text-gray-700">
-              Общий бюджет
-            </Text>
+            <View className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6">
+              <Text className="text-amber-900 font-semibold">Демо / учебный режим</Text>
+              <Text className="text-amber-800 text-sm mt-1">
+                Приложение работает в демонстрационном режиме. Данные используются только для
+                тестирования функционала и хранятся в тестовой базе.
+              </Text>
+            </View>
+
+            <Text className="text-lg font-semibold text-gray-700">Общий бюджет (DEMO)</Text>
             <Text className="text-4xl font-bold text-green-600 mt-2">
               {totalBudget.toLocaleString()} ₽
             </Text>
@@ -266,16 +249,13 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
               onPress={() => {
                 setWithdrawAmountModal(true);
               }}
-              className="mt-4 bg-green-100 px-4 py-3 rounded-xl active:opacity-70 flex-row items-center justify-center gap-[8px]"
-            >
+              className="mt-4 bg-green-100 px-4 py-3 rounded-xl active:opacity-70 flex-row items-center justify-center gap-[8px]">
               {/* <FontAwesome6
               name="money-bill-transfer"
               size={20}
               color="#16a34a"
             /> */}
-              <Text className="text-green-600 text-base font-semibold">
-                Снять сумму
-              </Text>
+              <Text className="text-green-600 text-base font-semibold">Снять сумму</Text>
               <AntDesign name="arrowright" size={24} color="#16a34a" />
             </TouchableOpacity>
           </View>
@@ -319,15 +299,12 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
               }}
               disabled={isRefreshing}
               className={`py-3 rounded-xl shadow flex-row justify-center items-center ${
-                isRefreshing ? "bg-gray-300" : "bg-blue-600"
-              }`}
-            >
+                isRefreshing ? 'bg-gray-300' : 'bg-blue-600'
+              }`}>
               {isRefreshing ? (
                 <ActivityIndicator size="small" color="white" />
               ) : (
-                <Text className="text-center text-white font-semibold">
-                  Обновить данные
-                </Text>
+                <Text className="text-center text-white font-semibold">Обновить данные</Text>
               )}
             </TouchableOpacity>
           </View>
