@@ -27,6 +27,14 @@ const CARD_WIDTH = width * 0.4;
 
 const ITEM_MARGIN = 20; // отступ справа
 
+interface TCarouselProps<CaseItem> {
+  // other properties...
+  panGestureHandlerProps?: {
+    activeOffsetX: [number, number];
+    failOffsetY: [number, number];
+  };
+}
+
 export default function CasePage() {
   const { user } = useGetUser({});
   const removeAllMarks = useSelector((state: RootState) => state.products.removeAllMarks);
@@ -356,6 +364,11 @@ export default function CasePage() {
     setIsLoadingToRedirect(false);
   };
 
+  const panGestureHandlerProps: any = {
+    activeOffsetX: [-10, 10],
+    failOffsetY: [-10, 10],
+  };
+
   return (
     <>
       {resultModal && (
@@ -487,10 +500,7 @@ export default function CasePage() {
                 scaleInterval: 0.08, // эффект масштаба
               }}
               enabled={false} // Отключает все жесты
-              panGestureHandlerProps={{
-                activeOffsetX: [-10, 10], // Блокирует горизонтальные свайпы
-                failOffsetY: [-10, 10], // Блокирует вертикальные свайпы
-              }}
+              panGestureHandlerProps={panGestureHandlerProps as any}
               renderItem={({ item }) => (
                 <View
                   style={{
