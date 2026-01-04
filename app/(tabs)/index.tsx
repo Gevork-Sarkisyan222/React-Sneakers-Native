@@ -20,10 +20,19 @@ import {
   Text,
   TouchableOpacity,
   View,
+  TextInput,
+  Alert,
+  ViewStyle,
+  DimensionValue,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from 'expo-router';
+
+import { ActivityIndicator } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 
 const INTRO_KEY = 'native_sneakers_intro_seen_v7';
 const ROLE_KEY = 'native_sneakers_role_v1';
@@ -105,31 +114,62 @@ function Chip({ text }: { text: string }) {
   );
 }
 
+type PrimaryButtonProps = {
+  title: string;
+  onPress: () => void | Promise<void>;
+  disabled?: boolean;
+  loading?: boolean;
+  width?: DimensionValue;
+  loadingText?: string;
+};
+
 function PrimaryButton({
   title,
   onPress,
   disabled,
+  loading = false,
   width = '60%',
-}: {
-  title: string;
-  onPress: () => void;
-  disabled?: boolean;
-  width?: number | string;
-}) {
+  loadingText = 'Создаём ваш аккаунт…',
+}: PrimaryButtonProps) {
+  const isDisabled = !!disabled || loading;
+
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={!!disabled}
+      disabled={isDisabled}
       activeOpacity={0.9}
       style={{
-        backgroundColor: PRIMARY,
+        backgroundColor: isDisabled ? '#D1D5DB' : PRIMARY,
         width,
         paddingVertical: 14,
         borderRadius: 999,
         alignItems: 'center',
-        opacity: disabled ? 0.5 : 1,
+        justifyContent: 'center',
+        opacity: isDisabled ? 0.95 : 1,
       }}>
-      <Text style={{ color: PRIMARY_TEXT, fontWeight: '900', fontSize: 16 }}>{title}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          width: '100%', // ✅ чтобы текст реально центрировался
+          paddingHorizontal: 16, // ✅ чтобы не прилипал к краям
+        }}>
+        {loading ? <ActivityIndicator size="small" color={PRIMARY_TEXT} /> : null}
+
+        <Text
+          style={{
+            color: PRIMARY_TEXT,
+            fontWeight: '900',
+            fontSize: 16,
+            textAlign: 'center',
+            flexShrink: 1, // ✅ чтобы переносилось красиво
+          }}
+          numberOfLines={2}>
+          {loading ? loadingText : title}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -220,8 +260,8 @@ function GuideBullet({ text }: { text: string }) {
     <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
       <View
         style={{
-          width: 8,
-          height: 8,
+          width: 8.5,
+          height: 8.5,
           borderRadius: 999,
           marginTop: 7,
           backgroundColor: PRIMARY,
@@ -233,7 +273,272 @@ function GuideBullet({ text }: { text: string }) {
 }
 
 function Intro({ onDone }: { onDone: (role: Role) => void }) {
-  type Stage = 'slides' | 'role' | 'quiz' | 'guide';
+  const router = useRouter();
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  const [role, setRole] = useState<Role | null>(null);
+
+  const isAdminLike = role === 'admin' || role === 'superadmin';
+  const canCreate = isAdminLike ? firstName.trim().length > 0 && lastName.trim().length > 0 : true;
+
+  // простая транслитерация RU → латиница (чтобы email был норм)
+  const ruMap: Record<string, string> = {
+    а: 'a',
+    б: 'b',
+    в: 'v',
+    г: 'g',
+    д: 'd',
+    е: 'e',
+    ё: 'e',
+    ж: 'zh',
+    з: 'z',
+    и: 'i',
+    й: 'i',
+    к: 'k',
+    л: 'l',
+    м: 'm',
+    н: 'n',
+    о: 'o',
+    п: 'p',
+    р: 'r',
+    с: 's',
+    т: 't',
+    у: 'u',
+    ф: 'f',
+    х: 'h',
+    ц: 'ts',
+    ч: 'ch',
+    ш: 'sh',
+    щ: 'shch',
+    ъ: '',
+    ы: 'y',
+    ь: '',
+    э: 'e',
+    ю: 'yu',
+    я: 'ya',
+  };
+
+  const toLatin = (s: string) =>
+    s
+      .trim()
+      .toLowerCase()
+      .split('')
+      .map((ch) => ruMap[ch] ?? ch)
+      .join('')
+      .replace(/\s+/g, '')
+      .replace(/[^a-z0-9._-]/g, '');
+
+  const emailPreview = isAdminLike
+    ? `${toLatin(firstName) || 'name'}.${toLatin(lastName) || 'lastname'}###@example.com`
+    : '';
+
+  type CreatePhase = 'idle' | 'create' | 'auth';
+  const [createPhase, setCreatePhase] = useState<CreatePhase>('idle');
+
+  type CreatedCreds = {
+    name: string;
+    lastName: string;
+    email: string;
+    password: string;
+    avatarUri: string;
+    position: 'admin' | 'superadmin';
+    balance: number;
+
+    role: 'admin' | 'superadmin';
+    fullName: string;
+  };
+
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createdCreds, setCreatedCreds] = useState<CreatedCreds | null>(null);
+
+  const FIRST_NAMES = [
+    'Alex',
+    'David',
+    'Mark',
+    'Artem',
+    'Nikita',
+    'Timur',
+    'Giorgi',
+    'Levan',
+    'Anna',
+    'Nino',
+    'Sofia',
+    'Maria',
+  ];
+  const LAST_NAMES = [
+    'Ivanov',
+    'Petrov',
+    'Smirnov',
+    'Kuznetsov',
+    'Volkov',
+    'Sargsyan',
+    'Melikyan',
+    'Karapetyan',
+    'Beridze',
+    'Kiknadze',
+    'Kalandadze',
+    'Hakobyan',
+  ];
+  const STREETS = [
+    'Ленина',
+    'Пушкина',
+    'Гагарина',
+    'Тбилисская',
+    'Садовая',
+    'Мира',
+    'Шота Руставели',
+  ];
+  const CITIES = [
+    'Москва, Россия',
+    'Тбилиси, Грузия',
+    'Ереван, Армения',
+    'Батуми, Грузия',
+    'Санкт-Петербург, Россия',
+  ];
+
+  const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+  const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  const makeEmail = (fn: string, ln: string, digits?: string) => {
+    const a = toLatin(fn) || 'user';
+    const b = toLatin(ln) || 'demo';
+    const d = digits ?? String(Math.floor(100 + Math.random() * 900)); // 3 цифры
+    return `${a}.${b}${d}@example.com`;
+  };
+
+  const makePassword = () => {
+    const a = randInt(1000, 9999);
+    const b = randInt(10, 99);
+    return `NS${a}${b}A`; // простой, но нормальный пароль для демо
+  };
+
+  const makePhone = () => {
+    const a = randInt(10, 99);
+    const b = randInt(100, 999);
+    const c = randInt(10, 99);
+    const d = randInt(10, 99);
+    return `+7 9${a} ${b} ${c} ${d}`;
+  };
+
+  const makeAddress = () => {
+    const street = pick(STREETS);
+    const house = randInt(1, 120);
+    const city = pick(CITIES);
+    return `ул. ${street}, д. ${house}, ${city}`;
+  };
+
+  const adminAvatar = 'https://i.pinimg.com/736x/34/60/3c/34603ce8a80b1ce9a768cad7ebf63c56.jpg';
+
+  const superAdminAvatar = 'https://cdn-icons-png.flaticon.com/512/10841/10841598.png';
+
+  const isDupEmail = (err: any) => {
+    const status = err?.response?.status;
+    const msg = String(err?.response?.data?.message ?? err?.message ?? '').toLowerCase();
+    return status === 409 || msg.includes('email') || msg.includes('exists') || msg.includes('уже');
+  };
+
+  const createRoleAccount = async (role: 'admin' | 'superadmin') => {
+    if (creating) return;
+
+    const first = firstName.trim();
+    const last = lastName.trim();
+
+    if (!first || !last) {
+      setCreateError('Введи имя и фамилию.');
+      return;
+    }
+
+    setCreateError(null);
+    setCreating(true);
+    setCreatePhase('create');
+
+    const avatarUri = role === 'admin' ? adminAvatar : superAdminAvatar;
+    const balance = role === 'superadmin' ? 200000 : 100000;
+
+    // пароль один раз (чтобы в кредах совпадал)
+    const createdPassword = makePassword();
+
+    try {
+      // 1) создаём юзера (с ретраями если email занят)
+      let createdEmail = '';
+      let createdUserCreated = false;
+
+      for (let attempt = 0; attempt < 6; attempt++) {
+        createdEmail = makeEmail(first, last); // first.last123@example.com
+
+        try {
+          await axios.post('https://dcc2e55f63f7f47b.mokky.dev/users', {
+            name: first,
+            lastName: last,
+            avatarUri,
+            email: createdEmail,
+            password: createdPassword,
+            phone: makePhone(),
+            address: makeAddress(),
+            balance,
+            position: role,
+            isBlocked: false,
+            banStart: null,
+            banUntil: null,
+            blockReason: null,
+            blockedBy: null,
+          });
+
+          createdUserCreated = true;
+          break;
+        } catch (err: any) {
+          // если email занят — пробуем другой
+          if (isDupEmail(err) && attempt < 5) continue;
+          throw err;
+        }
+      }
+
+      if (!createdUserCreated) throw new Error('create_failed');
+
+      // 2) логин + токен
+      setCreatePhase('auth');
+
+      const authRes = await axios.post('https://dcc2e55f63f7f47b.mokky.dev/auth', {
+        email: createdEmail,
+        password: createdPassword,
+      });
+
+      const { token } = authRes.data;
+
+      await SecureStore.setItemAsync('userToken', token);
+
+      // 3) показываем экран “Аккаунт готов”
+      setCreatedCreds({
+        name: first,
+        lastName: last,
+        email: createdEmail,
+        password: createdPassword,
+        avatarUri,
+        position: role,
+        balance,
+
+        // если у тебя это поле используется где-то в UI
+        role,
+        fullName: `${first} ${last}`,
+      });
+
+      // ВАЖНО: не уходим на '/' — иначе ты НЕ увидишь credentials.
+      setStage('credentials');
+    } catch (e) {
+      console.error(e);
+
+      // не пиши “слишком долго” — просто норм ошибка
+      setCreateError('Не получилось создать демо-аккаунт. Проверь интернет и попробуй ещё раз.');
+    } finally {
+      setCreating(false);
+      setCreatePhase('idle');
+    }
+  };
+
+  type Stage = 'slides' | 'role' | 'quiz' | 'guide' | 'setup' | 'credentials';
 
   const slides: Slide[] = useMemo(
     () => [
@@ -247,7 +552,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
         key: '2',
         icon: { uri: 'https://cdn-icons-png.flaticon.com/512/18091/18091014.png' },
         title: 'Роли и практика',
-        desc: 'Побудь пользователем, админом, главным админом или владельцем — чтобы понять права доступа и управление внутри приложения. Пройди практику сдесь',
+        desc: 'Побудь пользователем, админом, главным админом или владельцем — чтобы понять права доступа и управление внутри приложения. Пройди практику здесь.',
       },
       {
         key: '3',
@@ -374,14 +679,15 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
       },
       {
         id: 's5',
-        question: 'Что супер-админ делает, когда появляются спорные действия админов?',
+        question:
+          'Если админ случайно выдал пользователю статус “Admin”, что должен сделать супер-админ?',
         options: [
-          'Смотрит логи/историю действий и принимает решение',
-          'Сразу удаляет всех админов',
-          'Игнорирует, потому что это “неважно”',
+          'Вернуть правильную роль/статус и сохранить изменения',
+          'Оставить как есть, чтобы “не трогать” систему',
+          'Удалить аккаунт пользователя',
         ],
         correctIndex: 0,
-        tip: 'Логи/история → анализ → решение.',
+        tip: 'Супер-админ отвечает за корректные роли и доступы.',
       },
     ],
     [],
@@ -392,8 +698,6 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
 
   const listRef = useRef<FlatList<Slide> | null>(null);
   const isLastSlide = slideIndex === slides.length - 1;
-
-  const [role, setRole] = useState<Role | null>(null);
 
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
@@ -419,19 +723,35 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
     return () => sub.remove();
   }, []);
 
+  // const totalSteps = useMemo(() => {
+  //   if (stage === 'slides') return 5; // 4 слайда + выбор роли
+  //   if (!role) return 5;
+  //   if (role === 'user') return 6; // + guide
+  //   return 7; // + quiz + guide
+  // }, [stage, role]);
+
   const totalSteps = useMemo(() => {
-    if (stage === 'slides') return 5; // 4 слайда + выбор роли
+    // 4 слайда + выбор роли = 5
     if (!role) return 5;
-    if (role === 'user') return 6; // + guide
-    return 7; // + quiz + guide
-  }, [stage, role]);
+
+    // user: guide и дальше в логин
+    if (role === 'user') return 6;
+
+    // admin/superadmin: quiz + guide + setup + credentials
+    return 9;
+  }, [role]);
 
   const currentStep = useMemo(() => {
-    if (stage === 'slides') return slideIndex + 1;
+    if (stage === 'slides') return slideIndex + 1; // 1..4
     if (stage === 'role') return 5;
-    if (stage === 'quiz') return role === 'user' ? 5 : 6;
-    return totalSteps;
-  }, [stage, slideIndex, role, totalSteps]);
+    if (stage === 'quiz') return 6;
+
+    if (stage === 'guide') return role === 'user' ? 6 : 7;
+    if (stage === 'setup') return 8;
+    if (stage === 'credentials') return 9;
+
+    return 1;
+  }, [stage, slideIndex, role]);
 
   const goNextFromSlides = useCallback(() => {
     if (!isLastSlide) {
@@ -515,6 +835,19 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
       'Когда освоишься — можешь перейти в приложение и просто пользоваться там много чего.',
     ];
   }, [role]);
+
+  const CARD: ViewStyle = {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(15, 23, 42, 0.06)',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={['top', 'bottom']}>
@@ -630,13 +963,13 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
             />
             <RoleCard
               title="Админ"
-              subtitle="Практика управления контентом и модерации в тестовом режиме. Доступ к админ-функциям."
+              subtitle="Практика управления контентом и модерации. Доступ к админ-функциям."
               selected={role === 'admin'}
               onPress={() => setRole('admin')}
             />
             <RoleCard
               title="Супер Админ"
-              subtitle="Роли/права, контроль процессов и более широкий доступ. Тоже только тестовый режим."
+              subtitle="Роли/права, контроль процессов и более широкий доступ."
               selected={role === 'superadmin'}
               onPress={() => setRole('superadmin')}
             />
@@ -749,48 +1082,52 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
       {/* STAGE: GUIDE */}
       {stage === 'guide' && role && (
         <View style={{ flex: 1, paddingHorizontal: 22, paddingTop: 18 }}>
+          {/* Header */}
           <View style={{ alignItems: 'center', marginTop: 6 }}>
             <Text
               style={{ color: TEXT_MAIN, fontSize: 22, fontWeight: '900', textAlign: 'center' }}>
               {guideTitle}
             </Text>
 
-            {quizScore !== null && role !== 'user' && (
-              <Text style={{ color: TEXT_MUTED, marginTop: 8 }}>
+            {role !== 'user' && quizScore !== null ? (
+              <Text style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center' }}>
                 Результат теста: {quizScore}/{quiz.length} (это просто обучение)
               </Text>
+            ) : (
+              <Text
+                style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
+                Вот короткий план “как в игре”: что попробовать прямо сейчас, чтобы быстро
+                освоиться.
+              </Text>
             )}
-
-            <Text style={{ color: TEXT_MUTED, marginTop: 10, textAlign: 'center', lineHeight: 18 }}>
-              Вот короткий план “как в игре”: что попробовать прямо сейчас, чтобы быстро освоиться.
-            </Text>
           </View>
 
-          <View
-            style={{
-              marginTop: 16,
-              backgroundColor: '#FFFFFF',
-              borderRadius: 18,
-              padding: 16,
-              borderWidth: 1,
-              borderColor: '#EFECE6',
-            }}>
-            {guideBullets.map((b, i) => (
-              <GuideBullet key={i} text={b} />
+          {/* ✅ ВОТ ТУТ И ДОЛЖНА БЫТЬ “ОБУЧАЛКА” */}
+          <View style={{ ...CARD, marginTop: 12 }}>
+            {guideBullets.map((t, idx) => (
+              <GuideBullet key={`${idx}-${t}`} text={t} />
             ))}
 
-            <View style={{ marginTop: 16 }}>
+            <View style={{ marginTop: 14 }}>
               <Chip text="ДЕМО • ПЛАТЕЖИ НЕ НАСТОЯЩИЕ" />
               <Text
-                style={{ color: TEXT_MUTED, marginTop: 10, textAlign: 'center', lineHeight: 18 }}>
+                style={{ color: TEXT_MUTED, textAlign: 'center', lineHeight: 18, marginTop: 10 }}>
                 Всё, что ты вводишь и делаешь — только в тестовой базе. Не используй реальные
                 данные.
               </Text>
             </View>
           </View>
 
+          {role === 'user' && (
+            <Text style={{ color: TEXT_MUTED, textAlign: 'center', marginTop: 12, lineHeight: 18 }}>
+              Для роли “Пользователь” аккаунт создаётся вручную. Нажми ниже и зарегистрируйся на
+              экране входа.
+            </Text>
+          )}
+
           <View style={{ flex: 1 }} />
 
+          {/* Bottom actions */}
           <View style={{ paddingBottom: 18 }}>
             <View
               style={{
@@ -806,15 +1143,258 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 }}
               />
 
-              <PrimaryButton width="60%" title="Перейти в приложение" onPress={finishAll} />
+              {role === 'user' ? (
+                <PrimaryButton
+                  width="60%"
+                  title="Перейти к входу"
+                  onPress={() => {
+                    onDone(role);
+                    router.replace('/login');
+                  }}
+                />
+              ) : (
+                <PrimaryButton
+                  title={role === 'admin' ? 'Получить админку' : 'Получить супер-админку'}
+                  onPress={() => setStage('setup')} // ✅ теперь это отдельный шаг
+                />
+              )}
 
+              <View style={{ width: 56 }} />
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* STAGE: SETUP (ввод имени/фамилии перед созданием) */}
+      {stage === 'setup' && role && role !== 'user' && (
+        <View style={{ flex: 1, paddingHorizontal: 22, paddingTop: 18 }}>
+          <View style={{ alignItems: 'center', marginTop: 6 }}>
+            <Text
+              style={{ color: TEXT_MAIN, fontSize: 22, fontWeight: '900', textAlign: 'center' }}>
+              {role === 'admin' ? 'Получение админки' : 'Получение супер-админки'}
+            </Text>
+            <Text style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
+              Введи имя и фамилию — мы соберём email, создадим тестовый аккаунт и сразу авторизуем
+              тебя.
+            </Text>
+          </View>
+
+          <View style={{ ...CARD, marginTop: 12 }}>
+            <Text style={{ color: TEXT_MAIN, fontSize: 16, fontWeight: '800' }}>
+              Введите ваши данные
+            </Text>
+
+            <Text style={{ color: TEXT_MAIN, marginTop: 12, marginBottom: 6, fontWeight: '700' }}>
+              Имя
+            </Text>
+            <TextInput
+              value={firstName}
+              onChangeText={setFirstName}
+              placeholder="Введите ваше имя"
+              autoCapitalize="words"
+              style={{
+                height: 46,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                paddingHorizontal: 14,
+                backgroundColor: '#FFFFFF',
+                fontSize: 15,
+                color: TEXT_MAIN,
+              }}
+            />
+
+            <Text style={{ color: TEXT_MAIN, marginTop: 12, marginBottom: 6, fontWeight: '700' }}>
+              Фамилия
+            </Text>
+            <TextInput
+              value={lastName}
+              onChangeText={setLastName}
+              placeholder="Введите вашу фамилию"
+              autoCapitalize="words"
+              style={{
+                height: 46,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                paddingHorizontal: 14,
+                backgroundColor: '#FFFFFF',
+                fontSize: 15,
+                color: TEXT_MAIN,
+              }}
+            />
+
+            <Text style={{ color: TEXT_MUTED, marginTop: 10 }}>
+              Email будет примерно:{' '}
+              <Text style={{ color: TEXT_MAIN, fontWeight: '800' }}>{emailPreview}</Text>
+            </Text>
+
+            <Text style={{ color: TEXT_MUTED, marginTop: 10, lineHeight: 18 }}>
+              📸 После создания сделай скриншот экрана с данными (на всякий случай).
+            </Text>
+          </View>
+
+          {createError ? (
+            <Text style={{ color: '#B91C1C', textAlign: 'center', marginTop: 10 }}>
+              {createError}
+            </Text>
+          ) : null}
+
+          {creating ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingBottom: 90,
+              }}>
+              <ActivityIndicator size="large" color={PRIMARY} />
+              <Text style={{ color: TEXT_MAIN, marginTop: 12, fontWeight: '900', fontSize: 16 }}>
+                {role === 'admin' ? 'Готовим админ-аккаунт…' : 'Готовим супер-админ аккаунт…'}
+              </Text>
+              <Text
+                style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
+                {createPhase === 'create'
+                  ? 'Шаг 1/2: создаём профиль в тестовой базе.'
+                  : 'Шаг 2/2: выполняем вход и сохраняем токен.'}
+                {'\n'}Обычно это занимает несколько минут или дольше пожалуйста подождите, можете
+                пока поставить телефон на паузу и спокойно сделать чай — мы всё доделаем.
+                Пожалуйста, не закрывайте приложение.
+              </Text>
+            </View>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
+
+          <View style={{ paddingBottom: 18 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              <GhostButton title="Назад" onPress={() => setStage('guide')} hidden={creating} />
+
+              <PrimaryButton
+                title={role === 'admin' ? 'Создать админ-аккаунт' : 'Создать супер-админ аккаунт'}
+                onPress={() => createRoleAccount(role)}
+                disabled={creating || !canCreate}
+                loading={createPhase !== 'idle'}
+                loadingText={'Создаём аккаунт…'}
+                width="60%"
+              />
+
+              <View style={{ width: 56 }} />
+            </View>
+          </View>
+        </View>
+      )}
+
+      {stage === 'credentials' && createdCreds && (
+        <View style={{ flex: 1, paddingHorizontal: 22, paddingTop: 18 }}>
+          <View style={{ alignItems: 'center', marginTop: 10 }}>
+            <Image
+              source={{ uri: createdCreds.avatarUri }}
+              style={{ width: 96, height: 96, borderRadius: 999 }}
+            />
+            <Text style={{ color: TEXT_MAIN, fontSize: 26, fontWeight: '900', marginTop: 12 }}>
+              Аккаунт готов ✅
+            </Text>
+
+            <Text style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
+              Это ваш тестовый аккаунт: {createdCreds.position.toUpperCase()}. 📸 Обязательно
+              сделайте скриншот этого экрана (Email/Пароль), чтобы не потерять данные.
+            </Text>
+          </View>
+
+          <View
+            style={{
+              marginTop: 18,
+              backgroundColor: '#FFFFFF',
+              borderRadius: 18,
+              padding: 16,
+              borderWidth: 1,
+              borderColor: '#EFECE6',
+            }}>
+            <Text style={{ color: TEXT_MUTED, fontWeight: '800' }}>Email</Text>
+            <View
+              style={{
+                marginTop: 8,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: '#EFECE6',
+                padding: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10,
+              }}>
+              <Text style={{ color: TEXT_MAIN, fontWeight: '900', flex: 1 }} numberOfLines={1}>
+                {createdCreds.email}
+              </Text>
               <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={finishAll}
-                style={{ paddingVertical: 10, paddingHorizontal: 10 }}>
-                <Text style={{ color: TEXT_MUTED, fontWeight: '800' }}>Пропустить</Text>
+                onPress={() => Clipboard.setStringAsync(createdCreds.email)}
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  borderRadius: 12,
+                  backgroundColor: '#F3F4F6',
+                }}>
+                <Text style={{ fontWeight: '900', color: TEXT_MAIN }}>Копировать</Text>
               </TouchableOpacity>
             </View>
+
+            <Text style={{ color: TEXT_MUTED, fontWeight: '800', marginTop: 14 }}>Пароль</Text>
+            <View
+              style={{
+                marginTop: 8,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: '#EFECE6',
+                padding: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10,
+              }}>
+              <Text style={{ color: TEXT_MAIN, fontWeight: '900', flex: 1 }} numberOfLines={1}>
+                {createdCreds.password}
+              </Text>
+              <TouchableOpacity
+                onPress={() => Clipboard.setStringAsync(createdCreds.password)}
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  borderRadius: 12,
+                  backgroundColor: '#F3F4F6',
+                }}>
+                <Text style={{ fontWeight: '900', color: TEXT_MAIN }}>Копировать</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* <View style={{ marginTop: 14 }}>
+              <Chip text="ДЕМО • ПЛАТЕЖИ НЕ НАСТОЯЩИЕ" />
+            </View> */}
+
+            <Text style={{ color: TEXT_MUTED, textAlign: 'center', lineHeight: 18, marginTop: 15 }}>
+              Баланс: {createdCreds.balance.toLocaleString()} ₽ • роль: {createdCreds.position}
+            </Text>
+          </View>
+
+          <View style={{ flex: 1 }} />
+
+          <View style={{ paddingBottom: 18, display: 'flex', alignItems: 'center' }}>
+            <PrimaryButton
+              title="Перейти на главную"
+              onPress={async () => {
+                if (!role) return;
+                await onDone(role as any);
+              }}
+            />
+
+            <Text style={{ color: TEXT_MUTED, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>
+              Ты уже авторизован ✅ Данные выше — просто “резерв”, если захочешь войти вручную.
+            </Text>
           </View>
         </View>
       )}
@@ -845,12 +1425,23 @@ export default function Index() {
     return a;
   }, []);
 
+  //  old
   const fetchProducts = useCallback(async () => {
     const res = await axios.get<Product[]>(
       'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description,-comments',
     );
     dispatch(setProducts(shuffleArray(res.data)));
   }, [dispatch, shuffleArray]);
+
+  // new
+  // const fetchProducts = useCallback(async () => {
+  //   const res = await axios.get<Product[]>(
+  //     'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description,-comments',
+  //     { timeout: 20000 }, // 20s
+  //   );
+
+  //   dispatch(setProducts(shuffleArray(res.data)));
+  // }, [dispatch, shuffleArray]);
 
   // проверяем первый запуск
   useEffect(() => {
@@ -891,26 +1482,25 @@ export default function Index() {
   }, [showIntro]);
 
   // грузим товары только когда интро закрыто
+  const loadIdRef = useRef(0);
+
   useEffect(() => {
     if (!introChecked) return;
     if (showIntro) return;
 
-    let alive = true;
-    (async () => {
-      try {
-        setIsLoading(true);
-        await fetchProducts();
-      } catch (e) {
+    const loadId = ++loadIdRef.current;
+
+    setIsLoading(true);
+
+    fetchProducts()
+      .catch((e) => {
         console.error('Ошибка при загрузке:', e);
         dispatch(setProducts([]));
-      } finally {
-        if (alive) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
+      })
+      .finally(() => {
+        // выключаем лоадер только для последнего актуального запроса
+        if (loadId === loadIdRef.current) setIsLoading(false);
+      });
   }, [introChecked, showIntro, fetchProducts, dispatch, updateProducts]);
 
   const onRefresh = useCallback(async () => {
@@ -924,15 +1514,31 @@ export default function Index() {
     }
   }, [fetchProducts]);
 
-  const finishIntro = useCallback(async (role: Role) => {
-    try {
-      await AsyncStorage.setItem(INTRO_KEY, '1');
-      await AsyncStorage.setItem(ROLE_KEY, role);
-    } catch {
-      // ok
-    }
-    setShowIntro(false);
-  }, []);
+  const finishIntro = useCallback(
+    async (role: Role) => {
+      try {
+        await AsyncStorage.setItem(INTRO_KEY, '1');
+        await AsyncStorage.setItem(ROLE_KEY, role);
+      } catch (err) {
+        console.error('Ошибка при сохранении интро', err);
+      }
+
+      // ✅ закрываем интро
+      setShowIntro(false);
+
+      // ✅ сразу запускаем загрузку, чтобы не было “пусто пока не reload”
+      try {
+        setIsLoading(true);
+        await fetchProducts();
+      } catch (e) {
+        console.error('Ошибка при загрузке после интро:', e);
+        dispatch(setProducts([]));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [fetchProducts, dispatch],
+  );
 
   if (!introChecked) {
     return (
