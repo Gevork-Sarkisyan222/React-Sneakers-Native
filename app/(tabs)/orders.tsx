@@ -89,13 +89,13 @@ export default function Orders() {
   }, [removeAllMarks]);
 
   const handleClearOrders = () => {
-    Alert.alert('Очистка истории заказов', 'Вы действительно хотите очистить список заказов?', [
+    Alert.alert('Clear order history', 'Are you sure you want to clear the order list?', [
       {
-        text: 'Отмена',
+        text: 'Cancel',
         style: 'cancel',
       },
       {
-        text: 'Очистить',
+        text: 'Clear',
         style: 'destructive',
         onPress: async () => {
           try {
@@ -103,7 +103,7 @@ export default function Orders() {
             await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/orders', []);
             setData([]);
           } catch (err) {
-            console.error('Не удалось очистить историю заказов', err);
+            console.error('Failed to clear order history', err);
           } finally {
             setIsLoadingIndicator(false);
           }
@@ -123,7 +123,7 @@ export default function Orders() {
           <View style={{ paddingTop: 25, paddingHorizontal: 15, flex: 1 }}>
             <View className="flex flex-row justify-between items-center">
               <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
-                Мои покупки
+                My purchases
               </Text>
 
               {ordersProducts.length > 0 && user ? (
@@ -136,7 +136,7 @@ export default function Orders() {
                     <>
                       <FontAwesome name="trash" size={16} color="white" />
                       <Text className="text-[14px] text-white font-semibold text-center">
-                        историю покупок
+                        purchase history
                       </Text>
                     </>
                   )}
@@ -175,7 +175,7 @@ export default function Orders() {
                 {data.map((order) => (
                   <View key={order.id}>
                     <Text className="text-[20px] font-bold text-black mb-5 ml-[5px]">
-                      Заказ #{order.id}
+                      Order #{order.id}
                     </Text>
 
                     <FlatList
@@ -199,7 +199,7 @@ export default function Orders() {
                   source={require('../../assets/images/crying-smile.png')}
                 />
                 <Text style={{ fontSize: 22, fontWeight: '600', marginTop: 20, marginBottom: 9 }}>
-                  У вас нет заказов
+                  You have no orders
                 </Text>
                 {!user && (
                   <Text
@@ -209,11 +209,11 @@ export default function Orders() {
                       textAlign: 'center',
                       marginBottom: 5,
                     }}>
-                    Авторизуйтесь потом
+                    Please log in first
                   </Text>
                 )}
                 <Text style={{ fontSize: 16, color: '#9b9b9b', textAlign: 'center' }}>
-                  Оформите хотя бы один заказ.
+                  Place at least one order.
                 </Text>
               </View>
             )}

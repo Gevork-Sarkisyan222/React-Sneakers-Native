@@ -39,17 +39,17 @@ export default function Login({ closedStore, setRemoveContent }: Props) {
 
       const { token, data: userData } = response.data;
 
-      // Сохраняем токен и ID пользователя (если нужно)
+      // Save token and user ID (if needed)
       await SecureStore.setItemAsync('userToken', token);
 
       closedStore && setRemoveContent && setRemoveContent(false);
 
-      Alert.alert('Успех', 'Вы успешно вошли в аккаунт');
+      Alert.alert('Success', 'You have successfully signed in');
       router.push('/');
       closedStore && (await Updates.reloadAsync());
     } catch (error) {
-      console.error('Не удалось выполнить вход:', error);
-      Alert.alert('Ошибка', 'Неверный email или пароль');
+      console.error('Login failed:', error);
+      Alert.alert('Error', 'Incorrect email or password');
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +66,7 @@ export default function Login({ closedStore, setRemoveContent }: Props) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="mt-2 text-gray-600">Пожалуйста, подождите...</Text>
+        <Text className="mt-2 text-gray-600">Please wait...</Text>
       </View>
     );
   }
@@ -80,14 +80,14 @@ export default function Login({ closedStore, setRemoveContent }: Props) {
       />
       {closedStore && (
         <Text className="text-2xl font-bold text-center mb-2 whitespace-nowrap text-[#b10000] underline">
-          Магазин в приложении временно закрыт авторизация медленная ожидайте
+          The in-app store is temporarily closed. Sign-in is slow — please wait.
         </Text>
       )}
       <Text className="text-3xl font-bold text-center mb-8 whitespace-nowrap">
-        Вход в <Text className="text-blue-500">Native Sneakers</Text>
+        Sign in to <Text className="text-blue-500">Native Sneakers</Text>
       </Text>
 
-      <Text className="text-sm font-medium mb-2">Email (Войти в демо (готовый аккаунт))</Text>
+      <Text className="text-sm font-medium mb-2">Email (Demo)</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-4"
         placeholder="Email (Demo)"
@@ -97,21 +97,21 @@ export default function Login({ closedStore, setRemoveContent }: Props) {
         onChangeText={setEmail}
       />
 
-      <Text className="text-sm font-medium mb-2">Пароль</Text>
+      <Text className="text-sm font-medium mb-2">Password</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-6"
-        placeholder="Пароль"
+        placeholder="Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
       <TouchableOpacity className="bg-blue-500 rounded-lg py-3 mb-6" onPress={handleLogin}>
-        <Text className="text-white text-center font-semibold">Войти</Text>
+        <Text className="text-white text-center font-semibold">Sign in</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push('/register')}>
-        <Text className="text-blue-500 text-center">Нет аккаунта? Зарегистрироваться</Text>
+        <Text className="text-blue-500 text-center">No account? Sign up</Text>
       </TouchableOpacity>
     </View>
   );

@@ -226,7 +226,7 @@ export default function FullCard() {
 
   const formattedRating = Number.isInteger(rating)
     ? rating.toString()
-    : rating.toLocaleString('ru-RU', {
+    : rating.toLocaleString('en-US', {
         minimumFractionDigits: 1,
         maximumFractionDigits: 1,
       });
@@ -247,7 +247,7 @@ export default function FullCard() {
           <TouchableOpacity onPress={() => router.back()} className="p-2">
             <MaterialIcons name="arrow-back" size={28} color="#333" />
           </TouchableOpacity>
-          <Text className="text-lg font-bold ml-2 text-gray-800">Детали продукта</Text>
+          <Text className="text-lg font-bold ml-2 text-gray-800">Product Details</Text>
         </View>
 
         <View className="px-5 py-3 relative">
@@ -274,7 +274,7 @@ export default function FullCard() {
 
           <Text className="text-2xl font-semibold mb-2 text-gray-900">{currentProduct.title}</Text>
 
-          {/* Компонент Рейтинг */}
+          {/* Rating Component */}
           <View className="flex-row">
             <StarRatingDisplay
               style={{ marginBottom: 5, marginLeft: -5 }}
@@ -283,10 +283,10 @@ export default function FullCard() {
               rating={currentProduct.rating}
             />
 
-            <Text className="mr-[5px]">{formattedRating} Звезд</Text>
+            <Text className="mr-[5px]">{formattedRating} Stars</Text>
           </View>
 
-          <Text className="text-sm text-gray-700 mr-1">Цена:</Text>
+          <Text className="text-sm text-gray-700 mr-1">Price:</Text>
 
           <Text
             className={`leading-[16px] ${
@@ -312,7 +312,7 @@ export default function FullCard() {
             ) : (
               <>
                 <Text className="text-white font-bold text-base">
-                  {isAddedToCart ? 'Удалить из корзины' : 'Добавить в корзину'}
+                  {isAddedToCart ? 'Remove from cart' : 'Add to cart'}
                 </Text>
                 {isAddedToCart ? (
                   <MaterialIcons name="delete-sweep" size={24} color="white" />

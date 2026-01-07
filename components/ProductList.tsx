@@ -49,15 +49,18 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
     setSelectedSort(key);
   };
 
+  const isMens = (t: string) => /\bmen'?s\b/i.test(t); // "Men's" или "Mens"
+  const isWomens = (t: string) => /\bwomen'?s\b/i.test(t); // "Women's" или "Womens"
+
   const sortedProducts = () => {
     const parsePrice = (price: string) => Number(price.replace(/\s/g, ''));
 
     switch (selectedSort) {
       case 'men':
-        return filteredProducts.filter((item) => item.title.toLowerCase().includes('муж'));
+        return filteredProducts.filter((item) => isMens(item.title) && !isWomens(item.title));
 
-      case 'woman':
-        return filteredProducts.filter((item) => item.title.toLowerCase().includes('жен'));
+      case 'woman': // или переименуй ключ в 'women'
+        return filteredProducts.filter((item) => isWomens(item.title));
 
       case 'price_asc':
         return [...filteredProducts].sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
@@ -76,10 +79,10 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
   return (
     <View style={{ flex: 1, paddingTop: 25, paddingHorizontal: 15 }}>
       <View className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6">
-        <Text className="text-amber-900 font-semibold">Демо / учебный режим</Text>
+        <Text className="text-amber-900 font-semibold">Demo / training mode</Text>
         <Text className="text-amber-800 text-sm mt-1">
-          Приложение работает в демонстрационном режиме. Все суммы и значения в приложении являются
-          демонстрационными. Данные используются только для тестирования функционала.
+          The app runs in demo mode. All amounts and values in the app are for demonstration
+          purposes. The data is used only for testing the functionality.
         </Text>
       </View>
 
@@ -96,12 +99,12 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
               color: 'black',
               marginBottom: 20,
             }}>
-            Добро пожаловать,{' '}
+            Welcome,{' '}
             {user.position === 'superadmin'
-              ? 'Супер администратор'
+              ? 'Super Administrator'
               : user.position === 'owner'
-                ? 'Владелец'
-                : 'Администратор'}{' '}
+                ? 'Owner'
+                : 'Administrator'}{' '}
             {user.name}!
           </Text>
         )
@@ -110,8 +113,8 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
       <View className="flex-row justify-center">
         {productSaleInfo.sale && (
           <SaleBanner
-            title={`Акция: −${productSaleInfo.sale_discount}%`}
-            subtitle="Только сегодня!"
+            title={`Sale: −${productSaleInfo.sale_discount}%`}
+            subtitle="Today only!"
             iconName="tag"
             backgroundColor="#ffd35b"
             imageSource={{
@@ -121,8 +124,8 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
         )}
         {productSaleInfo.summer_sale && (
           <SaleBanner
-            title="Летняя распродажа"
-            subtitle="Всё по летним ценам!"
+            title="Summer sale"
+            subtitle="Everything at summer prices!"
             iconName="umbrella-beach"
             backgroundColor="#00c6ff"
             imageSource={{
@@ -132,7 +135,7 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
         )}
         {productSaleInfo.black_friday && (
           <SaleBanner
-            title="Чёрная пятница — до −70%"
+            title="Black Friday — up to −70%"
             subtitle={blackFridayDateSubtitle}
             iconName="shopping-basket"
             backgroundColor="#1a1a1a"
@@ -158,9 +161,7 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
               alignItems: 'center',
               borderRadius: 12,
             }}>
-            <Text className="text-white font-bold text-[16px] tracking-wider">
-              🎁 ОТКРЫТЬ КЕЙСЫ
-            </Text>
+            <Text className="text-white font-bold text-[16px] tracking-wider">🎁 OPEN CASES</Text>
           </LinearGradient>
         </Pressable>
       )}
@@ -173,7 +174,7 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
             color: 'black',
             marginBottom: 20,
           }}>
-          Все <Text style={{ color: '#338fd4' }}>новые</Text> кроссовки
+          All <Text style={{ color: '#338fd4' }}>new</Text> sneakers
         </Text>
       )}
 
@@ -225,7 +226,7 @@ const ProductList: React.FC<Props> = ({ products, isLoading }) => {
               color: 'black',
               marginBottom: 20,
             }}>
-            По вашему запросу ничего не найдено
+            Nothing found for your search
           </Text>
           <Image
             className="mt-[10px]"

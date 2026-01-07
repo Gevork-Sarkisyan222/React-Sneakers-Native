@@ -97,14 +97,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
           {description}
         </Text>
 
-        {/* Статус “приз забран” */}
+        {/* Status “reward claimed” */}
         {/* {claimed && (
-          <View className="mb-2 px-2 py-1 rounded-xl bg-white border border-slate-200">
-            <Text className="text-[11px] text-slate-600">✅ Награда уже забрана</Text>
-          </View>
-        )} */}
+      <View className="mb-2 px-2 py-1 rounded-xl bg-white border border-slate-200">
+        <Text className="text-[11px] text-slate-600">✅ Reward already claimed</Text>
+      </View>
+    )} */}
 
-        {/* Прогресс */}
+        {/* Progress */}
         <View className="flex-row items-center justify-between">
           <View className="flex-1 mr-2">
             <View className={`h-1.5 rounded-full overflow-hidden ${progressTrack}`}>
@@ -115,19 +115,19 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </View>
 
             <Text className={`text-[11px] mt-1 ${claimed ? 'text-slate-400' : 'text-slate-500'}`}>
-              {claimed ? 'Прогресс зафиксирован • приз получен' : progressText}
+              {claimed ? 'Progress locked • reward claimed' : progressText}
             </Text>
           </View>
 
-          {/* Награда */}
+          {/* Reward */}
           <View className="items-end">
             <Text className={`text-[11px] mb-0.5 ${claimed ? 'text-slate-400' : 'text-slate-500'}`}>
-              Награда
+              Reward
             </Text>
 
             <View className={`px-2 py-1 rounded-full ${rewardPill}`}>
               <Text className={`text-[11px] font-semibold ${rewardText}`}>
-                {claimed ? 'Получено' : reward}
+                {claimed ? 'Claimed' : reward}
               </Text>
             </View>
           </View>
@@ -171,91 +171,91 @@ function TasksPage({}: Props) {
   const weeklyTasks = weeklyTasksRes[0];
 
   // code
-  const enterApp = Number(dailyTasks?.enter_app ?? 0); // 0 или 1
+  const enterApp = Number(dailyTasks?.enter_app ?? 0); // 0 or 1
   const enterAppCompleted = enterApp >= 1;
 
   const enterAppProgressText = enterAppCompleted
-    ? '1 / 1 • Вход выполнен'
-    : '0 / 1 • Войти сегодня';
+    ? '1 / 1 • Login completed'
+    : '0 / 1 • Log in today';
 
   const weeklyEnter = Number(weeklyTasks?.enter_app_6_days ?? 0); // 0–6
   const weeklyDone = weeklyEnter >= 6;
 
   const weeklyProgressText = weeklyDone
-    ? '6 / 6 дней • Выполнено'
-    : `${Math.min(weeklyEnter, 6)} / 6 дней • Зайди ещё ${Math.max(0, 6 - weeklyEnter)} дн.`;
+    ? '6 / 6 days • Completed'
+    : `${Math.min(weeklyEnter, 6)} / 6 days • Log in ${Math.max(0, 6 - weeklyEnter)} more day(s)`;
 
-  // DAILY: Собери стиль (3 товара)
+  // DAILY: Collect style (3 items)
   const collect3 = Number(dailyTasks?.collect_3_products ?? 0);
   const collect3Done = collect3 >= 3;
 
   const collect3ProgressText = collect3Done
-    ? '3 / 3 товара • Выполнено'
-    : `${Math.min(collect3, 3)} / 3 товара • Осталось ${Math.max(0, 3 - collect3)}`;
+    ? '3 / 3 items • Completed'
+    : `${Math.min(collect3, 3)} / 3 items • ${Math.max(0, 3 - collect3)} left`;
 
-  // WEEKLY: Охотник за стилем (15 товаров)
+  // WEEKLY: Style hunter (15 items)
   const collect15 = Number(weeklyTasks?.collect_15_products ?? 0);
   const collect15Done = collect15 >= 15;
 
   const collect15ProgressText = collect15Done
-    ? '15 / 15 товаров • Выполнено'
-    : `${Math.min(collect15, 15)} / 15 товаров • Осталось ${Math.max(0, 15 - collect15)}`;
+    ? '15 / 15 items • Completed'
+    : `${Math.min(collect15, 15)} / 15 items • ${Math.max(0, 15 - collect15)} left`;
 
-  // DAILY: 1 отзыв
+  // DAILY: 1 review
   const dailyReviews = Number(dailyTasks?.make_review ?? 0);
   const dailyReviewsDone = dailyReviews >= 1;
 
   const dailyReviewsText = dailyReviewsDone
-    ? '1 / 1 отзыв • Выполнено'
-    : `${Math.min(dailyReviews, 1)} / 1 отзыв • Оставь отзыв`;
+    ? '1 / 1 review • Completed'
+    : `${Math.min(dailyReviews, 1)} / 1 review • Leave a review`;
 
-  // WEEKLY: 5 отзывов
+  // WEEKLY: 5 reviews
   const weeklyReviews = Number(weeklyTasks?.make_5_review ?? 0);
   const weeklyReviewsDone = weeklyReviews >= 5;
 
   const weeklyReviewsText = weeklyReviewsDone
-    ? '5 / 5 отзывов • Выполнено'
-    : `${Math.min(weeklyReviews, 5)} / 5 отзывов • Осталось ${Math.max(0, 5 - weeklyReviews)}`;
+    ? '5 / 5 reviews • Completed'
+    : `${Math.min(weeklyReviews, 5)} / 5 reviews • ${Math.max(0, 5 - weeklyReviews)} left`;
 
-  // DAILY: Кейсовый спринт (1 кейс)
+  // DAILY: Case sprint (1 case)
   const dailyCases = Number(dailyTasks?.buyed_opened_cases ?? 0);
   const dailyCasesDone = dailyCases >= 1;
 
   const dailyCasesText = dailyCasesDone
-    ? '1 / 1 кейс • Выполнено'
-    : `${Math.min(dailyCases, 1)} / 1 кейс • Открой кейс`;
+    ? '1 / 1 case • Completed'
+    : `${Math.min(dailyCases, 1)} / 1 case • Open a case`;
 
-  // WEEKLY: Кейс-хантер недели (20 кейсов)
+  // WEEKLY: Weekly case hunter (20 cases)
   const weeklyCases = Number(weeklyTasks?.buyed_opened_20_cases ?? 0);
   const weeklyCasesDone = weeklyCases >= 20;
 
   const weeklyCasesText = weeklyCasesDone
-    ? '20 / 20 кейсов • Выполнено'
-    : `${Math.min(weeklyCases, 20)} / 20 кейсов`;
+    ? '20 / 20 cases • Completed'
+    : `${Math.min(weeklyCases, 20)} / 20 cases`;
 
-  // DAILY: 3 покупки за день
+  // DAILY: 3 purchases per day
   const dailyBuys = Number(dailyTasks?.buy_3_product ?? 0);
   const dailyBuysDone = dailyBuys >= 3;
 
   const dailyBuysText = dailyBuysDone
-    ? '3 / 3 покупок • Выполнено'
-    : `${Math.min(dailyBuys, 3)} / 3 покупок • Осталось ${Math.max(0, 3 - dailyBuys)}`;
+    ? '3 / 3 purchases • Completed'
+    : `${Math.min(dailyBuys, 3)} / 3 purchases • ${Math.max(0, 3 - dailyBuys)} left`;
 
-  // WEEKLY: 6 покупок за неделю
+  // WEEKLY: 6 purchases per week
   const weeklyBuys = Number(weeklyTasks?.buy_6_product ?? 0);
   const weeklyBuysDone = weeklyBuys >= 6;
 
   const weeklyBuysText = weeklyBuysDone
-    ? '6 / 6 покупок • Выполнено'
-    : `${Math.min(weeklyBuys, 6)} / 6 покупок • Осталось ${Math.max(0, 6 - weeklyBuys)}`;
+    ? '6 / 6 purchases • Completed'
+    : `${Math.min(weeklyBuys, 6)} / 6 purchases • ${Math.max(0, 6 - weeklyBuys)} left`;
 
-  // WEEKLY: 3 редких дропа из кейсов
+  // WEEKLY: 3 rare drops from cases
   const rareWins = Number(weeklyTasks?.win_3_rare_in_cases ?? 0);
   const rareWinsDone = rareWins >= 3;
 
   const rareWinsText = rareWinsDone
-    ? '3 / 3 предметов • Выполнено'
-    : `${Math.min(rareWins, 3)} / 3 предметов`;
+    ? '3 / 3 items • Completed'
+    : `${Math.min(rareWins, 3)} / 3 items`;
 
   // new logic
 
@@ -377,19 +377,19 @@ function TasksPage({}: Props) {
 
   // accept gitfts
   const handleClaimDailyCase = async () => {
-    // защита: нет юзера или нельзя забирать награду
+    // guard: no user or reward cannot be claimed
     if (!user || !shouldShowDailyRewardCard) return;
 
     try {
       const bonus = 712;
       const newBalance = (user.balance ?? 0) + bonus;
 
-      // 1) Начисляем бабки пользователю
+      // 1) Credit the user's balance
       await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user.id}`, {
         balance: newBalance,
       });
 
-      // 2) Помечаем daily-квест как "приз забран"
+      // 2) Mark the daily quest as "reward claimed"
       await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/1', {
         claimed: true,
       });
@@ -398,20 +398,20 @@ function TasksPage({}: Props) {
 
       Toast.show({
         type: 'success',
-        text1: 'Награда получена 🎉',
-        text2: `На баланс начислено ${bonus} ₽`,
+        text1: 'Reward claimed 🎉',
+        text2: `Added ${bonus} ₽ to your balance`,
         visibilityTime: 3000,
       });
 
       setDailyRewardClaimed(true);
       closeDailyRewardModal();
     } catch (err) {
-      console.error('Ошибка начисления ежедневного приза:', err);
+      console.error('Error while crediting daily reward:', err);
 
       Toast.show({
         type: 'error',
-        text1: 'Ошибка',
-        text2: 'Не удалось выдать награду. Попробуй позже.',
+        text1: 'Error',
+        text2: 'Failed to grant the reward. Try again later.',
         visibilityTime: 3000,
       });
     }
@@ -428,25 +428,25 @@ function TasksPage({}: Props) {
 
       const items = [
         {
-          title: 'Награда: Современная hoodie',
+          title: 'Reward: Modern hoodie',
           imageUri:
             'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8O4oEDmEzscfhZA2U-5X1Ped7c_16w8p0gg&s',
           price: '0',
         },
         {
-          title: 'Награда: Кроссовки Gilse Balance',
+          title: 'Reward: Gilse Balance sneakers',
           imageUri:
             'https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/311306/01/fnd/PNA/fmt/png/MB.04-Golden-Child-Men%27s-Basketball-Shoes',
           price: '0',
         },
         {
-          title: 'Награда: Премиум часы',
+          title: 'Reward: Premium watch',
           imageUri:
             'https://imagedelivery.net/lyg2LuGO05OELPt1DKJTnw/1cc939bb-98af-4be1-eeb9-10147b738d00/w=400x400',
           price: '0',
         },
         {
-          title: 'Подарок: Премиум кейс',
+          title: 'Gift: Premium case',
           imageUri: 'https://i.ibb.co/4gdxk2KT/case.webp',
           price: '0',
         },
@@ -478,8 +478,8 @@ function TasksPage({}: Props) {
 
       Toast.show({
         type: 'success',
-        text1: 'Награда получена 🎉',
-        text2: `На баланс начислено ${bonusMoney}₽ и все подарки в корзине!`,
+        text1: 'Reward claimed 🎉',
+        text2: `Added ${bonusMoney}₽ to your balance and all gifts are in your cart!`,
         visibilityTime: 3000,
       });
 
@@ -490,8 +490,8 @@ function TasksPage({}: Props) {
 
       Toast.show({
         type: 'error',
-        text1: 'Ошибка',
-        text2: 'Не удалось выдать награду. Попробуй позже.',
+        text1: 'Error',
+        text2: 'Failed to grant the reward. Try again later.',
         visibilityTime: 3000,
       });
     }
@@ -503,7 +503,7 @@ function TasksPage({}: Props) {
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
           {/* Верхний блок */}
           <View className="px-5 pt-2 pb-3 bg-white">
-            {/* Заголовок + стрик */}
+            {/* Header + streak */}
             <View className="flex-row items-center justify-between">
               <View className="flex gap-[8px] items-start flex-row">
                 <TouchableOpacity
@@ -515,18 +515,18 @@ function TasksPage({}: Props) {
                   <Text className="text-xl text-slate-700">‹</Text>
                 </TouchableOpacity>
                 <View>
-                  <Text className="text-xl font-semibold text-slate-900">Твои квесты 👟</Text>
+                  <Text className="text-xl font-semibold text-slate-900">Your quests 👟</Text>
                   <Text className="text-xs text-slate-500 mt-1 max-w-[90%]">
-                    Выполняй задачи, чтобы получать монеты и кейсы
+                    Complete tasks to earn coins and cases
                   </Text>
                 </View>
               </View>
 
-              {/* Мини-карта прогресса */}
+              {/* Mini progress card */}
               <View className="px-3 py-2 rounded-2xl bg-emerald-50 border border-emerald-200 items-end">
-                <Text className="text-[11px] text-emerald-700">Стрик</Text>
+                <Text className="text-[11px] text-emerald-700">Streak</Text>
                 <Text className="text-lg font-semibold text-slate-900">
-                  7<Text className="text-xs text-slate-500"> дней</Text>
+                  7<Text className="text-xs text-slate-500"> days</Text>
                 </Text>
               </View>
             </View>
@@ -540,7 +540,7 @@ function TasksPage({}: Props) {
             {/* Daily */}
             <View className="mt-3 mb-1 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <Text className="text-sm font-semibold text-slate-900">Ежедневные задания</Text>
+                <Text className="text-sm font-semibold text-slate-900">Daily tasks</Text>
                 <View className="px-2 py-0.5 rounded-full bg-emerald-50">
                   <Text className="text-[11px] text-emerald-700">{dailyDoneCount}/5</Text>
                 </View>
@@ -549,8 +549,8 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="daily"
-              title="Разогрев дня"
-              description="Зайди в приложение и загляни в ленту кроссовок."
+              title="Daily warm-up"
+              description="Open the app and check out the sneakers feed."
               progressText={enterAppProgressText}
               reward="+20 ₽"
               accent={enterAppCompleted}
@@ -559,8 +559,8 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="daily"
-              title="Собери стиль"
-              description="Добавь 3 пары в избранное, чтобы сохранить свой сет."
+              title="Build your style"
+              description="Add 3 pairs to favorites to save your set."
               progressText={collect3ProgressText}
               reward="+22 ₽"
               accent={collect3Done}
@@ -569,8 +569,8 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="daily"
-              title="Оставь отзыв"
-              description="Оставь отзыв в кроссовке, чтобы получить бонус."
+              title="Leave a review"
+              description="Leave a review on a sneaker to get a bonus."
               progressText={dailyReviewsText}
               reward="+70 ₽"
               accent={dailyReviewsDone}
@@ -579,8 +579,8 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="daily"
-              title="Кейсовый спринт"
-              description="Купи и открой 1 кейс, чтобы получить бонус."
+              title="Case sprint"
+              description="Buy and open 1 case to get a bonus."
               progressText={dailyCasesText}
               reward="+280 ₽"
               accent={dailyCasesDone}
@@ -589,8 +589,8 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="daily"
-              title="Сделай 3 покупок"
-              description="Соверши 3 покупок за этот день, чтобы забрать бонус."
+              title="Make 3 purchases"
+              description="Make 3 purchases today to claim the bonus."
               progressText={dailyBuysText}
               reward="+320 ₽"
               accent={dailyBuysDone}
@@ -600,29 +600,27 @@ function TasksPage({}: Props) {
             {!dailyTasks?.claimed && dailyTasksCompleted && (
               <>
                 <View className="mt-4 mb-3 rounded-3xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex-row items-center justify-between">
-                  {/* Текстовая часть */}
+                  {/* Text part */}
                   <View className="flex-1 mr-3">
                     <View className="flex-row items-center mb-1">
-                      <Text className="text-base font-semibold text-emerald-800">
-                        Ежедневный приз
-                      </Text>
+                      <Text className="text-base font-semibold text-emerald-800">Daily reward</Text>
                       <Text className="ml-2 text-lg">🎁</Text>
                     </View>
                     <Text className="text-[11px] text-slate-600">
-                      Ты выполнил все ежедневные задания. Забери свой бонус!
+                      You’ve completed all daily tasks. Claim your bonus!
                     </Text>
                   </View>
 
-                  {/* Кнопка "Забрать" */}
+                  {/* "Claim" button */}
                   <TouchableOpacity
                     className="px-3 py-2 rounded-2xl bg-emerald-500 items-center justify-center"
                     activeOpacity={0.85}
                     onPress={openDailyRewardModal}>
-                    <Text className="text-xs font-semibold text-white">Забрать</Text>
+                    <Text className="text-xs font-semibold text-white">Claim</Text>
                   </TouchableOpacity>
                 </View>
 
-                {/* Линия-разделитель на всю ширину — конец блока daily */}
+                {/* Full-width divider — end of daily block */}
                 <View className="h-[1px] bg-slate-200 -mx-5 mb-4" />
               </>
             )}
@@ -630,7 +628,7 @@ function TasksPage({}: Props) {
             {/* Weekly */}
             <View className="mt-5 mb-1 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <Text className="text-sm font-semibold text-slate-900">Еженедельные задания</Text>
+                <Text className="text-sm font-semibold text-slate-900">Weekly tasks</Text>
                 <View className="px-2 py-0.5 rounded-full bg-sky-50">
                   <Text className="text-[11px] text-sky-700">{weeklyDoneCount}/6</Text>
                 </View>
@@ -639,8 +637,8 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="weekly"
-              title="Семидневный марафон"
-              description="Заходи в приложение 6 дней подряд на этой неделе."
+              title="Seven-day marathon"
+              description="Log into the app 6 days in a row this week."
               progressText={weeklyProgressText}
               reward="+300 ₽"
               accent={weeklyDone}
@@ -649,28 +647,28 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="weekly"
-              title="Большая неделя покупок"
-              description="Соверши 6 покупок за неделю, чтобы забрать особый бонус."
+              title="Big shopping week"
+              description="Make 6 purchases this week to claim a special bonus."
               progressText={weeklyBuysText}
-              reward="+450 ₽ + подарок"
+              reward="+450 ₽ + gift"
               accent={weeklyBuysDone}
               claimed_reward={Boolean(weeklyTasks?.claimed)}
             />
 
             <TaskCard
               type="weekly"
-              title="Кейс-хантер недели"
-              description="Открой & купи 20 кейсов за неделю и получи премиум-награду."
+              title="Weekly case hunter"
+              description="Open & buy 20 cases this week and get a premium reward."
               progressText={weeklyCasesText}
-              reward="+600 ₽ + премиум-подарок"
+              reward="+600 ₽ + premium gift"
               accent={weeklyCasesDone}
               claimed_reward={Boolean(weeklyTasks?.claimed)}
             />
 
             <TaskCard
               type="weekly"
-              title="Охотник за стилем"
-              description="Добавь 15 кроссовок в избранное за эту неделю."
+              title="Style hunter"
+              description="Add 15 sneakers to favorites this week."
               progressText={collect15ProgressText}
               reward="+400 ₽"
               accent={collect15Done}
@@ -679,8 +677,8 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="weekly"
-              title="Социальная неделя"
-              description="Оставь 5 отзывов за неделю, чтобы получить бонус."
+              title="Social week"
+              description="Leave 5 reviews this week to get a bonus."
               progressText={weeklyReviewsText}
               reward="+400 ₽"
               accent={weeklyReviewsDone}
@@ -689,38 +687,38 @@ function TasksPage({}: Props) {
 
             <TaskCard
               type="weekly"
-              title="Кейс-дропер недели"
-              description="Выиграй 3 редких предмета из кейсов за неделю."
+              title="Weekly case dropper"
+              description="Win 3 rare items from cases this week."
               progressText={rareWinsText}
-              reward="Редкий кейс + подарок"
+              reward="Rare case + gift"
               accent={rareWinsDone}
               claimed_reward={Boolean(weeklyTasks?.claimed)}
             />
 
             {!weeklyTasks?.claimed && weeklyTasksCompleted && (
               <View className="mt-4 mb-6 rounded-3xl bg-amber-50 border border-amber-300 px-4 py-3 flex-row items-center justify-between shadow-sm">
-                {/* Текстовая часть */}
+                {/* Text part */}
                 <View className="flex-1 mr-3">
                   <Text className="text-[10px] font-semibold text-amber-700 uppercase tracking-[1px]">
                     Premium reward
                   </Text>
 
                   <View className="flex-row items-center mb-1 mt-1">
-                    <Text className="text-base font-semibold text-slate-900">Приз за неделю</Text>
+                    <Text className="text-base font-semibold text-slate-900">Weekly reward</Text>
                     <Text className="ml-2 text-lg">👑</Text>
                   </View>
 
                   <Text className="text-[11px] text-slate-600">
-                    Ты закрыл все еженедельные квесты. Забери свою премиум-награду.
+                    You’ve completed all weekly quests. Claim your premium reward.
                   </Text>
                 </View>
 
-                {/* Кнопка "Забрать" */}
+                {/* "Claim" button */}
                 <TouchableOpacity
                   className="px-3 py-2 rounded-2xl bg-amber-500 items-center justify-center"
                   activeOpacity={0.9}
                   onPress={openWeeklyRewardModal}>
-                  <Text className="text-xs font-semibold text-white">Забрать</Text>
+                  <Text className="text-xs font-semibold text-white">Claim</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -741,41 +739,41 @@ function TasksPage({}: Props) {
               opacity: rewardOpacity,
               transform: [{ scale: rewardScale }],
             }}>
-            {/* верхний бейдж */}
+            {/* top badge */}
             <View className="mb-3 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100">
               <Text className="text-[10px] font-semibold text-emerald-600 tracking-[1px] uppercase">
                 Daily reward
               </Text>
             </View>
 
-            {/* эмодзи / конфетти */}
+            {/* emoji / confetti */}
             <Text className="text-4xl mb-2">🎉</Text>
 
             <Text className="text-lg font-bold text-slate-900 mb-1 text-center">
-              Нажми чтобы получить ежедневный приз
+              Tap to claim your daily reward
             </Text>
 
             <Text className="text-[12px] text-slate-500 mb-4 text-center">
-              Ты закрыл все ежедневные квесты и получил бонус.
+              You completed all daily quests and earned a bonus.
             </Text>
 
-            {/* Сумма выигрыша */}
+            {/* Reward amount */}
             <View className="mb-4 px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-300">
-              <Text className="text-xs text-emerald-700 text-center mb-1">Твой бонус</Text>
+              <Text className="text-xs text-emerald-700 text-center mb-1">Your bonus</Text>
               <Text className="text-3xl font-extrabold text-emerald-600 text-center">712 ₽</Text>
             </View>
 
-            {/* Кнопка "Забрать" внутри модалки */}
+            {/* "Claim" button inside the modal */}
             <TouchableOpacity
               className="mt-1 px-4 py-2 rounded-2xl bg-emerald-500 items-center justify-center w-full"
               activeOpacity={0.9}
               onPress={handleClaimDailyCase}>
-              <Text className="text-sm font-semibold text-white">Забрать 712 ₽</Text>
+              <Text className="text-sm font-semibold text-white">Claim 712 ₽</Text>
             </TouchableOpacity>
 
-            {/* Кнопка "Закрыть" маленькая */}
+            {/* Small "Close" button */}
             <TouchableOpacity className="mt-3" activeOpacity={0.7} onPress={closeDailyRewardModal}>
-              <Text className="text-[11px] text-slate-400">Закрыть</Text>
+              <Text className="text-[11px] text-slate-400">Close</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -803,11 +801,11 @@ function TasksPage({}: Props) {
             <Text className="text-4xl mb-2">👑</Text>
 
             <Text className="text-lg font-bold text-slate-900 mb-1 text-center">
-              Нажми чтобы получить премиум-награду за квесты
+              Tap to claim your premium quest reward
             </Text>
 
             <Text className="text-[12px] text-slate-500 mb-4 text-center">
-              Ты закрыл все еженедельные квесты и получил премиум-награду.
+              You completed all weekly quests and earned a premium reward.
             </Text>
 
             <View className="mb-4 px-4 py-2 rounded-2xl bg-amber-50 border border-amber-300 w-full relative">
@@ -818,7 +816,7 @@ function TasksPage({}: Props) {
                 className="w-8 h-8 mb-1 absolute left-[40px] top-[10px] -scale-x-100"
                 resizeMode="contain"
               />
-              <Text className="text-xs text-amber-700 text-center mb-1">Твой бонус</Text>
+              <Text className="text-xs text-amber-700 text-center mb-1">Your bonus</Text>
               <Text className="text-2xl font-extrabold text-amber-600 text-center">2150 ₽</Text>
               <Image
                 source={{
@@ -829,9 +827,9 @@ function TasksPage({}: Props) {
               />
             </View>
 
-            {/* Три призовые карточки в ряд */}
+            {/* Three reward cards in a row */}
             <View className="mb-3 flex-row gap-2">
-              {/* Карточка 1 — худи */}
+              {/* Card 1 — hoodie */}
               <View className="flex-1 rounded-2xl bg-amber-50 border border-amber-200 p-2 items-center">
                 <Image
                   className="w-full h-14 mb-1"
@@ -841,11 +839,11 @@ function TasksPage({}: Props) {
                   resizeMode="cover"
                 />
                 <Text className="text-[11px] font-semibold text-amber-700 text-center">
-                  Современная hoodie
+                  Modern hoodie
                 </Text>
               </View>
 
-              {/* Карточка 2 — кроссовки */}
+              {/* Card 2 — sneakers */}
               <View className="flex-1 rounded-2xl bg-amber-50 border border-amber-200 p-2 items-center">
                 <Image
                   className="w-full h-14 mb-1"
@@ -853,11 +851,11 @@ function TasksPage({}: Props) {
                   resizeMode="cover"
                 />
                 <Text className="text-[11px] font-semibold text-amber-700 text-center">
-                  Кроссовки Gilse Balance
+                  Gilse Balance sneakers
                 </Text>
               </View>
 
-              {/* Карточка 3 — часы */}
+              {/* Card 3 — watch */}
               <View className="flex-1 rounded-2xl bg-amber-50 border border-amber-200 p-2 items-center">
                 <Image
                   className="w-full h-14 mb-1"
@@ -867,26 +865,26 @@ function TasksPage({}: Props) {
                   resizeMode="cover"
                 />
                 <Text className="text-[11px] font-semibold text-amber-700 text-center">
-                  Премиум часы
+                  Premium watch
                 </Text>
               </View>
             </View>
 
-            {/* Премиум кейс на всю ширину снизу */}
+            {/* Premium case full width at the bottom */}
             <View className="w-full rounded-3xl bg-amber-50 border border-amber-300 px-3 py-3">
-              {/* верх: текст + подарки */}
+              {/* top: text + gifts */}
               <View className="flex-row items-center justify-between mb-2">
                 <View>
                   <Text className="text-[10px] font-semibold text-amber-700 uppercase tracking-[1px]">
                     Premium case
                   </Text>
-                  <Text className="text-xs text-amber-800 mt-0.5">Главный приз недели</Text>
+                  <Text className="text-xs text-amber-800 mt-0.5">Main prize of the week</Text>
                 </View>
 
                 <Text className="text-2xl">🎁🎁🎁</Text>
               </View>
 
-              {/* центрируем кейс */}
+              {/* center the case */}
               <View className="mt-1 w-full items-center">
                 <View className="w-[100%] h-[150px] self-center">
                   <Image
@@ -902,11 +900,11 @@ function TasksPage({}: Props) {
               className="mt-[14px] px-4 py-2 rounded-2xl bg-amber-500 items-center justify-center w-full"
               activeOpacity={0.9}
               onPress={handleClaimWeeklyCase}>
-              <Text className="text-sm font-semibold text-white">Забрать награду</Text>
+              <Text className="text-sm font-semibold text-white">Claim reward</Text>
             </TouchableOpacity>
 
             <TouchableOpacity className="mt-3" activeOpacity={0.7} onPress={closeWeeklyRewardModal}>
-              <Text className="text-[11px] text-slate-400">Закрыть</Text>
+              <Text className="text-[11px] text-slate-400">Close</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>

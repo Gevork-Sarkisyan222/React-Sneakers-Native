@@ -56,25 +56,25 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     Alert.alert(
-      'Выход из аккаунта',
-      'Вы действительно хотите выйти?',
+      'Log out',
+      'Are you sure you want to log out?',
       [
         {
-          text: 'Отмена',
+          text: 'Cancel',
           style: 'cancel',
         },
         {
-          text: 'Выйти',
+          text: 'Log out',
           style: 'destructive',
           onPress: async () => {
             try {
               await SecureStore.deleteItemAsync('userToken');
               // fetchUser();
               setRemoveContent(true);
-              Alert.alert('Выход', 'Вы успешно вышли из аккаунта');
+              Alert.alert('Log out', 'You have successfully logged out of your account');
             } catch (error) {
-              console.error('Ошибка при выходе из аккаунта:', error);
-              Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
+              console.error('Error while logging out:', error);
+              Alert.alert('Error', 'Failed to log out');
             }
           },
         },
@@ -107,7 +107,7 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
     const banDate = new Date(currentUser.banUntil);
     const today = new Date();
 
-    // обнуляем время
+    // reset the time
     banDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
 
@@ -119,7 +119,7 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
   if (isUserBlocked) {
     return (
       <BlockedScreen
-        adminName={currentUser?.blockedBy ?? 'Н/Д'}
+        adminName={currentUser?.blockedBy ?? 'N/A'}
         reason={currentUser?.blockReason ?? undefined}
         banUntil={currentUser?.banUntil ?? undefined}
       />
@@ -132,9 +132,9 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
     currentUser?.position === 'owner';
 
   if (
-    !isAdmin && // не админ
-    productSaleInfo.isStoreOpen === false && // магазин закрыт
-    currentUser?.position === 'user' // и это обычный пользователь
+    !isAdmin && // not an admin
+    productSaleInfo.isStoreOpen === false && // store is closed
+    currentUser?.position === 'user' // and this is a regular user
   ) {
     return (
       !removeContent && (
@@ -147,25 +147,21 @@ export function BlockedGuard({ children }: { children: React.ReactNode }) {
             resizeMode="contain"
           />
           <Text className="text-2xl font-bold text-center text-gray-800 mt-6">
-            Мы на обновлении
+            We’re under maintenance
           </Text>
           <Text className="text-base text-center text-gray-600 mt-2">
-            Магазин временно недоступен. Мы скоро вернёмся!
+            The store is temporarily unavailable. We’ll be back soon!
           </Text>
           <TouchableOpacity
             onPress={() => Linking.openURL('https://t.me/gevork_sarkisyan')}
             className="bg-blue-600 px-4 py-2 rounded-xl mt-4">
-            <Text className="text-white text-base font-semibold text-center">
-              Узнать подробности
-            </Text>
+            <Text className="text-white text-base font-semibold text-center">Learn more</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handleLogout}
             className="bg-blue-600 px-4 py-2 rounded-xl mt-4">
-            <Text className="text-white text-base font-semibold text-center">
-              Выйти из аккаунта
-            </Text>
+            <Text className="text-white text-base font-semibold text-center">Log out</Text>
           </TouchableOpacity>
         </View>
       )

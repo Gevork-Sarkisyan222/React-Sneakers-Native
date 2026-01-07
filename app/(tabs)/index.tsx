@@ -33,6 +33,7 @@ import { ActivityIndicator } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import * as Updates from 'expo-updates';
 
 const INTRO_KEY = 'native_sneakers_intro_seen_v7';
 const ROLE_KEY = 'native_sneakers_role_v1';
@@ -383,20 +384,23 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
     'Hakobyan',
   ];
   const STREETS = [
-    'Ленина',
-    'Пушкина',
-    'Гагарина',
-    'Тбилисская',
-    'Садовая',
-    'Мира',
-    'Шота Руставели',
+    'Lenina',
+    'Pushkina',
+    'Gagarina',
+    'Tbilisi Street',
+    'Sadovaya',
+    'Mira',
+    'Shota Rustaveli',
+    'Narodnaya',
   ];
+
   const CITIES = [
-    'Москва, Россия',
-    'Тбилиси, Грузия',
-    'Ереван, Армения',
-    'Батуми, Грузия',
-    'Санкт-Петербург, Россия',
+    'Moscow, Russia',
+    'Tbilisi, Georgia',
+    'Yerevan, Armenia',
+    'Batumi, Georgia',
+    'Saint Petersburg, Russia',
+    'USA, Los Angeles',
   ];
 
   const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -447,7 +451,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
     const last = lastName.trim();
 
     if (!first || !last) {
-      setCreateError('Введи имя и фамилию.');
+      setCreateError('Enter your first and last name.');
       return;
     }
 
@@ -531,7 +535,9 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
       console.error(e);
 
       // не пиши “слишком долго” — просто норм ошибка
-      setCreateError('Не получилось создать демо-аккаунт. Проверь интернет и попробуй ещё раз.');
+      setCreateError(
+        'Failed to create a demo account. Check your internet connection and try again.',
+      );
     } finally {
       setCreating(false);
       setCreatePhase('idle');
@@ -546,26 +552,26 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
         key: '1',
         icon: { uri: 'https://cdn-icons-png.flaticon.com/512/8771/8771926.png' },
         title: 'Native Sneakers',
-        desc: 'Учебная симуляция магазина. Можно безопасно потренироваться: товары, карточки, избранное, корзина и “покупки” а также очень много функции. И взаимодействие с приложением.',
+        desc: 'A training store simulation. You can safely practice: products, product pages, favorites, cart, and “purchases”, plus many other features and interactions inside the app.',
       },
       {
         key: '2',
         icon: { uri: 'https://cdn-icons-png.flaticon.com/512/18091/18091014.png' },
-        title: 'Роли и практика',
-        desc: 'Побудь пользователем, админом, главным админом или владельцем — чтобы понять права доступа и управление внутри приложения. Пройди практику здесь.',
+        title: 'Roles & practice',
+        desc: 'Try being a user, admin, super admin, or owner — to understand access rights and management inside the app. Do your practice here.',
       },
       {
         key: '3',
         icon: '🧠',
-        title: 'Полезно новичкам и детям',
-        desc: 'Это “тренажёр” интерфейсов: как работает корзина, баланс и действия пользователя. Подойдёт и как практика для модераторов/админов. Узнай как работает магазин изнутри.',
+        title: 'Helpful for beginners and kids',
+        desc: 'This is an “interface trainer”: how the cart, balance, and user actions work. It’s also useful as practice for moderators/admins. Learn how a store works from the inside.',
       },
       {
         key: '4',
         icon: '💳',
-        title: 'Важно: всё тестовое',
-        badge: 'ДЕМО • ПЛАТЕЖИ НЕ НАСТОЯЩИЕ',
-        desc: 'Любые “покупки”, “пополнения”, суммы и “карты” — демо-симуляция. Можете создать аккаунт и пользоваться всеми возможностями. Почему бы не попробовать?',
+        title: 'Important: everything is test',
+        badge: 'DEMO • PAYMENTS ARE NOT REAL',
+        desc: 'Any “purchases”, “top-ups”, amounts, and “cards” are a demo simulation. You can create an account and use all features. Why not try it?',
       },
     ],
     [],
@@ -575,55 +581,55 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
     () => [
       {
         id: 'a1',
-        question: 'Что обычно делает Админ с товарами в админке?',
+        question: 'What does an Admin usually do with products in the admin panel?',
         options: [
-          'Создаёт/редактирует товары и меняет их параметры',
-          'Только покупает товары как обычный пользователь',
-          'Не имеет доступа к товарам вообще',
+          'Creates/edits products and changes their settings',
+          'Only buys products like a regular user',
+          'Has no access to products at all',
         ],
         correctIndex: 0,
-        tip: 'Админ управляет контентом магазина.',
+        tip: 'An Admin manages the store’s content.',
       },
       {
         id: 'a2',
-        question: 'Если товар временно нельзя показывать в магазине, что логичнее сделать?',
-        options: ['Удалить навсегда', 'Скрыть/деактивировать товар', 'Поставить в избранное'],
+        question:
+          'If a product shouldn’t be shown in the store temporarily, what is the most logical action?',
+        options: ['Delete it forever', 'Hide/deactivate the product', 'Add it to favorites'],
         correctIndex: 1,
-        tip: 'В реальных админках чаще “скрывают”, а не удаляют.',
+        tip: 'In real admin panels, products are usually “hidden”, not deleted.',
       },
       {
         id: 'a3',
-        question:
-          'Пользователь написал плохой комментарий. Какой правильный порядок действий админа?',
+        question: 'A user wrote a bad comment. What is the correct order of actions for an admin?',
         options: [
-          'Сразу удалить всё подряд без проверки',
-          'Проверить и удалить/скрыть по правилам + при необходимости ограничить',
-          'Ответить “ок” и оставить как есть',
+          'Delete everything right away without checking',
+          'Review it and remove/hide it by the rules + restrict if needed',
+          'Reply “ok” and leave it as is',
         ],
         correctIndex: 1,
-        tip: 'Сначала проверка, потом действие по правилам.',
+        tip: 'First review, then take action according to the rules.',
       },
       {
         id: 'a4',
-        question: 'Что важно проверить после редактирования товара (цена/название/фото)?',
+        question: 'What is important to check after editing a product (price/name/photos)?',
         options: [
-          'Что изменения сохранились и отображаются в списке/карточке',
-          'Что приложение стало “красивее”',
-          'Что у админа повысился баланс',
+          'That the changes were saved and are shown in the list/product page',
+          'That the app became “prettier”',
+          'That the admin’s balance increased',
         ],
         correctIndex: 0,
-        tip: 'Админ всегда проверяет: сохранилось → отобразилось.',
+        tip: 'An admin always checks: saved → displayed.',
       },
       {
         id: 'a5',
-        question: 'Как админ обычно работает с заявками/жалобами?',
+        question: 'How does an admin usually handle requests/reports?',
         options: [
-          'Смотрит очередь, принимает решение и фиксирует результат',
-          'Игнорирует, потому что это не его зона',
-          'Отправляет всем пользователям уведомление “не пишите”',
+          'Checks the queue, makes a decision, and records the result',
+          'Ignores it because it’s not their area',
+          'Sends all users a notification: “don’t write”',
         ],
         correctIndex: 0,
-        tip: 'Очередь → решение → результат (логика большинства админок).',
+        tip: 'Queue → decision → result (the logic of most admin panels).',
       },
     ],
     [],
@@ -633,61 +639,61 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
     () => [
       {
         id: 's1',
-        question: 'В чём главная разница Супер Админа от Админа?',
+        question: 'What is the main difference between a Super Admin and an Admin?',
         options: [
-          'Супер Админ управляет ролями/правами и системными настройками',
-          'Супер Админ просто быстрее листает товары',
-          'Разницы нет вообще',
+          'A Super Admin manages roles/permissions and system settings',
+          'A Super Admin just scrolls products faster',
+          'There is no difference at all',
         ],
         correctIndex: 0,
-        tip: 'Супер Админ управляет доступами и правилами.',
+        tip: 'A Super Admin manages access and rules.',
       },
       {
         id: 's2',
-        question: 'Нужно выдать доступ новому админу. Как правильно?',
+        question: 'You need to grant access to a new admin. What is the correct approach?',
         options: [
-          'Выдать максимум прав сразу',
-          'Выдать только нужные права под задачи и при необходимости расширять',
-          'Не выдавать доступ никому',
+          'Give maximum permissions right away',
+          'Give only the necessary permissions for the tasks and expand if needed',
+          'Don’t give access to anyone',
         ],
         correctIndex: 1,
-        tip: 'Лучше выдавать минимум нужного и расширять по мере надобности.',
+        tip: 'It’s best to grant the minimum needed and expand when necessary.',
       },
       {
         id: 's3',
         question:
-          'Пользователь жалуется: “у меня пропал доступ к админке”. Что проверить первым делом?',
+          'A user complains: “I lost access to the admin panel.” What should you check first?',
         options: [
-          'Его роль/позицию и разрешения',
-          'Цвет темы в приложении',
-          'Количество товаров в каталоге',
+          'Their role/position and permissions',
+          'The theme color in the app',
+          'The number of products in the catalog',
         ],
         correctIndex: 0,
-        tip: 'Сначала права доступа: роль → разрешения.',
+        tip: 'Start with access rights: role → permissions.',
       },
       {
         id: 's4',
         question:
-          'Если админ случайно удаляет важные данные, какой “правильный” подход в реальных системах?',
+          'If an admin accidentally deletes important data, what is the “right” approach in real systems?',
         options: [
-          'Никакой — удалить значит удалить',
-          'Использовать “мягкое удаление”/восстановление или историю изменений',
-          'Попросить пользователя не жаловаться',
+          'None — deleted means deleted',
+          'Use “soft delete”/restore or a change history',
+          'Ask the user not to complain',
         ],
         correctIndex: 1,
-        tip: 'В реальных админках часто есть восстановление/история.',
+        tip: 'Real admin panels often have restore/history.',
       },
       {
         id: 's5',
         question:
-          'Если админ случайно выдал пользователю статус “Admin”, что должен сделать супер-админ?',
+          'If an admin accidentally gave a user the “Admin” status, what should the super admin do?',
         options: [
-          'Вернуть правильную роль/статус и сохранить изменения',
-          'Оставить как есть, чтобы “не трогать” систему',
-          'Удалить аккаунт пользователя',
+          'Restore the correct role/status and save the changes',
+          'Leave it as is so as “not to touch” the system',
+          'Delete the user’s account',
         ],
         correctIndex: 0,
-        tip: 'Супер-админ отвечает за корректные роли и доступы.',
+        tip: 'A super admin is responsible for correct roles and access.',
       },
     ],
     [],
@@ -799,40 +805,40 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
   }, [onDone, role]);
 
   const guideTitle = useMemo(() => {
-    if (role === 'admin') return 'Гайд для Админа';
-    if (role === 'superadmin') return 'Гайд для Супер Админа';
-    return 'Гайд для Пользователя';
+    if (role === 'admin') return 'Admin Guide';
+    if (role === 'superadmin') return 'Super Admin Guide';
+    return 'User Guide';
   }, [role]);
 
   const guideBullets = useMemo(() => {
     if (role === 'admin') {
       return [
-        'Зайди в админку и посмотри, какие разделы доступны твоей роли.',
-        'Потренируйся управлять контентом: добавление/редактирование данных (всё в тестовой базе).',
-        'Модерация: смотри комментарии/жалобы и учись принимать решения по правилам.',
-        'Ознакомиться со всеми функциями ты можешь в админ-панели.',
+        'Open the admin panel and check which sections are available for your role.',
+        'Practice managing content: adding/editing data (everything is in a test database).',
+        'Moderation: review comments/reports and learn to make decisions based on the rules.',
+        'You can explore all features inside the admin panel.',
       ];
     }
 
     if (role === 'superadmin') {
       return [
-        'Посмотри управление ролями/правами: кому и что разрешено.',
-        'Следи за порядком: проверяй спорные действия и принимай решения аккуратно.',
-        'Тренируй “least privilege”: выдавай только нужные права, чтобы меньше ошибок.',
-        'Проверяй логику модерации и админ-процессов на тестовых данных.',
-        'Устрайвать акции/скидки или закрыть магазин во время разработки — это твое дело.',
-        'Ознакомиться со всеми функциями ты можешь в админ-панели.',
+        'Check role/permission management: who is allowed to do what.',
+        'Keep things in order: review disputed actions and make careful decisions.',
+        'Practice “least privilege”: grant only the necessary permissions to reduce mistakes.',
+        'Validate moderation logic and admin workflows using test data.',
+        'Running promotions/discounts or closing the store during development is up to you.',
+        'You can explore all features inside the admin panel.',
       ];
     }
 
     return [
-      'Смотри товары, открывай карточки и изучай интерфейс магазина.',
-      'Добавляй в избранное и собирай свою “витрину” понравившихся вещей.',
-      'Симулируй покупки/действия — это обучение, никаких реальных оплат нет не бойся.',
-      'Если видишь баланс/пополнение — это демо. Не вводи настоящие данные просто вводи какие то цифры чтобы система засчитала и сумму которую ты хочешь.',
-      'Покупай кейсы и получай бонусы.',
-      'Выполняй квесты и получай новые бонусы и твои полученные бонусы все будут в корзине.',
-      'Когда освоишься — можешь перейти в приложение и просто пользоваться там много чего.',
+      'Browse products, open product pages, and explore the store interface.',
+      'Add items to favorites and build your own “showcase” of things you like.',
+      'Simulate purchases/actions — this is training, there are no real payments, don’t worry.',
+      'If you see balance/top-ups — it’s demo. Don’t enter real data; just type any numbers so the system accepts it, and the amount you want.',
+      'Buy cases and get bonuses.',
+      'Complete quests and earn new bonuses — all your earned bonuses will be in the cart.',
+      'Once you’re comfortable, you can enter the app and just use it — there’s a lot inside.',
     ];
   }, [role]);
 
@@ -856,7 +862,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
       <View style={{ alignItems: 'center', marginTop: 6 }}>
         <Text style={{ color: TEXT_MUTED, fontSize: 12 }}>Native Sneakers by Gevork Sarkisyan</Text>
         <Text style={{ marginTop: 6, color: TEXT_MUTED, fontSize: 12 }}>
-          Шаг {currentStep} из {totalSteps}
+          Step {currentStep} of {totalSteps}
         </Text>
       </View>
 
@@ -916,7 +922,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 textAlign: 'center',
                 lineHeight: 15,
               }}>
-              Учебная симуляция • данные тестовые • реальные платежи не выполняются
+              Training simulation • test data • no real payments are made
             </Text>
 
             <View
@@ -927,12 +933,12 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 alignItems: 'center',
               }}>
               <GhostButton
-                title="Назад"
+                title="Back"
                 onPress={() => goToSlide(slideIndex - 1)}
                 hidden={slideIndex === 0}
               />
 
-              <PrimaryButton title={isLastSlide ? 'Далее' : 'Далее'} onPress={goNextFromSlides} />
+              <PrimaryButton title={isLastSlide ? 'Next' : 'Next'} onPress={goNextFromSlides} />
 
               <View style={{ width: 56 }} />
             </View>
@@ -946,30 +952,31 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
           <View style={{ alignItems: 'center', marginTop: 10 }}>
             <Text
               style={{ color: TEXT_MAIN, fontSize: 22, fontWeight: '900', textAlign: 'center' }}>
-              Кем ты хочешь быть?
+              Who do you want to be?
             </Text>
+
             <Text style={{ color: TEXT_MUTED, marginTop: 10, textAlign: 'center', lineHeight: 18 }}>
-              Выбор роли влияет на обучение. Для Admin/Super Admin будет небольшой тест и отдельный
-              гайд.
+              Your role affects the training. For Admin/Super Admin there will be a short quiz and a
+              separate guide.
             </Text>
           </View>
 
           <View style={{ marginTop: 18 }}>
             <RoleCard
-              title="Пользователь"
-              subtitle="Смотри товары, избранное, корзина и демо-покупки. Без управления админкой."
+              title="User"
+              subtitle="Browse products, favorites, cart, and demo purchases. No admin panel management."
               selected={role === 'user'}
               onPress={() => setRole('user')}
             />
             <RoleCard
-              title="Админ"
-              subtitle="Практика управления контентом и модерации. Доступ к админ-функциям."
+              title="Admin"
+              subtitle="Practice content management and moderation. Access to admin features."
               selected={role === 'admin'}
               onPress={() => setRole('admin')}
             />
             <RoleCard
-              title="Супер Админ"
-              subtitle="Роли/права, контроль процессов и более широкий доступ."
+              title="Super Admin"
+              subtitle="Roles/permissions, process control, and broader access."
               selected={role === 'superadmin'}
               onPress={() => setRole('superadmin')}
             />
@@ -979,7 +986,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
 
           <View style={{ paddingBottom: 18 }}>
             <Text style={{ color: TEXT_MUTED, fontSize: 11, textAlign: 'center', lineHeight: 15 }}>
-              Не вводите настоящие пароли/банковские данные. Это обучение.
+              Do not enter real passwords or banking details. This is training.
             </Text>
 
             <View
@@ -989,8 +996,8 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
-              <GhostButton title="Назад" onPress={() => setStage('slides')} />
-              <PrimaryButton title="Продолжить" onPress={startTraining} disabled={!role} />
+              <GhostButton title="Back" onPress={() => setStage('slides')} />
+              <PrimaryButton title="Continue" onPress={startTraining} disabled={!role} />
               <View style={{ width: 56 }} />
             </View>
           </View>
@@ -1003,10 +1010,10 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
           <View style={{ alignItems: 'center', marginTop: 6 }}>
             <Text
               style={{ color: TEXT_MAIN, fontSize: 22, fontWeight: '900', textAlign: 'center' }}>
-              Мини-тест: {role === 'admin' ? 'Админ' : 'Супер Админ'}
+              Mini quiz: {role === 'admin' ? 'Admin' : 'Super Admin'}
             </Text>
             <Text style={{ color: TEXT_MUTED, marginTop: 8 }}>
-              Вопрос {quizIndex + 1} из {quiz.length}
+              Question {quizIndex + 1} of {quiz.length}
             </Text>
           </View>
 
@@ -1025,7 +1032,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
 
             {!!quiz[quizIndex].tip && (
               <Text style={{ color: TEXT_MUTED, marginTop: 8, lineHeight: 18 }}>
-                Подсказка: {quiz[quizIndex].tip}
+                Tip: {quiz[quizIndex].tip}
               </Text>
             )}
 
@@ -1056,7 +1063,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 alignItems: 'center',
               }}>
               <GhostButton
-                title="Назад"
+                title="Back"
                 onPress={() => {
                   if (quizIndex === 0) setStage('role');
                   else setQuizIndex((v) => Math.max(0, v - 1));
@@ -1065,7 +1072,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
 
               <PrimaryButton
                 width="60%"
-                title={quizIndex === quiz.length - 1 ? 'Завершить' : 'Далее'}
+                title={quizIndex === quiz.length - 1 ? 'Finish' : 'Next'}
                 disabled={quizAnswers[quiz[quizIndex].id] === undefined}
                 onPress={() => {
                   if (quizIndex === quiz.length - 1) finishQuiz();
@@ -1091,37 +1098,35 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
 
             {role !== 'user' && quizScore !== null ? (
               <Text style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center' }}>
-                Результат теста: {quizScore}/{quiz.length} (это просто обучение)
+                Quiz result: {quizScore}/{quiz.length} (this is just training)
               </Text>
             ) : (
               <Text
                 style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
-                Вот короткий план “как в игре”: что попробовать прямо сейчас, чтобы быстро
-                освоиться.
+                Here’s a short “game-style” plan: what to try right now to get comfortable fast.
               </Text>
             )}
           </View>
 
-          {/* ✅ ВОТ ТУТ И ДОЛЖНА БЫТЬ “ОБУЧАЛКА” */}
+          {/* ✅ THIS IS WHERE THE “TRAINING GUIDE” SHOULD BE */}
           <View style={{ ...CARD, marginTop: 12 }}>
             {guideBullets.map((t, idx) => (
               <GuideBullet key={`${idx}-${t}`} text={t} />
             ))}
 
             <View style={{ marginTop: 14 }}>
-              <Chip text="ДЕМО • ПЛАТЕЖИ НЕ НАСТОЯЩИЕ" />
+              <Chip text="DEMO • PAYMENTS ARE NOT REAL" />
               <Text
                 style={{ color: TEXT_MUTED, textAlign: 'center', lineHeight: 18, marginTop: 10 }}>
-                Всё, что ты вводишь и делаешь — только в тестовой базе. Не используй реальные
-                данные.
+                Everything you enter and do is only in a test database. Do not use real data.
               </Text>
             </View>
           </View>
 
           {role === 'user' && (
             <Text style={{ color: TEXT_MUTED, textAlign: 'center', marginTop: 12, lineHeight: 18 }}>
-              Для роли “Пользователь” аккаунт создаётся вручную. Нажми ниже и зарегистрируйся на
-              экране входа.
+              For the “User” role, the account is created manually. Tap below and register on the
+              login screen.
             </Text>
           )}
 
@@ -1136,7 +1141,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 alignItems: 'center',
               }}>
               <GhostButton
-                title="Назад"
+                title="Back"
                 onPress={() => {
                   if (role === 'user') setStage('role');
                   else setStage('quiz');
@@ -1146,7 +1151,7 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
               {role === 'user' ? (
                 <PrimaryButton
                   width="60%"
-                  title="Перейти к входу"
+                  title="Go to login"
                   onPress={() => {
                     onDone(role);
                     router.replace('/login');
@@ -1154,8 +1159,8 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 />
               ) : (
                 <PrimaryButton
-                  title={role === 'admin' ? 'Получить админку' : 'Получить супер-админку'}
-                  onPress={() => setStage('setup')} // ✅ теперь это отдельный шаг
+                  title={role === 'admin' ? 'Get Admin access' : 'Get Super Admin access'}
+                  onPress={() => setStage('setup')} // ✅ now this is a separate step
                 />
               )}
 
@@ -1171,68 +1176,75 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
           <View style={{ alignItems: 'center', marginTop: 6 }}>
             <Text
               style={{ color: TEXT_MAIN, fontSize: 22, fontWeight: '900', textAlign: 'center' }}>
-              {role === 'admin' ? 'Получение админки' : 'Получение супер-админки'}
+              {role === 'admin' ? 'Getting Admin access' : 'Getting Super Admin access'}
             </Text>
-            <Text style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
-              Введи имя и фамилию — мы соберём email, создадим тестовый аккаунт и сразу авторизуем
-              тебя.
-            </Text>
+
+            {!creating && (
+              <Text
+                style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
+                Enter your first and last name — we’ll generate an email, create a test account, and
+                sign you in right away.
+              </Text>
+            )}
           </View>
 
-          <View style={{ ...CARD, marginTop: 12 }}>
-            <Text style={{ color: TEXT_MAIN, fontSize: 16, fontWeight: '800' }}>
-              Введите ваши данные
-            </Text>
+          {!creating && (
+            <View style={{ ...CARD, marginTop: 12 }}>
+              <Text style={{ color: TEXT_MAIN, fontSize: 16, fontWeight: '800' }}>
+                Enter your details
+              </Text>
 
-            <Text style={{ color: TEXT_MAIN, marginTop: 12, marginBottom: 6, fontWeight: '700' }}>
-              Имя
-            </Text>
-            <TextInput
-              value={firstName}
-              onChangeText={setFirstName}
-              placeholder="Введите ваше имя"
-              autoCapitalize="words"
-              style={{
-                height: 46,
-                borderRadius: 14,
-                borderWidth: 1,
-                borderColor: '#E5E7EB',
-                paddingHorizontal: 14,
-                backgroundColor: '#FFFFFF',
-                fontSize: 15,
-                color: TEXT_MAIN,
-              }}
-            />
+              <Text style={{ color: TEXT_MAIN, marginTop: 12, marginBottom: 6, fontWeight: '700' }}>
+                First name
+              </Text>
+              <TextInput
+                value={firstName}
+                onChangeText={setFirstName}
+                placeholder="Enter your first name"
+                autoCapitalize="words"
+                style={{
+                  height: 46,
+                  borderRadius: 14,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  paddingHorizontal: 14,
+                  backgroundColor: '#FFFFFF',
+                  fontSize: 15,
+                  color: TEXT_MAIN,
+                }}
+              />
 
-            <Text style={{ color: TEXT_MAIN, marginTop: 12, marginBottom: 6, fontWeight: '700' }}>
-              Фамилия
-            </Text>
-            <TextInput
-              value={lastName}
-              onChangeText={setLastName}
-              placeholder="Введите вашу фамилию"
-              autoCapitalize="words"
-              style={{
-                height: 46,
-                borderRadius: 14,
-                borderWidth: 1,
-                borderColor: '#E5E7EB',
-                paddingHorizontal: 14,
-                backgroundColor: '#FFFFFF',
-                fontSize: 15,
-                color: TEXT_MAIN,
-              }}
-            />
+              <Text style={{ color: TEXT_MAIN, marginTop: 12, marginBottom: 6, fontWeight: '700' }}>
+                Last name
+              </Text>
+              <TextInput
+                value={lastName}
+                onChangeText={setLastName}
+                placeholder="Enter your last name"
+                autoCapitalize="words"
+                style={{
+                  height: 46,
+                  borderRadius: 14,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  paddingHorizontal: 14,
+                  backgroundColor: '#FFFFFF',
+                  fontSize: 15,
+                  color: TEXT_MAIN,
+                }}
+              />
 
-            <Text style={{ color: TEXT_MUTED, marginTop: 10 }}>
-              Email будет примерно:{' '}
-              <Text style={{ color: TEXT_MAIN, fontWeight: '800' }}>{emailPreview}</Text>
-            </Text>
+              <Text style={{ color: TEXT_MUTED, marginTop: 10 }}>
+                Your email will look like:{' '}
+                <Text style={{ color: TEXT_MAIN, fontWeight: '800' }}>{emailPreview}</Text>
+              </Text>
 
-            <Text style={{ color: TEXT_MUTED, marginTop: 10, lineHeight: 18 }}>
-              📸 После создания сделай скриншот экрана с данными (на всякий случай).
-            </Text>
-          </View>
+              <Text style={{ color: TEXT_MUTED, marginTop: 10, lineHeight: 18 }}>
+                📸 After creating the account, take a screenshot of this screen with the details
+                (just in case).
+              </Text>
+            </View>
+          )}
 
           {createError ? (
             <Text style={{ color: '#B91C1C', textAlign: 'center', marginTop: 10 }}>
@@ -1248,18 +1260,28 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 alignItems: 'center',
                 paddingBottom: 90,
               }}>
-              <ActivityIndicator size="large" color={PRIMARY} />
+              <ActivityIndicator
+                size="large"
+                color={PRIMARY}
+                style={{ transform: [{ scale: 1.3 }] }}
+              />
+
               <Text style={{ color: TEXT_MAIN, marginTop: 12, fontWeight: '900', fontSize: 16 }}>
-                {role === 'admin' ? 'Готовим админ-аккаунт…' : 'Готовим супер-админ аккаунт…'}
+                {role === 'admin'
+                  ? 'Preparing your admin account…'
+                  : 'Preparing your super admin account…'}
               </Text>
+
               <Text
                 style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
-                {createPhase === 'create'
-                  ? 'Шаг 1/2: создаём профиль в тестовой базе.'
-                  : 'Шаг 2/2: выполняем вход и сохраняем токен.'}
-                {'\n'}Обычно это занимает несколько минут или дольше пожалуйста подождите, можете
-                пока поставить телефон на паузу и спокойно сделать чай — мы всё доделаем.
-                Пожалуйста, не закрывайте приложение.
+                <Text className="text-black font-semibold">
+                  {createPhase === 'create'
+                    ? 'Step 1/2: creating a profile in the test database.'
+                    : 'Step 2/2: signing in and saving the token.'}
+                </Text>
+                {'\n'}This usually takes a few minutes or longer — please wait. You can put your
+                phone down and calmly make some tea — we’ll finish everything. Please do not close
+                the app.
               </Text>
             </View>
           ) : (
@@ -1273,14 +1295,14 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
-              <GhostButton title="Назад" onPress={() => setStage('guide')} hidden={creating} />
+              <GhostButton title="Back" onPress={() => setStage('guide')} hidden={creating} />
 
               <PrimaryButton
-                title={role === 'admin' ? 'Создать админ-аккаунт' : 'Создать супер-админ аккаунт'}
+                title={role === 'admin' ? 'Create admin account' : 'Create super admin account'}
                 onPress={() => createRoleAccount(role)}
                 disabled={creating || !canCreate}
                 loading={createPhase !== 'idle'}
-                loadingText={'Создаём аккаунт…'}
+                loadingText={'Creating account…'}
                 width="60%"
               />
 
@@ -1298,12 +1320,12 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
               style={{ width: 96, height: 96, borderRadius: 999 }}
             />
             <Text style={{ color: TEXT_MAIN, fontSize: 26, fontWeight: '900', marginTop: 12 }}>
-              Аккаунт готов ✅
+              Account is ready ✅
             </Text>
 
             <Text style={{ color: TEXT_MUTED, marginTop: 8, textAlign: 'center', lineHeight: 18 }}>
-              Это ваш тестовый аккаунт: {createdCreds.position.toUpperCase()}. 📸 Обязательно
-              сделайте скриншот этого экрана (Email/Пароль), чтобы не потерять данные.
+              This is your test account: {createdCreds.position.toUpperCase()}. 📸 Make sure to take
+              a screenshot of this screen (Email/Password) so you don’t lose the details.
             </Text>
           </View>
 
@@ -1340,11 +1362,11 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                   borderRadius: 12,
                   backgroundColor: '#F3F4F6',
                 }}>
-                <Text style={{ fontWeight: '900', color: TEXT_MAIN }}>Копировать</Text>
+                <Text style={{ fontWeight: '900', color: TEXT_MAIN }}>Copy</Text>
               </TouchableOpacity>
             </View>
 
-            <Text style={{ color: TEXT_MUTED, fontWeight: '800', marginTop: 14 }}>Пароль</Text>
+            <Text style={{ color: TEXT_MUTED, fontWeight: '800', marginTop: 14 }}>Password</Text>
             <View
               style={{
                 marginTop: 8,
@@ -1368,16 +1390,12 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
                   borderRadius: 12,
                   backgroundColor: '#F3F4F6',
                 }}>
-                <Text style={{ fontWeight: '900', color: TEXT_MAIN }}>Копировать</Text>
+                <Text style={{ fontWeight: '900', color: TEXT_MAIN }}>Copy</Text>
               </TouchableOpacity>
             </View>
 
-            {/* <View style={{ marginTop: 14 }}>
-              <Chip text="ДЕМО • ПЛАТЕЖИ НЕ НАСТОЯЩИЕ" />
-            </View> */}
-
             <Text style={{ color: TEXT_MUTED, textAlign: 'center', lineHeight: 18, marginTop: 15 }}>
-              Баланс: {createdCreds.balance.toLocaleString()} ₽ • роль: {createdCreds.position}
+              Balance: {createdCreds.balance.toLocaleString()} ₽ • role: {createdCreds.position}
             </Text>
           </View>
 
@@ -1385,15 +1403,17 @@ function Intro({ onDone }: { onDone: (role: Role) => void }) {
 
           <View style={{ paddingBottom: 18, display: 'flex', alignItems: 'center' }}>
             <PrimaryButton
-              title="Перейти на главную"
+              title="Go to Home"
               onPress={async () => {
                 if (!role) return;
                 await onDone(role as any);
+                await Updates.reloadAsync();
               }}
             />
 
             <Text style={{ color: TEXT_MUTED, textAlign: 'center', marginTop: 10, lineHeight: 18 }}>
-              Ты уже авторизован ✅ Данные выше — просто “резерв”, если захочешь войти вручную.
+              You’re already signed in ✅ The details above are just a “backup” in case you ever
+              want to log in manually.
             </Text>
           </View>
         </View>
@@ -1415,9 +1435,19 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // нормальный shuffle (без sort random)
+  //  old
+  // const fetchProducts = useCallback(async () => {
+  //   const res = await axios.get<Product[]>(
+  //     'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description,-comments',
+  //   );
+  //   dispatch(setProducts(shuffleArray(res.data)));
+  // }, [dispatch, shuffleArray]);
+
+  // new
+  const PRODUCTS_CACHE_KEY = 'native_sneakers_products_cache_v1';
+
   const shuffleArray = useCallback((arr: Product[]) => {
-    const a = [...arr];
+    const a = [...arr]; // ВАЖНО: именно [...arr]
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [a[i], a[j]] = [a[j], a[i]];
@@ -1425,23 +1455,75 @@ export default function Index() {
     return a;
   }, []);
 
-  //  old
-  const fetchProducts = useCallback(async () => {
-    const res = await axios.get<Product[]>(
-      'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description,-comments',
-    );
-    dispatch(setProducts(shuffleArray(res.data)));
-  }, [dispatch, shuffleArray]);
+  const fetchProducts = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      const silent = !!opts?.silent;
 
-  // new
-  // const fetchProducts = useCallback(async () => {
-  //   const res = await axios.get<Product[]>(
-  //     'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description,-comments',
-  //     { timeout: 20000 }, // 20s
-  //   );
+      try {
+        if (!silent) setIsLoading(true);
 
-  //   dispatch(setProducts(shuffleArray(res.data)));
-  // }, [dispatch, shuffleArray]);
+        const res = await axios.get<Product[]>(
+          'https://dcc2e55f63f7f47b.mokky.dev/products?_select=-description,-comments',
+          { timeout: 20000 },
+        );
+
+        const shuffled = shuffleArray(res.data);
+        dispatch(setProducts(shuffled));
+
+        // кеш на следующий запуск
+        AsyncStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(shuffled)).catch(() => {});
+      } catch (e) {
+        console.log('fetchProducts error', e);
+        // НЕ ОБНУЛЯЙ если уже есть продукты — но минимум так:
+        dispatch(setProducts([]));
+      } finally {
+        if (!silent) setIsLoading(false);
+      }
+    },
+    [dispatch, shuffleArray],
+  );
+
+  // 1) мгновенно отрисовать из кеша (без ожидания сети)
+  useEffect(() => {
+    if (!introChecked) return;
+
+    let alive = true;
+    (async () => {
+      try {
+        const cached = await AsyncStorage.getItem(PRODUCTS_CACHE_KEY);
+        if (!alive || !cached) return;
+
+        const parsed = JSON.parse(cached) as Product[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          dispatch(setProducts(parsed));
+        }
+      } catch {}
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [introChecked, dispatch]);
+
+  // 2) один раз префетчим сеть В ФОНЕ сразу при старте (даже когда интро открыто)
+  const prefetchStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (!introChecked) return;
+    if (prefetchStartedRef.current) return;
+
+    prefetchStartedRef.current = true;
+    void fetchProducts({ silent: true });
+  }, [introChecked, fetchProducts]);
+
+  // 3) если у тебя есть updateProductsEffect — обновляй, но только когда интро закрыто
+  useEffect(() => {
+    if (!introChecked) return;
+    if (showIntro) return;
+    if (products.length > 0) return;
+
+    fetchProducts(); // тут можно silent:true если хочешь без спиннера
+  }, [introChecked, showIntro, products.length, fetchProducts]);
 
   // проверяем первый запуск
   useEffect(() => {
@@ -1488,8 +1570,10 @@ export default function Index() {
     if (!introChecked) return;
     if (showIntro) return;
 
-    const loadId = ++loadIdRef.current;
+    // ✅ если finishIntro уже успел загрузить — не грузим второй раз
+    if (products.length > 0) return;
 
+    const loadId = ++loadIdRef.current;
     setIsLoading(true);
 
     fetchProducts()
@@ -1498,10 +1582,9 @@ export default function Index() {
         dispatch(setProducts([]));
       })
       .finally(() => {
-        // выключаем лоадер только для последнего актуального запроса
         if (loadId === loadIdRef.current) setIsLoading(false);
       });
-  }, [introChecked, showIntro, fetchProducts, dispatch, updateProducts]);
+  }, [introChecked, showIntro, products.length, fetchProducts, dispatch, updateProducts]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -1514,38 +1597,27 @@ export default function Index() {
     }
   }, [fetchProducts]);
 
-  const finishIntro = useCallback(
-    async (role: Role) => {
-      try {
-        await AsyncStorage.setItem(INTRO_KEY, '1');
-        await AsyncStorage.setItem(ROLE_KEY, role);
-      } catch (err) {
-        console.error('Ошибка при сохранении интро', err);
-      }
+  const finishIntro = useCallback(async (role: Role) => {
+    try {
+      // 1) сохраняем факт прохождения интро + выбранную роль
+      await AsyncStorage.multiSet([
+        [INTRO_KEY, '1'],
+        [ROLE_KEY, role],
+      ]);
+    } catch (err) {
+      console.error('Ошибка при сохранении интро', err);
+    }
 
-      // ✅ закрываем интро
-      setShowIntro(false);
-
-      // ✅ сразу запускаем загрузку, чтобы не было “пусто пока не reload”
-      try {
-        setIsLoading(true);
-        await fetchProducts();
-      } catch (e) {
-        console.error('Ошибка при загрузке после интро:', e);
-        dispatch(setProducts([]));
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchProducts, dispatch],
-  );
+    // 2) НЕ делаем fetchProducts здесь — чтобы не было задержек/повторной загрузки
+    setShowIntro(false);
+  }, []);
 
   if (!introChecked) {
     return (
       <SafeAreaView
         style={{ flex: 1, backgroundColor: BG, alignItems: 'center', justifyContent: 'center' }}>
         <StatusBar barStyle="dark-content" backgroundColor={BG} />
-        <Text style={{ color: TEXT_MUTED }}>Загрузка...</Text>
+        <Text style={{ color: TEXT_MUTED }}>Loading...</Text>
       </SafeAreaView>
     );
   }
@@ -1562,7 +1634,7 @@ export default function Index() {
         }>
         <View>
           <Header />
-          <ProductList products={products} isLoading={isLoading} />
+          <ProductList products={products} isLoading={products.length === 0 && isLoading} />
         </View>
       </ScrollView>
     </SafeAreaView>

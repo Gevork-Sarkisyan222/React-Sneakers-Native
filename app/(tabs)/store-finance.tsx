@@ -102,12 +102,12 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
   // Заглушка обработки снятия
   const handleWithdraw = async (amount: number) => {
     if (amount > totalBudget) {
-      Alert.alert('Ошибка', 'Недостаточно средств');
+      Alert.alert('Error', 'Insufficient funds');
       return;
     }
 
     if (!amount) {
-      Alert.alert('Ошибка', 'Введите корректную сумму');
+      Alert.alert('Error', 'Enter a valid amount');
       return;
     }
 
@@ -116,13 +116,13 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
         store_budget: totalBudget - amount,
       });
 
-      Alert.alert('Успех', 'Средства успешно сняты');
+      Alert.alert('Success', 'Funds were withdrawn successfully');
       await axios.post('https://email-send-server.vercel.app/api/send-email', {
         amount,
       });
       fetchBudgetData();
     } catch (err) {
-      Alert.alert('Ошибка', 'Не удалось снять средства');
+      Alert.alert('Error', 'Failed to withdraw funds');
       console.error(err);
     } finally {
       handleCloseWithdrawModal();
@@ -140,32 +140,32 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
     <>
       {withdrawAmountModal && (
         <Modal visible animationType="fade" transparent>
-          {/* Затенённый фон */}
+          {/* Dimmed backdrop */}
           <Pressable
             className="flex-1 justify-center items-center"
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
             onPress={handleCloseWithdrawModal}>
-            {/* Карточка модалки */}
+            {/* Modal card */}
             <Pressable onPress={() => {}}>
               <View className="w-11/12 max-w-sm bg-white rounded-2xl overflow-hidden shadow-xl">
-                {/* Хедер с градиентом */}
+                {/* Header with gradient */}
                 <LinearGradient
                   colors={['#4C9EEB', '#367AD8']}
                   start={[0, 0]}
                   end={[1, 0]}
                   className="py-4 px-6">
                   <Text className="text-center text-lg font-bold text-white">
-                    Снять средства (Demo)
+                    Withdraw Funds (Demo)
                   </Text>
                 </LinearGradient>
 
                 <View className="p-6 gap-4">
-                  {/* Описание */}
+                  {/* Description */}
                   <Text className="text-center text-gray-600">
-                    Введите сумму или снимите весь доступный баланс
+                    Enter an amount or withdraw the entire available balance
                   </Text>
 
-                  {/* Поле ввода с кнопкой "Вся сумма" */}
+                  {/* Input with "Full amount" button */}
                   <View className="flex-row items-center gap-2">
                     <View className="relative flex-1">
                       <TextInput
@@ -183,26 +183,26 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
                     <TouchableOpacity
                       className="px-4 py-3 bg-indigo-50 rounded-lg shadow-inner"
                       onPress={() => setWithdrawAmount(totalBudget.toString())}>
-                      <Text className="text-blue-600 font-semibold">Вся сумма</Text>
+                      <Text className="text-blue-600 font-semibold">Full amount</Text>
                     </TouchableOpacity>
                   </View>
 
-                  {/* Разделитель */}
+                  {/* Divider */}
                   <View className="h-px bg-gray-200" />
 
-                  {/* Кнопки действий */}
+                  {/* Action buttons */}
                   <View className="flex-row justify-between gap-4">
                     <TouchableOpacity
                       className="flex-1 py-3 bg-gray-100 rounded-lg items-center"
                       onPress={handleCloseWithdrawModal}>
-                      <Text className="text-gray-700 font-medium">Отмена</Text>
+                      <Text className="text-gray-700 font-medium">Cancel</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       className="flex-1 py-3 bg-blue-600 rounded-lg items-center shadow"
                       onPress={() => {
                         handleWithdraw(Number(withdrawAmount));
                       }}>
-                      <Text className="text-white font-semibold">Снять (Demo)</Text>
+                      <Text className="text-white font-semibold">Withdraw (Demo)</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -215,71 +215,71 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
       <SafeAreaView className="flex-1 bg-gray-100">
         <ScrollView className="flex-1 p-4">
           <View className="flex-row items-start gap-4">
-            {/* КНОПКА НАЗАД */}
+            {/* BACK BUTTON */}
             <Pressable
               onPress={() => router.push('/admin-panel')}
               className="bg-white w-10 h-10 items-center justify-center rounded-full shadow-md shadow-gray-300 active:opacity-60 mb-4">
               <Feather name="arrow-left" size={20} color="#333" />
             </Pressable>
 
-            {/* Заголовок */}
+            {/* Title */}
             <View className="mb-6">
-              <Text className="text-[22px] font-bold text-gray-900">Финансы вашего магазина</Text>
-              <Text className="text-gray-600 mt-1">Обзор бюджета и метрик (demo)</Text>
+              <Text className="text-[22px] font-bold text-gray-900">Your Store Finances</Text>
+              <Text className="text-gray-600 mt-1">Budget and metrics overview (demo)</Text>
             </View>
           </View>
 
-          {/* Карточка общего бюджета */}
+          {/* Total budget card */}
           <View className="bg-white rounded-2xl p-6 shadow mb-6">
             <View className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6">
-              <Text className="text-amber-900 font-semibold">Демо / учебный режим</Text>
+              <Text className="text-amber-900 font-semibold">Demo / training mode</Text>
               <Text className="text-amber-800 text-sm mt-1">
-                Приложение работает в демонстрационном режиме. Данные используются только для
-                тестирования функционала и хранятся в тестовой базе.
+                The app is running in demo mode. The data is used only for feature testing and is
+                stored in a test database.
               </Text>
             </View>
 
-            <Text className="text-lg font-semibold text-gray-700">Общий бюджет (DEMO)</Text>
+            <Text className="text-lg font-semibold text-gray-700">Total Budget (DEMO)</Text>
             <Text className="text-4xl font-bold text-green-600 mt-2">
               {totalBudget.toLocaleString()} ₽
             </Text>
 
-            {/* КНОПКА: ПЕРЕВЕСТИ СУММУ */}
+            {/* BUTTON: WITHDRAW AMOUNT */}
             <TouchableOpacity
               onPress={() => {
                 setWithdrawAmountModal(true);
               }}
               className="mt-4 bg-green-100 px-4 py-3 rounded-xl active:opacity-70 flex-row items-center justify-center gap-[8px]">
               {/* <FontAwesome6
-              name="money-bill-transfer"
-              size={20}
-              color="#16a34a"
-            /> */}
-              <Text className="text-green-600 text-base font-semibold">Снять сумму</Text>
+          name="money-bill-transfer"
+          size={20}
+          color="#16a34a"
+        /> */}
+              <Text className="text-green-600 text-base font-semibold">Withdraw amount</Text>
               <AntDesign name="arrowright" size={24} color="#16a34a" />
             </TouchableOpacity>
           </View>
 
-          {/* Статистика месяца */}
+          {/* Monthly stats */}
           <View className="bg-white rounded-2xl p-6 shadow mb-6">
             <Text className="text-lg font-semibold text-gray-700 mb-4">
-              Статистика за текущий месяц
+              Current month statistics
             </Text>
             <View className="flex-row justify-between">
               <View className="items-start">
-                <Text className="text-sm text-gray-500">Доход</Text>
+                <Text className="text-sm text-gray-500">Income</Text>
                 <Text className="text-2xl font-bold text-blue-600 mt-1">
                   {currentMonthIncome.toLocaleString()} ₽
                 </Text>
               </View>
               <View className="items-start">
-                <Text className="text-sm text-gray-500">Расходы</Text>
+                <Text className="text-sm text-gray-500">Expenses</Text>
                 <Text className="text-2xl font-bold text-red-600 mt-1">
                   {monthlyExpenses.toLocaleString()} ₽
                 </Text>
               </View>
               <View className="items-start">
-                <Text className="text-sm text-gray-500">Прибыль</Text>
+                <Text className="text-sm text-gray-500">Profit</Text>
                 <Text className="text-2xl font-bold text-green-600 mt-1">
                   {profit.toLocaleString()} ₽
                 </Text>
@@ -287,10 +287,10 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
             </View>
           </View>
 
-          {/* Дополнительные показатели */}
+          {/* Additional metrics */}
           <StatsChart data={monthsIncomeArray} />
 
-          {/* Кнопка действий */}
+          {/* Action button */}
           <View className="mt-8 mb-4">
             <TouchableOpacity
               onPress={() => {
@@ -304,7 +304,7 @@ const StoreFinancePage: React.FC<Props> = ({}) => {
               {isRefreshing ? (
                 <ActivityIndicator size="small" color="white" />
               ) : (
-                <Text className="text-center text-white font-semibold">Обновить данные</Text>
+                <Text className="text-center text-white font-semibold">Refresh data</Text>
               )}
             </TouchableOpacity>
           </View>

@@ -17,7 +17,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data }) => {
     };
   }, [data]);
 
-  // теперь отнимаем 64 — по 16px с каждой стороны у ScrollView и у блока с p-4
+  // now subtract 64 — 16px on each side for the ScrollView and the block with p-4
   const screenWidth = Dimensions.get('window').width - 64;
 
   const chartConfig = {
@@ -31,7 +31,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data }) => {
 
   return (
     <View className="bg-white rounded-2xl shadow p-4">
-      <Text className="text-lg font-semibold text-gray-700 mb-2">Статистика доходов (DEMO)</Text>
+      <Text className="text-lg font-semibold text-gray-700 mb-2">Income Statistics (DEMO)</Text>
       {data.length > 0 ? (
         <LineChart
           data={chartData}
@@ -44,7 +44,7 @@ const StatsChart: React.FC<StatsChartProps> = ({ data }) => {
         />
       ) : (
         <View className="h-40 items-center justify-center">
-          <Text className="text-gray-400">Нет данных для отображения</Text>
+          <Text className="text-gray-400">No data to display</Text>
         </View>
       )}
     </View>

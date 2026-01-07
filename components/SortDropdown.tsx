@@ -3,11 +3,11 @@ import { View, Text, TouchableOpacity, Animated, Easing, FlatList } from 'react-
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 const SORT_OPTIONS = [
-  { key: 'all', label: 'Все' },
-  { key: 'price_asc', label: 'Цена: по возрастанию' },
-  { key: 'price_desc', label: 'Цена: по убыванию' },
-  { key: 'men', label: 'Мужские' },
-  { key: 'woman', label: 'Женские' },
+  { key: 'all', label: 'All' },
+  { key: 'price_asc', label: 'Price: low to high' },
+  { key: 'price_desc', label: 'Price: high to low' },
+  { key: 'men', label: "Men's" },
+  { key: 'woman', label: "Women's" },
 ];
 
 const SortDropdown: React.FC<{
@@ -45,7 +45,7 @@ const SortDropdown: React.FC<{
   );
 
   return (
-    // relative-контейнер, чтобы потом выпадашка позиционировалась относительно него
+    // relative container so the dropdown is positioned relative to it
     <View style={{ marginBottom: 25, zIndex: 10, position: 'relative' }}>
       <TouchableOpacity
         activeOpacity={0.7}
@@ -62,16 +62,16 @@ const SortDropdown: React.FC<{
           paddingHorizontal: 15,
         }}>
         <Text style={{ fontSize: 14, color: '#000' }}>
-          {SORT_OPTIONS.find((o) => o.key === selectedKey)?.label || 'Сортировать'}
+          {SORT_OPTIONS.find((o) => o.key === selectedKey)?.label || 'Sort by'}
         </Text>
         <AntDesign name={open ? 'up' : 'down'} size={16} color="black" />
       </TouchableOpacity>
 
-      {/* Абсолютно позиционированный контейнер */}
+      {/* Absolutely positioned container */}
       <Animated.View
         style={{
           position: 'absolute',
-          top: 50, // чуть ниже кнопки (45px + 5px отступ)
+          top: 50, // slightly below the button (45px + 5px spacing)
           left: 0,
           right: 0,
           height: animation,
@@ -80,7 +80,7 @@ const SortDropdown: React.FC<{
           borderWidth: open ? 1 : 0,
           borderColor: '#e6e6e6',
           borderRadius: 10,
-          zIndex: 20, // чтобы был над остальным
+          zIndex: 20, // so it's above everything else
         }}>
         <FlatList data={SORT_OPTIONS} keyExtractor={(item) => item.key} renderItem={renderOption} />
       </Animated.View>

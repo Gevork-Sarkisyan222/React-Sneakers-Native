@@ -149,8 +149,8 @@ export default function Header() {
             />
           </Pressable>
           <View>
-            <Text className="text-black text-sm font-bold">REACT SNEAKERS</Text>
-            <Text className="text-[#9d9d9d] text-sm font-normal">Магазин лучших кроссовок</Text>
+            <Text className="text-black text-sm font-bold">NATIVE SNEAKERS</Text>
+            <Text className="text-[#9d9d9d] text-sm font-normal">The best sneakers store</Text>
           </View>
         </View>
 

@@ -25,7 +25,7 @@ const CartCard: React.FC<Props> = ({ title, price, imgUrl, handleRemove }) => {
           {title}
         </Text>
 
-        <Text className="font-bold text-[14px]">{price} руб.</Text>
+        <Text className="font-bold text-[14px]">{price} RUB</Text>
       </View>
 
       <Pressable

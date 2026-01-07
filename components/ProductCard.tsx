@@ -240,7 +240,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     <TouchableOpacity className="w-[48%] mb-4 h-[260px] rounded-[40px] border border-[#e6e6e6] bg-white p-[20px] px-[22px]">
       {!removeAllButtons && (
         <>
-          {/* Кнопка избранного */}
+          {/* Favorite button */}
           <TouchableOpacity
             onPress={handleToggleFavorite}
             disabled={isProcessingFavorite}
@@ -256,7 +256,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
         </>
       )}
 
-      {/* Изображение товара */}
+      {/* Product image */}
       <TouchableOpacity
         onPress={() => {
           !noRedirect &&
@@ -275,15 +275,15 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
         />
       </TouchableOpacity>
 
-      {/* Заголовок */}
+      {/* Title */}
       <Text className="text-[14px] font-normal text-black mb-[14px]">{title}</Text>
 
-      {/* Нижняя часть карточки */}
+      {/* Bottom part of the card */}
       <View className="flex-row items-center justify-between">
         <View className="flex-col items-start">
           {!inOrderPage && isOnSales && (
             <Text className="text-[15px] font-bold text-green-500 leading-[20px]">
-              {currentPriceWithSale} руб.
+              {currentPriceWithSale} RUB
             </Text>
           )}
 
@@ -295,13 +295,13 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                   ? 'line-through text-gray-400 text-[12px]'
                   : 'text-[14px] text-black font-bold'
             }`}>
-            {price} руб.
+            {price} RUB
           </Text>
         </View>
 
         {!removeAllButtons && (
           <>
-            {/* Кнопка добавления в корзину */}
+            {/* Add to cart button */}
             <TouchableOpacity
               onPress={handleAddToCart}
               disabled={isProcessingCart}

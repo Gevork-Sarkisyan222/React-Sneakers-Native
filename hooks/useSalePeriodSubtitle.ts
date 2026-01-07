@@ -1,24 +1,24 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 /**
- * Хук для генерации подзаголовка периода распродажи от сегодняшнего дня на +7 дней.
- * Формат: "С D по D месяц"
+ * Hook to generate a sale period subtitle from today through +7 days.
+ * Format: "From D to D month"
  */
 export function useSalePeriodSubtitle(): string {
   return useMemo(() => {
     const rusMonths = [
-      "января",
-      "февраля",
-      "марта",
-      "апреля",
-      "мая",
-      "июня",
-      "июля",
-      "августа",
-      "сентября",
-      "октября",
-      "ноября",
-      "декабря",
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
     const today = new Date();
@@ -29,6 +29,6 @@ export function useSalePeriodSubtitle(): string {
     const dayFuture = future.getDate();
     const monthName = rusMonths[today.getMonth()];
 
-    return `С ${dayToday} по ${dayFuture} ${monthName}`;
+    return `From ${dayToday} to ${dayFuture} ${monthName}`;
   }, []);
 }

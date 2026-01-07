@@ -51,7 +51,7 @@ export default function Favorites() {
 
           <View style={{ paddingTop: 25, paddingHorizontal: 15, flex: 1 }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20 }}>
-              Мои закладки
+              My favorites
             </Text>
 
             {isLoading ? (
@@ -97,10 +97,10 @@ export default function Favorites() {
                   source={require('../../assets/images/sad-smile.png')}
                 />
                 <Text style={{ fontSize: 22, fontWeight: '600', marginTop: 20, marginBottom: 9 }}>
-                  Закладок нет :(
+                  No favorites :(
                 </Text>
                 <Text style={{ fontSize: 16, color: '#9b9b9b', textAlign: 'center' }}>
-                  Вы ничего не добавляли в закладки.
+                  You haven't added anything to your favorites.
                 </Text>
               </View>
             )}

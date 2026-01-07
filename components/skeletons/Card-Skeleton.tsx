@@ -32,7 +32,7 @@ const CardSkeleton = ({ loading = true }: Props) => {
 
   if (!loading) return null;
 
-  // вычисляем ширину 48% от экрана минус общий горизонтальный padding (по 16px)
+  // calculate width as 48% of the screen minus total horizontal padding (16px on each side)
   const { width: SCREEN_WIDTH } = Dimensions.get('window');
   const CARD_WIDTH = (SCREEN_WIDTH - 32) * 0.48;
 
@@ -40,24 +40,24 @@ const CardSkeleton = ({ loading = true }: Props) => {
     <Animated.View
       style={{ opacity, width: CARD_WIDTH, height: 260 }}
       className="mb-4 rounded-[40px] bg-white">
-      {/* изображение */}
+      {/* image */}
       <View
         className="bg-gray-200 rounded-[12px]"
         style={{ width: 133, height: 112, marginTop: 20, marginLeft: 20 }}
       />
 
-      {/* заголовок */}
+      {/* title */}
       <View
         className="bg-gray-200 rounded-[4px] mb-2"
         style={{
-          width: CARD_WIDTH - 40, // отступы слева/справа по 20
+          width: CARD_WIDTH - 40, // 20px padding left/right
           height: 14,
           marginTop: 10,
           marginLeft: 20,
         }}
       />
 
-      {/* подзаголовок */}
+      {/* subtitle */}
       <View
         className="bg-gray-200 rounded-[4px] mb-4"
         style={{
@@ -67,14 +67,14 @@ const CardSkeleton = ({ loading = true }: Props) => {
         }}
       />
 
-      {/* нижний ряд */}
+      {/* bottom row */}
       <View className="flex-row items-center justify-between px-5 mt-3">
-        {/* цена */}
+        {/* price */}
         <View>
           <View className="bg-gray-200 rounded-[4px] mb-1" style={{ width: 30, height: 11 }} />
           <View className="bg-gray-200 rounded-[4px]" style={{ width: 60, height: 14 }} />
         </View>
-        {/* кнопка */}
+        {/* button */}
         <View className="bg-gray-200 rounded-[8px]" style={{ width: 32, height: 32 }} />
       </View>
     </Animated.View>

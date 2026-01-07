@@ -22,8 +22,8 @@ export default function Controller({ onCloseModal, setModalType, isVisible }: Pr
     try {
       await axios.patch('https://dcc2e55f63f7f47b.mokky.dev/app-settings/1', payload);
     } catch (err) {
-      console.error('ОШИБКА ПРИ СОХРАНЕНИИ НАСТРОЕК', err);
-      alert('Не удалось сохранить изменения');
+      console.error('ERROR WHILE SAVING SETTINGS', err);
+      alert('Failed to save changes');
     }
   };
 
@@ -86,7 +86,7 @@ export default function Controller({ onCloseModal, setModalType, isVisible }: Pr
   // ЗАПУСК ГЛОБАЛЬНОЙ АКЦИИ: отправка запроса и сброс остальных
   const handleStartPromo = async () => {
     if (!promoDiscount) {
-      alert('Введите скидку');
+      alert('Enter the discount');
       return;
     }
 
@@ -125,15 +125,13 @@ export default function Controller({ onCloseModal, setModalType, isVisible }: Pr
 
   return (
     <View className="p-4 bg-white rounded-2xl">
-      <Text className="text-2xl font-semibold text-gray-800 mb-6">Настройки приложения</Text>
+      <Text className="text-2xl font-semibold text-gray-800 mb-6">App Settings</Text>
 
-      {/* СЕЗОННЫЕ ПРЕДЛОЖЕНИЯ */}
+      {/* SEASONAL OFFERS */}
       <View className="mb-6">
-        <Text className="text-[16px] font-medium text-gray-800 mb-[10px]">
-          Сезонные предложения
-        </Text>
+        <Text className="text-[16px] font-medium text-gray-800 mb-[10px]">Seasonal Offers</Text>
         <View className="flex-row justify-between items-center mb-[5px]">
-          <Text className="text-base text-gray-700">Летняя распродажа</Text>
+          <Text className="text-base text-gray-700">Summer Sale</Text>
           <Switch
             value={summerSale}
             onValueChange={onToggleSummerSale}
@@ -142,7 +140,7 @@ export default function Controller({ onCloseModal, setModalType, isVisible }: Pr
           />
         </View>
         <View className="flex-row justify-between items-center">
-          <Text className="text-base text-gray-700">Чёрная пятница</Text>
+          <Text className="text-base text-gray-700">Black Friday</Text>
           <Switch
             value={blackFriday}
             onValueChange={onToggleBlackFriday}
@@ -152,11 +150,11 @@ export default function Controller({ onCloseModal, setModalType, isVisible }: Pr
         </View>
       </View>
 
-      {/* ГЛОБАЛЬНАЯ АКЦИЯ */}
+      {/* GLOBAL PROMOTION */}
       <View className="mb-6">
-        <Text className="text-[16px] font-medium text-gray-800">Глобальная акция</Text>
+        <Text className="text-[16px] font-medium text-gray-800">Global Promotion</Text>
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-base text-gray-700">Устроить акцию</Text>
+          <Text className="text-base text-gray-700">Enable Promotion</Text>
           <Switch
             value={promoActive}
             onValueChange={onTogglePromoActive}
@@ -167,7 +165,7 @@ export default function Controller({ onCloseModal, setModalType, isVisible }: Pr
         </View>
         {promoActive && (
           <TextInput
-            placeholder="Скидка (%)"
+            placeholder="Discount (%)"
             value={promoDiscount}
             keyboardType="numeric"
             onChangeText={handleDiscountChange}
@@ -185,13 +183,13 @@ export default function Controller({ onCloseModal, setModalType, isVisible }: Pr
             setModalType(null);
           }}
           className="px-5 py-2">
-          <Text className="text-gray-700 uppercase">Отмена</Text>
+          <Text className="text-gray-700 uppercase">Cancel</Text>
         </TouchableOpacity>
         {promoActive && (
           <TouchableOpacity
             onPress={handleStartPromo}
             className="px-5 py-2 bg-[#9DD458] rounded-2xl shadow shadow-yellow-300">
-            <Text className="text-white uppercase">Запустить</Text>
+            <Text className="text-white uppercase">Start</Text>
           </TouchableOpacity>
         )}
       </View>

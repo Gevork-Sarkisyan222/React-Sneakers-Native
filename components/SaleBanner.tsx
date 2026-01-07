@@ -9,7 +9,7 @@ interface SaleBannerProps {
   subtitle?: string;
   iconName: string;
   backgroundColor: string;
-  imageSource: any; // require или { uri: ... }
+  imageSource: any; // require or { uri: ... }
 }
 
 export default function SaleBanner({
@@ -19,8 +19,8 @@ export default function SaleBanner({
   backgroundColor,
   imageSource,
 }: SaleBannerProps) {
-  // Предполагается, что backgroundColor передается как HEX-цвет (#RRGGBB)
-  // Добавляем прозрачность для оверлея. Если цвет не в формате HEX, можно указать прозрачный цвет по умолчанию.
+  // Assumes backgroundColor is passed as a HEX color (#RRGGBB)
+  // Add transparency for the overlay. If the color is not in HEX format, a default transparent color can be used.
   const overlayColor = backgroundColor.length === 7 ? backgroundColor + '90' : 'rgba(0,0,0,0.5)';
 
   return (
@@ -46,12 +46,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     marginVertical: 12,
-    // Тень для iOS
+    // Shadow for iOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    // Тень для Android
+    // Shadow for Android
     elevation: 6,
   },
   imageBackground: {

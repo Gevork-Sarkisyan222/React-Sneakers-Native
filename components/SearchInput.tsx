@@ -20,7 +20,7 @@ function SearchInput({ value, setValue, onChangeValue }: Props) {
       <TextInput
         value={value}
         onChange={(e) => onChangeValue(e)}
-        placeholder="Поиск кроссовок..."
+        placeholder="Search sneakers..."
         placeholderTextColor="#767676"
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}

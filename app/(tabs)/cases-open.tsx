@@ -26,26 +26,26 @@ import { sendToFinance } from '@/utils/finance';
 const RenderCaseSkeleton = () => {
   return Array.from({ length: 4 }).map((_, index) => (
     <View key={index} className="bg-white rounded-2xl overflow-hidden shadow-xl mb-5">
-      {/* Верхняя полоса (редкость) */}
+      {/* Top stripe (rarity) */}
       <View className="bg-gray-300 px-4 py-2" />
 
       <View className="flex-row p-4 items-center">
-        {/* Имитация изображения */}
+        {/* Image placeholder */}
         <View className="w-24 h-24 rounded-xl bg-gray-200 animate-pulse" />
 
         <View className="flex-1 ml-4">
-          {/* Название */}
+          {/* Title */}
           <View className="h-5 bg-gray-200 rounded w-3/4 mb-2 animate-pulse" />
-          {/* Текст ниже */}
+          {/* Subtitle */}
           <View className="h-4 bg-gray-200 rounded w-1/2 mb-3 animate-pulse" />
 
-          {/* Цена и метка */}
+          {/* Price + badge */}
           <View className="flex-row justify-between items-center mb-3">
             <View className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
             <View className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
           </View>
 
-          {/* Кнопка */}
+          {/* Button */}
           <View className="h-10 bg-gray-300 rounded-xl animate-pulse" />
         </View>
       </View>
@@ -94,13 +94,13 @@ const CasesOpenPage = () => {
   const getRarityText = (rarity: SneakerCase['rarity']) => {
     switch (rarity) {
       case 'common':
-        return 'ОБЫЧНЫЙ';
+        return 'COMMON';
       case 'rare':
-        return 'РЕДКИЙ';
+        return 'RARE';
       case 'epic':
-        return 'ЭПИЧЕСКИЙ';
+        return 'EPIC';
       case 'legendary':
-        return 'ЛЕГЕНДАРНЫЙ';
+        return 'LEGENDARY';
       default:
         return rarity;
     }
@@ -109,94 +109,91 @@ const CasesOpenPage = () => {
   const handleBuyCase = async (item: SneakerCase) => {
     if (!item || !user) return;
 
-    Alert.alert(
-      'Подтверждение',
-      'Вы действительно хотите купить этот кейс за ' + item.price + ' ₽ ?',
-      [
-        {
-          text: 'Отмена',
-          style: 'cancel',
-        },
-        {
-          text: 'Купить',
-          onPress: async () => {
+    Alert.alert('Confirmation', `Are you sure you want to buy this case for ${item.price} ₽?`, [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Buy',
+        onPress: async () => {
+          try {
+            setIsLoading(true);
+
+            if (user.balance < item.price) return Alert.alert('Error', 'Insufficient funds');
+
+            await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cases', item);
+
+            await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`, {
+              balance: user?.balance - item.price,
+            });
+
+            await sendToFinance(item.price);
+
+            Alert.alert('Success', `${item.title} was successfully purchased for ${item.price} ₽`);
+
+            await fetchBuyedCases();
+
+            await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cases', item);
+
+            await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`, {
+              balance: user?.balance - item.price,
+            });
+
+            await sendToFinance(item.price);
+
+            // Обновляем список купленных кейсов
+            await fetchBuyedCases();
+
+            // === Обновляем прогресс квестов по кейсам ===
             try {
-              setIsLoading(true);
+              const [dailyRes, weeklyRes] = await Promise.all([
+                axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/1'), // daily
+                axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/2'), // weekly
+              ]);
 
-              if (user.balance < item.price) return Alert.alert('Ошибка', 'Недостаточно средств');
+              const daily = dailyRes.data;
+              const weekly = weeklyRes.data;
 
-              await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cases', item);
+              const currentDailyCases = Number(daily?.buyed_opened_cases ?? 0);
+              const currentWeeklyCases = Number(weekly?.buyed_opened_20_cases ?? 0);
 
-              await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`, {
-                balance: user?.balance - item.price,
-              });
+              const requests: Promise<any>[] = [];
 
-              await sendToFinance(item.price);
+              // DAILY: buyed_opened_cases (максимум 1)
+              if (currentDailyCases < 1) {
+                requests.push(
+                  axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/1', {
+                    buyed_opened_cases: currentDailyCases + 1,
+                  }),
+                );
+              }
 
-              Alert.alert('Успех', `${item.title} успешно куплен за ${item.price} ₽`);
-              await fetchBuyedCases();
+              // WEEKLY: buyed_opened_20_cases (максимум 20)
+              if (currentWeeklyCases < 20) {
+                requests.push(
+                  axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/2', {
+                    buyed_opened_20_cases: currentWeeklyCases + 1,
+                  }),
+                );
+              }
 
-              await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cases', item);
-
-              await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user?.id}`, {
-                balance: user?.balance - item.price,
-              });
-
-              await sendToFinance(item.price);
-
-              // Обновляем список купленных кейсов
-              await fetchBuyedCases();
-
-              // === Обновляем прогресс квестов по кейсам ===
-              try {
-                const [dailyRes, weeklyRes] = await Promise.all([
-                  axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/1'), // daily
-                  axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/2'), // weekly
-                ]);
-
-                const daily = dailyRes.data;
-                const weekly = weeklyRes.data;
-
-                const currentDailyCases = Number(daily?.buyed_opened_cases ?? 0);
-                const currentWeeklyCases = Number(weekly?.buyed_opened_20_cases ?? 0);
-
-                const requests: Promise<any>[] = [];
-
-                // DAILY: buyed_opened_cases (максимум 1)
-                if (currentDailyCases < 1) {
-                  requests.push(
-                    axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/1', {
-                      buyed_opened_cases: currentDailyCases + 1,
-                    }),
-                  );
-                }
-
-                // WEEKLY: buyed_opened_20_cases (максимум 20)
-                if (currentWeeklyCases < 20) {
-                  requests.push(
-                    axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/2', {
-                      buyed_opened_20_cases: currentWeeklyCases + 1,
-                    }),
-                  );
-                }
-
-                if (requests.length > 0) {
-                  await Promise.all(requests);
-                }
-              } catch (err) {
-                console.error('Ошибка обновления прогресса кейсов:', err);
+              if (requests.length > 0) {
+                await Promise.all(requests);
               }
             } catch (err) {
-              console.error(err);
-              Alert.alert('Ошибка', 'Не удалось купить кейс');
-            } finally {
-              setIsLoading(false);
+              console.error('Ошибка обновления прогресса кейсов:', err);
             }
-          },
-          style: 'default',
+          } catch (err) {
+            console.error(err);
+            Alert.alert('Error', 'Failed to purchase the case');
+          } finally {
+            setIsLoading(false);
+          }
         },
-      ],
-    );
+        style: 'default',
+      },
+    ]);
   };
 
   const caseBuyed = (item: SneakerCase) => {
@@ -242,25 +239,25 @@ const CasesOpenPage = () => {
 
   const handleAddFreeCase = async (item: SneakerCase) => {
     try {
-      // Получаем все кейсы
+      // Get all cases
       const res = await axios.get('https://dcc2e55f63f7f47b.mokky.dev/cases');
       const existingCases: SneakerCase[] = res.data;
 
-      // Проверяем: есть ли уже такой бесплатный кейс с той же редкостью
+      // Check: is there already a free case with the same rarity?
       const alreadyExists = existingCases.some(
         (c) => c.rarity === item.rarity && c.type === 'free',
       );
 
       if (alreadyExists) {
-        console.log('Такой бесплатный кейс уже добавлен.');
+        console.log('This free case has already been added.');
         return;
       }
 
-      // Добавляем кейс, если его нет
+      // Add the case if it doesn't exist
       await axios.post('https://dcc2e55f63f7f47b.mokky.dev/cases', item);
-      console.log('Бесплатный кейс успешно добавлен.');
+      console.log('Free case added successfully.');
     } catch (err) {
-      console.error('Ошибка при добавлении бесплатного кейса:', err);
+      console.error('Error while adding free case:', err);
     }
   };
 
@@ -314,22 +311,23 @@ const CasesOpenPage = () => {
             🔥 Sneakers Cases 🔥
           </Text>
           <Text className="text-black text-center mb-[20px] font-bold">
-            Открой кейсы и получай вознаграждение
+            Open cases and earn rewards
           </Text>
 
-          {/* Промо-баннер */}
+          {/* Promo banner */}
           <LinearGradient
             colors={['#8E44AD', '#3498DB', '#00FFAA']}
             style={{ borderRadius: 16, padding: 16, marginBottom: 16 }}>
-            <Text className="text-white text-xl font-bold mb-2 text-center">БЕСПЛАТНЫЙ КЕЙС</Text>
-            <Text className="text-gray-300 text-center mb-4">
-              Открывайте бесплатный кейс каждые 24 часа
-            </Text>
+            <Text className="text-white text-xl font-bold mb-2 text-center">FREE CASE</Text>
+
+            <Text className="text-gray-300 text-center mb-4">Open a free case every 24 hours</Text>
+
             <View className="bg-black/30 rounded-full px-4 py-2 mb-4">
               <Text className="text-amber-300 text-center font-bold">
-                {!showFreeCase ? `Следующий кейс через: ${countdown}` : 'Кейс доступен!'}
+                {!showFreeCase ? `Next case in: ${countdown}` : 'Case is available!'}
               </Text>
             </View>
+
             {showFreeCase && commonCase && (
               <TouchableOpacity
                 onPress={async () => {
@@ -337,10 +335,10 @@ const CasesOpenPage = () => {
                   router.push({
                     pathname: '/case/[rarity]',
                     params: { rarity: 'common', type: 'free' },
-                  }); // затем перейти
+                  }); // then navigate
                 }}
                 className="bg-amber-400 rounded-full py-3">
-                <Text className="text-gray-900 text-center font-bold">ОТКРЫТЬ КЕЙС</Text>
+                <Text className="text-gray-900 text-center font-bold">OPEN CASE</Text>
               </TouchableOpacity>
             )}
           </LinearGradient>
@@ -379,23 +377,26 @@ const CasesOpenPage = () => {
                       {/* Информация о кейсе */}
                       <View className="flex-1 ml-4">
                         <Text className="text-lg font-bold text-gray-900">{item.title}</Text>
-                        <Text className="text-gray-500 mt-1">Содержит {item.itemsInside} пар</Text>
+                        <Text className="text-gray-500 mt-1">
+                          Contains {item.itemsInside} pairs
+                        </Text>
 
                         <View className="flex-row justify-between items-center mt-3">
                           <Text className="text-xl font-bold text-gray-900">{item.price} ₽</Text>
+
                           <View
                             className={` ${caseBuyed(item) ? 'bg-none' : 'bg-green-500'} rounded-full px-3 py-1`}>
                             <Text className="flex-row items-center space-x-1">
                               {caseBuyed(item) ? (
                                 <View className="flex-row items-center gap-[5px]">
-                                  <Feather name="check" size={16} color="#22c55e" />{' '}
+                                  <Feather name="check" size={16} color="#22c55e" />
                                   {/* green-500 */}
                                   <Text className="text-green-500 text-[12.5px] font-bold">
-                                    КУПЛЕНО
+                                    PURCHASED
                                   </Text>
                                 </View>
                               ) : (
-                                <Text className="text-white text-xs font-bold">НОВИНКА</Text>
+                                <Text className="text-white text-xs font-bold">NEW</Text>
                               )}
                             </Text>
                           </View>
@@ -416,7 +417,7 @@ const CasesOpenPage = () => {
                           }
                           className={`mt-3 ${getRarityColor(item.rarity)} rounded-xl py-3 flex-row items-center justify-center gap-2`}>
                           <Text className="text-white text-center font-bold text-base uppercase">
-                            {caseBuyed(item) ? 'ОТКРЫТЬ КЕЙС' : 'КУПИТЬ'}{' '}
+                            {caseBuyed(item) ? 'OPEN CASE' : 'BUY'}{' '}
                           </Text>
 
                           {caseBuyed(item) && (

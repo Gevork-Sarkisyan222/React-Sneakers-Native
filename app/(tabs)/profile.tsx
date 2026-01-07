@@ -66,25 +66,25 @@ export default function Profile() {
 
   const handleLogout = () => {
     Alert.alert(
-      'Выход из аккаунта',
-      'Вы действительно хотите выйти?',
+      'Log out',
+      'Are you sure you want to log out?',
       [
         {
-          text: 'Отмена',
+          text: 'Cancel',
           style: 'cancel',
         },
         {
-          text: 'Выйти',
+          text: 'Log out',
           style: 'destructive',
           onPress: async () => {
             try {
               await SecureStore.deleteItemAsync('userToken');
               fetchUser();
-              Alert.alert('Выход', 'Вы успешно вышли из аккаунта');
+              Alert.alert('Logged out', 'You have successfully logged out');
               router.replace('/login');
             } catch (error) {
-              console.error('Ошибка при выходе из аккаунта:', error);
-              Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
+              console.error('Error while logging out:', error);
+              Alert.alert('Error', 'Failed to log out');
             }
           },
         },
@@ -123,23 +123,23 @@ export default function Profile() {
     return (
       <SafeAreaView className="flex-1 bg-gray-100">
         <ScrollView
-          // вот это свойство добавляет выравнивание по центру
+          // this property centers the content
           contentContainerStyle={{
             flexGrow: 1,
             justifyContent: 'center',
-            padding: 16, // вместо p-4 на SafeAreaView
+            padding: 16, // instead of p-4 on SafeAreaView
           }}
           refreshControl={
             <RefreshControl colors={['#338fd4']} refreshing={isLoading} onRefresh={fetchUser} />
           }>
-          {/* Скелетон аватара */}
+          {/* Avatar skeleton */}
           <View className="items-center mb-6">
             <SkeletonBlock style={styles.avatarSkeleton} />
             <SkeletonBlock style={styles.nameSkeleton} />
             <SkeletonBlock style={styles.roleSkeleton} />
           </View>
 
-          {/* Скелетон информации */}
+          {/* Info skeleton */}
           <View className="bg-white p-4 rounded-2xl shadow-lg mb-6">
             <SkeletonBlock style={styles.infoLine} />
             <SkeletonBlock style={styles.infoLine} />
@@ -147,7 +147,7 @@ export default function Profile() {
             <SkeletonBlock style={styles.balanceSkeleton} />
           </View>
 
-          {/* Скелетон кнопки выхода */}
+          {/* Logout button skeleton */}
           <View className="items-center">
             <SkeletonBlock style={styles.logoutSkeleton} />
           </View>
@@ -161,27 +161,27 @@ export default function Profile() {
     const cleanCardNumber = cardNumber.replace(/\s+/g, '');
 
     if (cleanCardNumber.length !== 16) {
-      Alert.alert('ОШИБКА', 'Номер карты должен содержать ровно 16 цифр');
+      Alert.alert('ERROR', 'The card number must contain exactly 16 digits');
       return;
     }
 
     if (!amount || isNaN(Number(amount))) {
-      Alert.alert('ОШИБКА', 'Введите корректную сумму');
+      Alert.alert('ERROR', 'Enter a valid amount');
       return;
     }
-    // здесь можно добавить валидацию номера карты
+    // you can add card number validation here
     try {
       await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user.id}`, {
         balance: Number(user.balance) + Number(amount),
       });
-      Alert.alert('УСПЕХ', 'Баланс успешно пополнен');
+      Alert.alert('SUCCESS', 'Balance topped up successfully');
       setAmount('');
       setCardNumber('');
       setModalVisible(false);
       fetchUser();
     } catch (error) {
-      console.error('Ошибка при пополнении баланса:', error);
-      Alert.alert('ОШИБКА', 'Не удалось пополнить баланс');
+      console.error('Error while topping up balance:', error);
+      Alert.alert('ERROR', 'Failed to top up balance');
     }
   };
 
@@ -210,10 +210,10 @@ export default function Profile() {
           {/* Информация */}
           <View className="bg-white p-4 rounded-2xl shadow-lg mb-6">
             <View className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6">
-              <Text className="text-amber-900 font-semibold">Демо / учебный режим</Text>
+              <Text className="text-amber-900 font-semibold">Demo / training mode</Text>
               <Text className="text-amber-800 text-sm mt-1">
-                Приложение работает в демонстрационном режиме. Данные используются только для
-                тестирования функционала и хранятся в тестовой базе.
+                The app is running in demo mode. Data is used only for testing functionality and is
+                stored in a test database.
               </Text>
             </View>
 
@@ -223,18 +223,18 @@ export default function Profile() {
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-600">Телефон</Text>
+              <Text className="text-gray-600">Phone</Text>
               <Text className="text-gray-800 font-medium">{user.phone}</Text>
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-600">Адрес</Text>
+              <Text className="text-gray-600">Address</Text>
               <Text className="text-gray-800 font-medium">{user.address}</Text>
             </View>
 
             <View className="mt-6 flex-row justify-between items-center">
               <View>
-                <Text className="text-gray-600">Баланс</Text>
+                <Text className="text-gray-600">Balance</Text>
                 <Text className="text-xl font-bold text-blue-500">
                   {user.balance.toLocaleString()} ₽
                 </Text>
@@ -244,7 +244,7 @@ export default function Profile() {
                 className="bg-green-100 px-4 py-2 rounded-xl flex-row justify-center gap-[10px] items-center">
                 <FontAwesome name="credit-card" size={20} color="text-green-800" />
                 <Text className="text-green-800 font-medium text-center">
-                  Пополнить баланс{'\n'}(DEMO)
+                  Top up balance{'\n'}(DEMO)
                 </Text>
               </TouchableOpacity>
             </View>
@@ -257,16 +257,16 @@ export default function Profile() {
             <Pressable
               onPress={() => router.push('/admin-panel')}
               className="bg-white rounded-xl py-3 items-center shadow-md mb-4 flex-row justify-center gap-2">
-              <Text className="text-blue-500 font-semibold text-base">Перейти в админ панель</Text>
+              <Text className="text-blue-500 font-semibold text-base">Go to admin panel</Text>
               <AntDesign name="arrowright" size={24} color="#338fd4" />
             </Pressable>
           )}
 
-          {/* Кнопка выхода */}
+          {/* Logout button */}
           <Pressable
             onPress={handleLogout}
             className="bg-white rounded-xl py-3 items-center shadow-md flex-row justify-center gap-2">
-            <Text className="text-blue-500 font-semibold text-base">Выйти из аккаунта</Text>
+            <Text className="text-blue-500 font-semibold text-base">Log out</Text>
             <MaterialIcons name="exit-to-app" size={24} color="#338fd4" />
           </Pressable>
         </ScrollView>
@@ -280,36 +280,36 @@ export default function Profile() {
         onRequestClose={() => setModalVisible(false)}>
         <View className="flex-1 bg-black/50 justify-center items-center">
           <View className="w-11/12 bg-white rounded-2xl p-6">
-            <Text className="text-xl font-bold mb-4">Пополнить баланс (DEMO)</Text>
-            <Text className="text-sm mb-1">Сумма (₽)</Text>
+            <Text className="text-xl font-bold mb-4">Top up balance (DEMO)</Text>
+            <Text className="text-sm mb-1">Amount (₽)</Text>
             <TextInput
               className="border border-gray-300 rounded-lg p-3 mb-4"
-              placeholder="Введите сумму"
+              placeholder="Enter amount"
               keyboardType="numeric"
               value={amount}
               onChangeText={setAmount}
             />
-            <Text className="text-sm mb-1">Номер карты (DEMO)</Text>
+            <Text className="text-sm mb-1">Card number (DEMO)</Text>
             <TextInput
               className="border border-gray-300 rounded-lg p-3 mb-4"
               placeholder="XXXX XXXX XXXX XXXX"
               keyboardType="number-pad"
               value={cardNumber}
               onChangeText={(text) => {
-                // 1) Убираем всё, кроме цифр
+                // 1) Remove everything except digits
                 const digitsOnly = text.replace(/\D/g, '');
-                // 2) Обрезаем до 16 цифр
+                // 2) Limit to 16 digits
                 const limitedDigits = digitsOnly.slice(0, 16);
-                // 3) Форматируем: каждые 4 цифры + пробел
+                // 3) Format: every 4 digits + space
                 const formatted = limitedDigits.replace(/(.{4})/g, '$1 ').trim();
                 setCardNumber(formatted);
               }}
-              // 16 цифр + 3 пробела = 19 символов
+              // 16 digits + 3 spaces = 19 characters
               maxLength={19}
             />
             <Text className="text-xs text-gray-500 mb-4">
-              Демо-режим. Реальные платежи не поддерживаются. Данные карты не сохраняются. Номер
-              карты используется только для симуляции и не отправляется на сервер.
+              Demo mode. Real payments are not supported. Card data is not saved. The card number is
+              used only for simulation and is not sent to the server.
             </Text>
             <View className="flex-row justify-end">
               <TouchableOpacity
@@ -319,10 +319,10 @@ export default function Profile() {
                   setAmount('');
                   setCardNumber('');
                 }}>
-                <Text className="text-gray-600">Отмена</Text>
+                <Text className="text-gray-600">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity className="p-2" onPress={onReplenish}>
-                <Text className="text-blue-500 font-semibold">Пополнить</Text>
+                <Text className="text-blue-500 font-semibold">Top up</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -92,21 +92,21 @@ export default function CommentsSection({
       await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${productId}`, {
         comments: updated,
       });
-      Toast.show({ type: 'success', text1: 'ОТЗЫВ ИЗМЕНЕН' });
+      Toast.show({ type: 'success', text1: 'REVIEW UPDATED' });
       onEditComment(selectedComment.id, editedText.trim(), editedStars);
       setModalVisible(false);
     } catch (e) {
       console.error(e);
-      Alert.alert('ОШИБКА', 'НЕ УДАЛОСЬ ИЗМЕНИТЬ ОТЗЫВ');
+      Alert.alert('ERROR', 'FAILED TO UPDATE THE REVIEW');
     }
   };
 
-  // ФУНКЦИЯ ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ ОТЗЫВА
+  // REVIEW DELETE CONFIRM FUNCTION
   const sumbitDelete = (id: number) => {
-    Alert.alert('Удаление отзыва', 'Вы уверены что хотите удалить этот отзыв?', [
-      { text: 'ОТМЕНА', style: 'cancel' },
+    Alert.alert('Delete review', 'Are you sure you want to delete this review?', [
+      { text: 'CANCEL', style: 'cancel' },
       {
-        text: 'УДАЛИТЬ',
+        text: 'DELETE',
         style: 'destructive',
         onPress: async () => {
           try {
@@ -117,11 +117,11 @@ export default function CommentsSection({
             await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${productId}`, {
               comments: filtered,
             });
-            Toast.show({ type: 'success', text1: 'ОТЗЫВ УДАЛЕН' });
+            Toast.show({ type: 'success', text1: 'REVIEW DELETED' });
             onDeleteComment(id);
           } catch (e) {
             console.error(e);
-            Alert.alert('ОШИБКА', 'НЕ УДАЛОСЬ УДАЛИТЬ ОТЗЫВ');
+            Alert.alert('ERROR', 'FAILED TO DELETE THE REVIEW');
           }
         },
       },
@@ -130,40 +130,40 @@ export default function CommentsSection({
 
   const handleSubmit = async () => {
     if (!user) {
-      Alert.alert('Ошибка', 'Пожалуйста, войдите, чтобы оставить отзыв.');
+      Alert.alert('Error', 'Please sign in to leave a review.');
       return;
     }
 
     if (comment.trim().length === 0) {
-      Alert.alert('Ошибка', 'Пожалуйста, введите текст отзыва.');
+      Alert.alert('Error', 'Please enter your review text.');
       return;
     }
 
-    // Собираем объект нового комментария
+    // Build the new comment object
     const newComment: Comment = {
-      id: Date.now(), // Временный уникальный ID
-      user_id: user ? user.id : 0, // Из useGetUser
+      id: Date.now(), // Temporary unique ID
+      user_id: user ? user.id : 0, // From useGetUser
       text: comment.trim(),
       stars: rating,
       created_at: new Date().toISOString(),
     };
 
     try {
-      // 1) Получаем текущие комментарии
+      // 1) Get current comments
       const { data } = await axios.get<{ comments: Comment[] }>(
         `https://dcc2e55f63f7f47b.mokky.dev/products/${productId}`,
       );
       const existingComments = data.comments || [];
 
-      // 2) Формируем обновлённый массив
+      // 2) Create the updated array
       const updatedComments = [...existingComments, newComment];
 
-      // 3) Отправляем PATCH для замены поля comments
+      // 3) Send PATCH to replace the comments field
       await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/products/${productId}`, {
         comments: updatedComments,
       });
 
-      // 4) Обновляем прогресс daily/weekly за отзывы
+      // 4) Update daily/weekly progress for reviews
       try {
         const [dailyRes, weeklyRes] = await Promise.all([
           axios.get('https://dcc2e55f63f7f47b.mokky.dev/tasks/1'), // daily
@@ -178,7 +178,7 @@ export default function CommentsSection({
 
         const requests: Promise<any>[] = [];
 
-        // DAILY: make_review (максимум 1)
+        // DAILY: make_review (max 1)
         if (currentDailyReviews < 1) {
           requests.push(
             axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/1', {
@@ -187,7 +187,7 @@ export default function CommentsSection({
           );
         }
 
-        // WEEKLY: make_5_review (максимум 5)
+        // WEEKLY: make_5_review (max 5)
         if (currentWeeklyReviews < 5) {
           requests.push(
             axios.patch('https://dcc2e55f63f7f47b.mokky.dev/tasks/2', {
@@ -200,26 +200,26 @@ export default function CommentsSection({
           await Promise.all(requests);
         }
       } catch (err) {
-        console.error('Ошибка обновления прогресса по отзывам:', err);
+        console.error('Error updating review progress:', err);
       }
 
-      // 5) Уведомляем пользователя
+      // 5) Notify the user
       Toast.show({
         type: 'success',
-        text1: 'Спасибо',
-        text2: 'Ваш отзыв успешно отправлен',
+        text1: 'Thank you',
+        text2: 'Your review has been submitted successfully',
         visibilityTime: 3000,
       });
 
-      // 6) Уведомляем родителя, чтобы он добавил комментарий в своё состояние
+      // 6) Notify the parent so it can add the comment to its state
       onNewComment(newComment);
 
-      // 7) Очищаем форму
+      // 7) Clear the form
       setComment('');
       setRating(0);
     } catch (err) {
-      console.error('Ошибка при создании отзыва:', err);
-      // тут можно вызвать Alert или Toast
+      console.error('Error while creating a review:', err);
+      // You can show an Alert or Toast here
     }
   };
 
@@ -243,7 +243,7 @@ export default function CommentsSection({
       .finally(() => setLoading(false));
   }, [items]);
 
-  // ПОКА ЗАГРУЖАЕМ — СПИННЕР
+  // WHILE LOADING — SPINNER
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -264,7 +264,7 @@ export default function CommentsSection({
               {itemUser.name} {itemUser.lastName}
             </Text>
             <Text className="text-xs text-gray-500">
-              {new Date(item.created_at).toLocaleDateString('ru-RU', {
+              {new Date(item.created_at).toLocaleDateString('en-US', {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric',
@@ -276,7 +276,7 @@ export default function CommentsSection({
             <StarRatingDisplay style={{ marginLeft: -5 }} rating={item.stars} starSize={20} />
           </View>
 
-          {/* КНОПКИ РЕДАКТИРОВАТЬ И УДАЛИТЬ ДЛЯ АВТОРА */}
+          {/* EDIT AND DELETE BUTTONS FOR THE AUTHOR */}
           {user?.id === item.user_id && (
             <>
               <View className="mt-2 flex-row justify-end space-x-4">
@@ -300,49 +300,49 @@ export default function CommentsSection({
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           className="p-4 bg-white rounded-2xl shadow mb-[25px]">
-          {/* ЗАГОЛОВОК ФОРМЫ */}
+          {/* FORM TITLE */}
           <View className="mb-4">
-            <Text className="text-xl font-semibold">Написать отзыв</Text>
+            <Text className="text-xl font-semibold">Write a review</Text>
           </View>
 
-          {/* ПОЛЕ ДЛЯ ТЕКСТА ОТЗЫВА */}
+          {/* REVIEW TEXT FIELD */}
           <View className="mb-4">
             <TextInput
               value={comment}
               onChangeText={setComment}
-              placeholder="Ваш отзыв..."
+              placeholder="Your review..."
               multiline
               className="border border-gray-300 rounded-lg p-3 h-24 text-base"
             />
           </View>
 
-          {/* ВЫБОР РЕЙТИНГА */}
+          {/* RATING SELECTION */}
           <View className="mb-4">
             <StarRating rating={rating} onChange={setRating} starSize={30} />
           </View>
 
-          {/* КНОПКА ОТПРАВИТЬ */}
+          {/* SUBMIT BUTTON */}
           <TouchableOpacity
             onPress={handleSubmit}
             className="bg-blue-500 py-3 rounded-full items-center">
-            <Text className="text-white text-base font-medium">Отправить</Text>
+            <Text className="text-white text-base font-medium">Submit</Text>
           </TouchableOpacity>
         </KeyboardAvoidingView>
 
-        <Text className="text-2xl font-bold mb-4">Отзывы пользователей</Text>
-        <Text className="text-lg font-semibold mb-4">{items.length} отзывов</Text>
+        <Text className="text-2xl font-bold mb-4">User Reviews</Text>
+        <Text className="text-lg font-semibold mb-4">{items.length} reviews</Text>
         <FlatList
           data={displayItems}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
         />
 
-        {/* КНОПКА ПОКАЗАТЬ ВСЕ / СКРЫТЬ */}
+        {/* SHOW ALL / HIDE BUTTON */}
         {items.length > 5 && (
           <TouchableOpacity
             onPress={() => setExpanded(!expanded)}
             className="mt-4 py-2 px-6 bg-blue-500 rounded-full self-center">
-            <Text className="text-white text-base">{expanded ? 'Скрыть' : 'Показать все'}</Text>
+            <Text className="text-white text-base">{expanded ? 'Hide' : 'Show all'}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -353,21 +353,21 @@ export default function CommentsSection({
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
           className="flex-1 justify-center items-center bg-opacity-50">
           <View className="bg-white p-6 rounded-2xl w-11/12">
-            <Text className="text-xl font-semibold mb-4">РЕДАКТИРОВАТЬ ОТЗЫВ</Text>
+            <Text className="text-xl font-semibold mb-4">EDIT REVIEW</Text>
             <TextInput
               value={editedText}
               onChangeText={setEditedText}
-              placeholder="ТЕКСТ ОТЗЫВА"
+              placeholder="REVIEW TEXT"
               multiline
               className="border border-gray-300 rounded-lg p-3 h-24 text-base mb-4"
             />
             <StarRating rating={editedStars} onChange={setEditedStars} starSize={30} />
             <View className="flex-row justify-end mt-6">
               <TouchableOpacity onPress={() => setModalVisible(false)} className="mr-4">
-                <Text className="text-gray-500">ОТМЕНА</Text>
+                <Text className="text-gray-500">CANCEL</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={submitEdit}>
-                <Text className="text-blue-500">СОХРАНИТЬ</Text>
+                <Text className="text-blue-500">SAVE</Text>
               </TouchableOpacity>
             </View>
           </View>

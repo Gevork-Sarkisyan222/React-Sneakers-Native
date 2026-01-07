@@ -150,7 +150,7 @@ export default function CasePage() {
             fontWeight: '600',
             fontSize: 18,
           }}>
-          Загрузка...
+          Loading...
         </Text>
       </View>
     );
@@ -203,15 +203,15 @@ export default function CasePage() {
   const getWinnedItemName = (rarity: SneakerCase['rarity']): string => {
     switch (rarity) {
       case 'common':
-        return 'Обычная';
+        return 'Common';
       case 'rare':
-        return 'Редкая';
+        return 'Rare';
       case 'epic':
-        return 'Эпическая';
+        return 'Epic';
       case 'legendary':
-        return 'Легендарная';
+        return 'Legendary';
       default:
-        return 'Обычная';
+        return 'Common';
     }
   };
 
@@ -284,10 +284,10 @@ export default function CasePage() {
         setTimeout(() => {
           Toast.show({
             type: 'success',
-            text1: 'Поздравляем!',
-            text2: 'Выигранный товар добавлен в корзину 👟',
-            position: 'top', // или "top"
-            visibilityTime: 3000, // 3 секунды
+            text1: 'Congratulations!',
+            text2: 'The won item has been added to your cart 👟',
+            position: 'top', // or "top"
+            visibilityTime: 3000, // 3 seconds
           });
         }, duration + 300);
 
@@ -301,22 +301,20 @@ export default function CasePage() {
           balance: user?.balance + wonItem.item_price,
         });
 
-        setTimeout(() => {
-          Toast.show({
-            type: 'success',
-            text1: 'Поздравляем!',
-            text2: `Ваш баланс пополнен на ${wonItem.item_price}` + '₽',
-            position: 'top', // или "top"
-            visibilityTime: 3000, // 3 секунды
-          });
-        }, duration + 300);
+        Toast.show({
+          type: 'success',
+          text1: 'Congratulations!',
+          text2: `Your balance has been topped up by ${wonItem.item_price}₽`,
+          position: 'top', // or "top"
+          visibilityTime: 3000, // 3 seconds
+        });
       }
 
       if (wonItem?.item_type === 'empty') {
         console.log('К сожалению вы нечего не выиграли');
       }
     } catch (err) {
-      Alert.alert('Ошибка', 'Не удалось открыть кейс');
+      Alert.alert('Error', 'Something went wrong');
       console.error(err);
     }
 
@@ -401,26 +399,31 @@ export default function CasePage() {
             <View className="p-6">
               <Text className="text-xl font-bold mb-2 text-gray-800">
                 {winnedItem?.item_type === 'empty'
-                  ? 'К сожалению вы нечего не выиграли'
-                  : ' 🎉 Ты получил!'}
+                  ? 'Unfortunately, you didn’t win anything'
+                  : '🎉 You got it!'}
               </Text>
+
               <Text
-                className={`text-lg font-semibold text-gray-700 ${winnedItem?.item_type === 'shoe' ? 'mb-1' : 'mb-4'}`}>
+                className={`text-lg font-semibold text-gray-700 ${
+                  winnedItem?.item_type === 'shoe' ? 'mb-1' : 'mb-4'
+                }`}>
                 {winnedItem?.item_type === 'empty'
-                  ? 'Попробуйте ещё раз'
-                  : winnedItem?.item_title || 'Неизвестный предмет'}
+                  ? 'Try again'
+                  : winnedItem?.item_title || 'Unknown item'}
               </Text>
 
               {winnedItem?.item_type === 'shoe' && (
-                <Text className={`text-lg font-semibold mb-4 text-gray-700`}>
-                  Цена которого {winnedItem?.item_price} ₽
+                <Text className="text-lg font-semibold mb-4 text-gray-700">
+                  Valued at {winnedItem?.item_price} ₽
                 </Text>
               )}
 
-              {/* Редкость */}
+              {/* Rarity */}
               {winnedItem?.item_type !== 'empty' && winnedItem?.item_type !== 'money' && (
                 <View
-                  className={`self-start px-3 py-1 rounded-full mb-6 ${getRarityBgColor(winnedItem?.item_rarity ?? 'common')}`}>
+                  className={`self-start px-3 py-1 rounded-full mb-6 ${getRarityBgColor(
+                    winnedItem?.item_rarity ?? 'common',
+                  )}`}>
                   <Text
                     className={`text-sm font-medium ${
                       winnedItem?.item_rarity === 'common' ? 'text-black' : 'text-white'
@@ -438,7 +441,7 @@ export default function CasePage() {
                   className={`text-center font-semibold text-base ${
                     currentCase.rarity === 'common' ? 'text-black' : 'text-white'
                   }`}>
-                  Подтвердить и закрыть
+                  Confirm & Close
                 </Text>
               </Pressable>
             </View>
@@ -450,7 +453,7 @@ export default function CasePage() {
         <View className="absolute inset-0 bg-beige-200/60 items-center pt-[75px]">
           {/* Header */}
           <Text className="text-white text-[23px] font-semibold">
-            Открыть{' '}
+            Open{' '}
             <Text
               className={`font-extrabold tracking-wide`}
               style={{
@@ -459,15 +462,13 @@ export default function CasePage() {
                 textShadowRadius: 2,
                 color: getRarityTextColor(currentCase.rarity),
               }}>
-              {currentCase.type === 'free' ? 'Бесплатный кейс' : currentCase.title}
+              {currentCase.type === 'free' ? 'Free Case' : currentCase.title}
             </Text>
           </Text>
 
-          <Text className="text-white/70 text-base underline mt-1">Кейсы Native Sneakers</Text>
+          <Text className="text-white/70 text-base underline mt-1">Native Sneakers Cases</Text>
 
-          <Text className="text-white/70 text-base mt-1">
-            Этот кейс можно открыть только один раз
-          </Text>
+          <Text className="text-white/70 text-base mt-1">This case can only be opened once</Text>
 
           {/* Carousel */}
           <View className="w-full mt-[150px] justify-center">
@@ -543,7 +544,7 @@ export default function CasePage() {
                 textShadowOffset: { width: 1, height: 1 },
                 textShadowRadius: 2,
               }}>
-              {isSpinning ? 'Открываеться...' : 'Открыть'}
+              {isSpinning ? 'Opening...' : 'Open'}
             </Text>
           </TouchableOpacity>
         </View>

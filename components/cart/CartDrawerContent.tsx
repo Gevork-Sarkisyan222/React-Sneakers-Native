@@ -45,13 +45,13 @@ const CartDrawerContent: React.FC<Props> = ({
   const taxCount = Math.round(totalAmount * 0.05);
 
   const handleRemoveFromCart = (productId: string, title: string) => {
-    Alert.alert('Удаление товара', 'Вы действительно хотите удалить этот товар из корзины?', [
+    Alert.alert('Remove item', 'Are you sure you want to remove this item from the cart?', [
       {
-        text: 'Отмена',
+        text: 'Cancel',
         style: 'cancel',
       },
       {
-        text: 'Удалить',
+        text: 'Remove',
         style: 'destructive',
         onPress: async () => {
           try {
@@ -60,40 +60,40 @@ const CartDrawerContent: React.FC<Props> = ({
             );
 
             if (deleteResponse.status === 200) {
-              // Обновляем состояние корзины
+              // Update cart state
               setCartProducts((prevProducts) =>
                 prevProducts.filter((product) => product.id !== Number(productId)),
               );
 
               dispatch(setRemoveAllMarks(!removeAllMarks));
 
-              // Показываем Toast
+              // Show Toast
               Toast.show({
                 type: 'success',
-                text1: `Товар ${title} удален`,
-                text2: 'Товар успешно удален из корзины',
+                text1: `Item ${title} removed`,
+                text2: 'The item was successfully removed from your cart',
                 visibilityTime: 2000,
                 autoHide: true,
                 topOffset: 50,
               });
             }
           } catch (error) {
-            console.error('Ошибка при удалении:', error);
+            console.error('Error while removing:', error);
 
-            // Показываем ошибку пользователю
+            // Show error to the user
             Toast.show({
               type: 'error',
-              text1: 'Ошибка удаления',
-              text2: 'Не удалось удалить товар из корзины',
+              text1: 'Remove failed',
+              text2: 'Could not remove the item from the cart',
               visibilityTime: 2000,
             });
 
-            // Детализация ошибок
+            // Error details
             if (axios.isAxiosError(error)) {
               if (error.response?.config.url?.includes('cart-products')) {
-                console.error('Ошибка при удалении из корзины');
+                console.error('Error while removing from cart');
               } else if (error.response?.config.url?.includes('products')) {
-                console.error('Ошибка при обновлении статуса товара');
+                console.error('Error while updating product status');
               }
             }
           }
@@ -108,8 +108,8 @@ const CartDrawerContent: React.FC<Props> = ({
     if (!user) {
       Toast.show({
         type: 'error',
-        text1: 'Ошибка',
-        text2: 'Вы не авторизованы',
+        text1: 'Error',
+        text2: 'You are not authorized',
         visibilityTime: 3000,
       });
       return;
@@ -118,8 +118,8 @@ const CartDrawerContent: React.FC<Props> = ({
     if (user && user.balance < totalAmount) {
       Toast.show({
         type: 'error',
-        text1: 'Недостаточно средств',
-        text2: 'У вас недостаточно средств для оформления заказа',
+        text1: 'Insufficient funds',
+        text2: 'You do not have enough funds to place the order',
         visibilityTime: 3000,
       });
       return;
@@ -127,7 +127,7 @@ const CartDrawerContent: React.FC<Props> = ({
 
     setIsButtonLoading(true);
 
-    // списываем деньги с баланса
+    // deduct money from balance
     await axios.patch(`https://dcc2e55f63f7f47b.mokky.dev/users/${user.id}`, {
       balance: user.balance - totalAmount - taxCount,
     });
@@ -154,15 +154,15 @@ const CartDrawerContent: React.FC<Props> = ({
 
         Toast.show({
           type: 'success',
-          text1: 'Заказ успешно оформлен',
-          text2: 'Ваш заказ успешно оформлен. Спасибо за покупку!',
+          text1: 'Order placed successfully',
+          text2: 'Your order has been successfully placed. Thank you for your purchase!',
           visibilityTime: 3000,
         });
 
-        // Логика для tasks
-        // === Логика для tasks: buy_3_product / buy_6_product ===
+        // Logic for tasks
+        // === Logic for tasks: buy_3_product / buy_6_product ===
         try {
-          // считаем только платные товары
+          // count only paid products
           const paidProductsCount = cartProducts.filter((item) => Number(item.price) > 0).length;
 
           if (paidProductsCount > 0) {
@@ -179,7 +179,7 @@ const CartDrawerContent: React.FC<Props> = ({
 
             const requests: Promise<any>[] = [];
 
-            // DAILY: максимум 3 товара
+            // DAILY: maximum 3 products
             if (currentDailyBuy < 3) {
               const newDailyBuy = Math.min(3, currentDailyBuy + paidProductsCount);
 
@@ -190,7 +190,7 @@ const CartDrawerContent: React.FC<Props> = ({
               );
             }
 
-            // WEEKLY: максимум 6 товаров
+            // WEEKLY: maximum 6 products
             if (currentWeeklyBuy < 6) {
               const newWeeklyBuy = Math.min(6, currentWeeklyBuy + paidProductsCount);
 
@@ -206,10 +206,10 @@ const CartDrawerContent: React.FC<Props> = ({
             }
           }
         } catch (err) {
-          console.error('Ошибка обновления прогресса покупок:', err);
+          console.error('Error updating purchase progress:', err);
         }
-        // === Логика для tasks: buy_3_product / buy_6_product ===
-        // end Логика для tasks
+        // === Logic for tasks: buy_3_product / buy_6_product ===
+        // end Logic for tasks
       } catch (e) {
         console.error(e);
       } finally {
@@ -256,7 +256,7 @@ const CartDrawerContent: React.FC<Props> = ({
     <DrawerContent className="border-t border-t-2 rounded-t-[20px]">
       <SafeAreaView className="flex-1">
         <DrawerHeader>
-          <Text className="text-[24px] font-[700] mb-[30px]">Корзина</Text>
+          <Text className="text-[24px] font-[700] mb-[30px]">Cart</Text>
         </DrawerHeader>
 
         {/* Ограниченный по высоте список товаров */}
@@ -280,19 +280,19 @@ const CartDrawerContent: React.FC<Props> = ({
                 }}
               />
               <Text className="text-[22px] font-[600] text-[#87C20A] mt-[20px] mb-[9px]">
-                Заказ оформлен!
+                Order placed!
               </Text>
               <Text className="font-[400] text-[16px] text-[#9b9b9b] text-center">
-                Ваш заказ #{orderId} скоро будет передан
+                Your order #{orderId} will soon be handed over
               </Text>
               <Text className="font-[400] text-[16px] text-[#9b9b9b] mb-[25px] text-center">
-                курьерской доставке
+                to the courier delivery service
               </Text>
               <Pressable
                 onPress={onCloseDrawer}
                 className="w-[90%] h-[55px] rounded-[18px] bg-[#9DD458] flex items-center justify-center flex-row gap-5">
                 <AntDesign name="arrowleft" size={24} color="white" />
-                <Text className="text-white mr-[15px] text-[17px]">Вернуться назад</Text>
+                <Text className="text-white mr-[15px] text-[17px]">Go back</Text>
               </Pressable>
             </View>
           ) : cartProducts.length > 0 ? (
@@ -319,18 +319,18 @@ const CartDrawerContent: React.FC<Props> = ({
                   uri: 'https://store-sneakers-vue.vercel.app/package-icon.png',
                 }}
               />
-              <Text className="text-[22px] font-[600] mt-[20px] mb-[9px]">Корзина пустая</Text>
+              <Text className="text-[22px] font-[600] mt-[20px] mb-[9px]">Cart is empty</Text>
               <Text className="font-[400] text-[16px] text-[#9b9b9b] text-center">
-                Добавьте хотя бы одну пару
+                Add at least one pair
               </Text>
               <Text className="font-[400] text-[16px] text-[#9b9b9b] mb-[25px] text-center">
-                кроссовок, чтобы сделать заказ.
+                of sneakers to place an order.
               </Text>
               <Pressable
                 onPress={onCloseDrawer}
                 className="w-[90%] h-[55px] rounded-[18px] bg-[#9DD458] flex items-center justify-center flex-row gap-5">
                 <AntDesign name="arrowleft" size={24} color="white" />
-                <Text className="text-white mr-[15px] text-[17px]">Вернуться назад</Text>
+                <Text className="text-white mr-[15px] text-[17px]">Go back</Text>
               </Pressable>
             </View>
           )}
@@ -341,15 +341,15 @@ const CartDrawerContent: React.FC<Props> = ({
           {!isOrdered && cartProducts.length > 0 && (
             <View className="flex flex-col">
               <View className="flex flex-row justify-between w-full mb-[20px]">
-                <Text>Итого: </Text>
+                <Text>Total: </Text>
                 <View className="w-full border-b border-b-[#DFDFDF] flex-1 border-dashed mx-[9px]"></View>
-                <Text className="font-bold">{totalAmount.toLocaleString('ru-RU')} руб.</Text>
+                <Text className="font-bold">{totalAmount.toLocaleString('en-US')} RUB</Text>
               </View>
 
               <View className="flex flex-row justify-between w-full">
-                <Text>Налог 5%: </Text>
+                <Text>Tax 5%: </Text>
                 <View className="w-full border-b border-b-[#DFDFDF] flex-1 border-dashed mx-[9px]"></View>
-                <Text className="font-bold">{taxCount.toLocaleString('ru-RU')} руб.</Text>
+                <Text className="font-bold">{taxCount.toLocaleString('en-US')} RUB</Text>
               </View>
 
               <Pressable
@@ -362,7 +362,7 @@ const CartDrawerContent: React.FC<Props> = ({
                   <ActivityIndicator size="small" color="white" />
                 ) : (
                   <>
-                    <Text className="text-white mr-[15px] text-[16px]">Оформить заказ</Text>
+                    <Text className="text-white mr-[15px] text-[16px]">Place order</Text>
                     <Entypo name="chevron-small-right" size={24} color="white" />
                   </>
                 )}
