@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
@@ -11,9 +11,8 @@ export default function Register({}: Props) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [avatarUri, setAvatarUri] = useState('');
+  const [avatarUri, setAvatarUri] = useState('https://avatar.iran.liara.run/public/42');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('+7');
   const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,11 +23,19 @@ export default function Register({}: Props) {
     return pattern.test(value);
   };
 
+  function generateDemoRuPhone() {
+    const timePart = (Date.now() % 1_000_000_0000).toString().padStart(10, '0'); // 10 digits
+    return `+7${timePart}`;
+  }
+
+  // Generate demo phone ONCE (so it doesn't change on every re-render)
+  const demoPhoneRef = useRef<string>(generateDemoRuPhone());
+
   // ФУНКЦИЯ ВАЛИДАЦИИ РОССИЙСКОГО ТЕЛЕФОНА +7...
-  const validatePhone = (value: string) => {
-    const pattern = /^\+7\d{10}$/;
-    return pattern.test(value.replace(/[^\d+]/g, ''));
-  };
+  // const validatePhone = (value: string) => {
+  //   const pattern = /^\+7\d{10}$/;
+  //   return pattern.test(value.replace(/[^\d+]/g, ''));
+  // };
 
   const handleRegister = async () => {
     // ПРОВЕРКА ПОЛЕЙ
@@ -40,10 +47,10 @@ export default function Register({}: Props) {
       Alert.alert('Error', 'Enter a valid email');
       return;
     }
-    if (!validatePhone(phone)) {
-      Alert.alert('Error', 'Enter a Russian phone number in the format +7XXXXXXXXXX');
-      return;
-    }
+    // if (!validatePhone(phone)) {
+    //   Alert.alert('Error', 'Enter a Russian phone number in the format +7XXXXXXXXXX');
+    //   return;
+    // }
     if (!address.trim()) {
       Alert.alert('Error', 'Enter an address');
       return;
@@ -60,7 +67,7 @@ export default function Register({}: Props) {
         avatarUri ||
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQADjfoADAlJPrsl_hiiOMeE-FBor-i6hEAVg&s',
       email,
-      phone,
+      phone: demoPhoneRef.current,
       address,
       password,
       balance: 0,
@@ -131,7 +138,7 @@ export default function Register({}: Props) {
         </TouchableOpacity>
       </View>
 
-      <Text className="text-sm font-medium mb-2">Avatar URL</Text>
+      <Text className="text-sm font-medium mb-2">Paste Your Avatar URL</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-4"
         placeholder="https://..."
@@ -139,15 +146,15 @@ export default function Register({}: Props) {
         onChangeText={setAvatarUri}
       />
 
-      <Text className="text-sm font-medium mb-2">Phone (Demo for testing and practice)</Text>
+      {/* <Text className="text-sm font-medium mb-2">Phone (Demo write any numbers)</Text>
       <TextInput
         className="border border-gray-300 rounded-lg p-3 mb-4"
-        placeholder="+7XXXXXXXXXX"
+        placeholder="+"
         keyboardType="phone-pad"
         value={phone}
         onChangeText={setPhone}
         maxLength={12}
-      />
+      /> */}
 
       <Text className="text-sm font-medium mb-2">Address (Demo for testing and practice)</Text>
       <TextInput

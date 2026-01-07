@@ -28,7 +28,7 @@ const BASE_DELAY_NORMAL = 12; // for regular characters
 const JITTER = 8; // small randomness to feel “more alive”
 
 /** =========================
- *  FAQ DATA (Play Market-friendly, no crypto)
+ *  FAQ DATA (Play Market-friendly, no payments)
  *  ========================= */
 type FaqItem = {
   id: string;
@@ -39,21 +39,11 @@ type FaqItem = {
 
 const FAQ_DATA: FaqItem[] = [
   {
-    id: 'pay',
-    q: 'How do I pay for an order?',
-    a: 'We accept bank cards and Apple/Google Pay. After placing an order, proceed to payment — you’ll see step-by-step prompts on the screen.',
-    keywords: ['payment', 'pay', 'card', 'bank card', 'google pay', 'apple pay', 'checkout'],
-  },
-  {
-    id: 'refund',
-    q: 'How do I request a refund?',
-    a: 'Open Profile → “Refunds”. Fill out the form and follow the steps. We accept returns within 14 days if the item is in good condition.',
-    keywords: ['refund', 'return', 'exchange', 'money back', 'return policy'],
-  },
-  {
     id: 'delivery',
     q: 'Delivery time & cost',
-    a: 'Within Georgia: 1–3 business days, international: 5–10 business days. Cost depends on city and weight — the exact amount will be shown in the cart before payment.',
+    a:
+      'Delivery within Georgia usually takes 1–3 business days. International delivery typically takes 5–10 business days. ' +
+      'The cost depends on the city/region and parcel weight. The exact total is shown in the cart before you confirm the order.',
     keywords: [
       'delivery',
       'shipping',
@@ -62,41 +52,96 @@ const FAQ_DATA: FaqItem[] = [
       'shipping cost',
       'shipping price',
       'delivery time',
+      'how long',
+      'courier',
+    ],
+  },
+  {
+    id: 'refund',
+    q: 'How do I request a refund or return?',
+    a:
+      'Open Profile → “Refunds/Returns”, choose the order, and follow the steps. ' +
+      'Returns are usually accepted within 14 days if the item is in good condition and in the original packaging.',
+    keywords: [
+      'refund',
+      'return',
+      'returns',
+      'exchange',
+      'money back',
+      'return policy',
+      'cancel order',
     ],
   },
   {
     id: 'track',
     q: 'How do I track my order?',
-    a: 'After shipping, you’ll receive a tracking number in notifications and by email. Tracking is also available in Profile → “My orders”.',
-    keywords: ['track', 'tracking', 'tracking number', 'where is my order', 'order status'],
-  },
-  {
-    id: 'acc',
-    q: 'Login / account issues',
-    a: 'Try “Reset password” via email/phone. If that doesn’t help — contact support in the “Help” section.',
-    keywords: ['login', 'sign in', 'password', 'account', 'authorization', 'reset password'],
-  },
-  {
-    id: 'contacts',
-    q: 'Contacts & support',
-    a: 'In-app support: Profile → “Help” (chat 10:00–20:00). Email: support@example.com. We reply as fast as possible.',
-    keywords: ['contacts', 'support', 'help', 'email', 'contact', 'customer support'],
+    a:
+      'After shipping, you’ll receive a tracking number in notifications (and email, if enabled). ' +
+      'You can also find it in Profile → “My orders”.',
+    keywords: [
+      'track',
+      'tracking',
+      'tracking number',
+      'where is my order',
+      'order status',
+      'shipment',
+    ],
   },
   {
     id: 'sizes',
     q: 'Sizes & exchanges',
-    a: 'A size chart is available on the product page. If it doesn’t fit — request an exchange via “Refunds”, and we’ll suggest the closest size.',
-    keywords: ['size', 'size chart', "doesn't fit", 'exchange size', 'sizes'],
+    a:
+      'A size chart is available on the product page. If the size doesn’t fit, request an exchange in Profile → “Refunds/Returns”. ' +
+      'We’ll suggest the closest available size based on your choice.',
+    keywords: [
+      'size',
+      'sizes',
+      'size chart',
+      "doesn't fit",
+      'exchange size',
+      'sizing',
+      'measurements',
+    ],
+  },
+  {
+    id: 'acc',
+    q: 'Login / account issues',
+    a: 'Try “Reset password” using your email/phone. If you still can’t sign in, open Profile → “Help” and contact support.',
+    keywords: [
+      'login',
+      'sign in',
+      'password',
+      'account',
+      'authorization',
+      'reset password',
+      'can’t log in',
+    ],
+  },
+  {
+    id: 'contacts',
+    q: 'Contacts & support',
+    a:
+      'In-app support: Profile → “Help”. Working hours: 10:00–20:00. ' +
+      'Email: support@yourapp.com. We reply as soon as possible.',
+    keywords: [
+      'contacts',
+      'support',
+      'help',
+      'email',
+      'contact',
+      'customer support',
+      'working hours',
+    ],
   },
 ];
 
-// Quick suggestions at the start of the chat (no crypto)
+// Quick suggestions at the start of the chat (no payments)
 const QUICK_SUGGESTIONS = [
-  'How do I pay for an order?',
   'Delivery time & cost',
-  'How do I request a refund?',
+  'How do I request a refund or return?',
   'How do I track my order?',
   'Sizes & exchanges',
+  'Login / account issues',
   'Contacts & support',
 ];
 
@@ -175,28 +220,26 @@ function matchFaq(userText: string) {
       if (stems.has(crudeStem(qw))) score += 0.5;
     }
 
-    // 3) small bonus for common triggers
-    if (/\b(how|when|where|how much|payment|delivery|refund|size|track|support)\b/i.test(text))
+    // 3) small bonus for common triggers (no payments)
+    if (/\b(how|when|where|delivery|refund|return|size|track|support|login|account)\b/i.test(text))
       score += 0.3;
 
     if (!best || score > best.score) best = { item, score };
   }
 
-  // You can tweak the threshold
+  // threshold
   return best && best.score >= 2 ? best : null;
 }
 
-/** Follow-ups: which clarifying questions / quick actions to show under the answer */
+/** Follow-ups: which quick actions to show under the answer */
 function followUpsById(id: string): string[] {
   switch (id) {
-    case 'pay':
-      return ['Pay by card', 'Pay with Apple/Google Pay', 'Any fees?'];
     case 'delivery':
       return ['My city is Tbilisi', 'Another city', 'International delivery'];
     case 'track':
       return ['Where is the tracking number?', "The order isn't moving", 'Contact support'];
     case 'refund':
-      return ['Request a refund', 'Refund timelines', 'Exchange instead of refund'];
+      return ['Start a return', 'Refund timelines', 'Exchange instead of return'];
     case 'acc':
       return ['Reset password', 'Sign in with phone', 'Contact support'];
     case 'sizes':
@@ -204,18 +247,18 @@ function followUpsById(id: string): string[] {
     case 'contacts':
       return ['Message in chat', 'Email support', 'Working hours'];
     default:
-      return ['Clarify the question', 'Delivery', 'Payment'];
+      return ['Delivery time & cost', 'Returns & refunds', 'Contact support'];
   }
 }
 
-/** “Human” answer generator: explanation + short summary + clarifying question */
+/** “Human” answer generator */
 function craftAnswer(userText: string) {
   const match = matchFaq(userText);
   const introPool = [
     'Got it!',
     'Okay, here’s the short version.',
     'Here’s how it works:',
-    'Let’s sort it out in a minute:',
+    'Let’s sort it out:',
   ];
   const outroPool = [
     'If you want, share a couple of details and I’ll guide you further.',
@@ -230,14 +273,16 @@ function craftAnswer(userText: string) {
 
     const clarifier =
       item.id === 'delivery'
-        ? 'Which city is the delivery for?'
-        : item.id === 'pay'
-          ? 'What’s more convenient — card or Apple/Google Pay?'
-          : item.id === 'refund'
-            ? 'What do you want — a refund or an exchange?'
-            : item.id === 'sizes'
-              ? 'Which product do you need the size for?'
-              : null;
+        ? 'Which city/region is the delivery for?'
+        : item.id === 'refund'
+          ? 'Do you want a return or an exchange?'
+          : item.id === 'sizes'
+            ? 'Which product do you need the size for?'
+            : item.id === 'track'
+              ? 'Do you already have a tracking number?'
+              : item.id === 'acc'
+                ? 'Are you signing in with email or phone?'
+                : null;
 
     const text =
       `${pick(introPool)} ${item.a}\n\n` +
@@ -265,8 +310,8 @@ type Message = {
   text: string;
   sender: Sender;
   time: string;
-  followUps?: string[]; // quick replies under bot message
-  typing?: boolean; // “typing…” indicator
+  followUps?: string[];
+  typing?: boolean;
 };
 
 export default function ChatPage() {
@@ -281,7 +326,7 @@ export default function ChatPage() {
     {
       id: 'hello',
       text:
-        'Hi! I’m Arman — an assistant. I can help with payment, delivery, refunds, and more. ' +
+        'Hi! I’m Arman — an assistant. I can help with delivery, tracking, returns, sizes, and support. ' +
         'Pick a question below or just type — I’ll answer clearly and to the point.',
       sender: 'bot',
       time: now(),
@@ -291,11 +336,12 @@ export default function ChatPage() {
 
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlatList<Message>>(null);
 
   // Scroll down on new messages
   useEffect(() => {
-    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 50);
+    const t = setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 50);
+    return () => clearTimeout(t);
   }, [messages]);
 
   /** Main send */
@@ -342,7 +388,7 @@ export default function ChatPage() {
         { id: botMsgId, text: '', sender: 'bot', time: now(), followUps },
       ]);
 
-      // Stream characters (human typing effect)
+      // Stream characters
       await streamText(botMsgId, botText, setMessages);
     } finally {
       setIsLoading(false);
@@ -399,7 +445,7 @@ export default function ChatPage() {
               <Text className="text-green-500 font-bold">Online</Text> • Assistant
             </Text>
             <Text className="text-[12px] text-gray-500">
-              Just an AI Beta assistant its not works only texts.
+              AI beta assistant. Text only. Many feautures coming soon
             </Text>
           </View>
         </View>
@@ -449,9 +495,7 @@ export default function ChatPage() {
             <TouchableOpacity
               onPress={() => sendMessage()}
               disabled={!inputText.trim() || isLoading}
-              className={`${
-                inputText.trim() && !isLoading ? 'bg-[#9dd357]' : 'bg-gray-200'
-              } w-12 h-12 rounded-full items-center justify-center`}>
+              className={`${inputText.trim() && !isLoading ? 'bg-[#9dd357]' : 'bg-gray-200'} w-12 h-12 rounded-full items-center justify-center`}>
               <Text className="text-white text-lg font-bold">➤</Text>
             </TouchableOpacity>
           </View>
@@ -470,12 +514,10 @@ function sleep(ms: number) {
 
 /** Compute delay per typing tick based on character type and SPEED_MULT */
 function delayForChar(ch: string) {
-  // Faster pauses for space, newline, and “soft” punctuation
   const fastChars = [' ', '\n', '.', ',', '!', '?', ':', ';', '—', '-', '…'];
   const isFast = fastChars.includes(ch);
   const base = isFast ? BASE_DELAY_FAST : BASE_DELAY_NORMAL;
   const jitter = Math.floor(Math.random() * JITTER);
-  // Multiply by SPEED_MULT and never drop below 1 ms
   return Math.max(1, Math.floor((base + jitter) * SPEED_MULT));
 }
 
@@ -489,7 +531,6 @@ async function streamText(
   for (let i = 0; i < full.length; ) {
     const ch = full[i];
 
-    // For newlines / punctuation — 1 char, otherwise — 2
     const chunkSize =
       ch === '\n' || ch === ' ' || ['.', ',', '!', '?', ':', ';', '—', '-', '…'].includes(ch)
         ? CHARS_PER_TICK_SLOW
